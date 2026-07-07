@@ -1,0 +1,18 @@
+<section class="mx-4 mt-9" id="kroc-facility-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {{this.toJson()}};
+
+  data.photos = [
+    {{each media.{this.hero_image} as img}}
+    { src: "{{img.image.getImage(1200)}}", alt: "{{img.image.getImageTitle()}}" },
+    {{end-each}}
+    null
+  ].filter(Boolean);
+
+  ReactDOM.createRoot(document.getElementById("kroc-facility-{{this.zuid}}")).render(
+    <FacilitySection data={data} />
+  );
+})();
+</script>
