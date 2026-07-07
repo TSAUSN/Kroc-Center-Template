@@ -1,0 +1,12 @@
+<section class="mx-4 mt-9" id="kroc-intro-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {{this.toJson()}};
+  data.image = "{{!this.image.getImage(1200)}}".trim();
+
+  ReactDOM.createRoot(document.getElementById("kroc-intro-{{this.zuid}}")).render(
+    <IntroBand data={data} />
+  );
+})();
+</script>
