@@ -1,0 +1,6 @@
+.vscode
+zesty.config.json
+
+# Node / Tailwind build tooling (dev-only, never synced to Zesty)
+node_modules/
+.node_modules

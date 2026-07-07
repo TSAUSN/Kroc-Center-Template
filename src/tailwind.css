@@ -1,0 +1,303 @@
+/* ============================================================================
+   KROC — Tailwind CSS v4 design-token source
+   ----------------------------------------------------------------------------
+   This is the SOURCE file. Do not edit the compiled output
+   (webengine/styles/tailwind.css) by hand — it is generated from this file.
+
+   Build:   npm run build:css      (one-off, minified)
+   Develop: npm run watch:css      (rebuild on change)
+
+   Token values are taken verbatim from the KROC Web Design System
+   (design-system.md). Do not invent token values — add them there first.
+
+   ── Architecture (3 tiers) ───────────────────────────────────────────────
+   Tier 1  PRIMITIVES   Raw brand palette. Fixed values. Rarely used directly.
+                        e.g. --color-brand-red-200  ->  bg-brand-red-200
+   Tier 2  SEMANTIC     What you actually author with. Generated via
+                        `@theme inline` so each utility resolves to a *runtime*
+                        CSS variable (--ui-*), not a baked-in value.
+                        e.g. --color-primary -> bg-primary / text-primary
+   Tier 3  PROFILES     The swappable layer. `:root` is the default mapping;
+                        `[data-theme="…"]` blocks override the --ui-* variables.
+                        Flip the attribute on <html> and the whole site
+                        re-themes (dark mode, alternate brand, sharp radii…)
+                        with NO rebuild.
+   ============================================================================ */
+
+/* Web fonts — imported here so they load with the stylesheet (Zesty auto-
+   includes managed stylesheets in <head>; no loader <link> needed for these).
+   Creato Display = primary. Adobe Jenson Pro (serif accent) is self-hosted and
+   not yet in the repo — see the @font-face stub near the bottom. */
+@import url("https://fonts.cdnfonts.com/css/creato-display");
+
+@import "tailwindcss";
+
+/* ── Source scanning ──────────────────────────────────────────────────────
+   The Zesty views are extension-less files (e.g. `homepage`, `loader`), which
+   Tailwind's automatic detection skips. These explicit globs force every
+   WebEngine template + script to be scanned for class usage so unused styles
+   are purged correctly. Paths are relative to THIS file (src/). */
+@source "../webengine/views/**/*";
+@source "../webengine/scripts/**/*.js";
+/* Don't scan the generated inline-CSS snippet (it contains the compiled output). */
+@source not "../webengine/views/components/styles.html";
+
+/* ============================================================================
+   TIER 1 — PRIMITIVES (raw brand palette)
+   Namespaced under `brand-*` so they don't clobber Tailwind's stock palette
+   and so it's obvious in markup when a raw value is used instead of a token.
+   ============================================================================ */
+@theme {
+  /* KROC Red */
+  --color-brand-red-50: #ffebeb;
+  --color-brand-red-100: #ff838b;
+  --color-brand-red-200: #ef3e42; /* base */
+  --color-brand-red-300: #c5000e;
+  --color-brand-red-400: #9e121c;
+
+  /* KROC Navy */
+  --color-brand-navy-50: #d7e9ff;
+  --color-brand-navy-100: #77a9ee;
+  --color-brand-navy-150: #61769c;
+  --color-brand-navy-200: #002056; /* base */
+
+  /* Neutrals / surfaces */
+  --color-brand-bg: #d9d9d9; /* page background */
+  --color-brand-area: #efefef; /* input bg, alt sections */
+  --color-brand-gray-100: #f8f9fa;
+  --color-brand-ink: #1c1b1f; /* primary text */
+  --color-brand-ink-muted: #575757; /* secondary text */
+  --color-brand-link: #022056; /* body link navy */
+
+  /* Status */
+  --color-brand-green: #12825f;
+  --color-brand-amber: #f2ab53;
+  --color-brand-error: #eb2533;
+
+  /* ── Typography ─────────────────────────────────────────────────────────
+     Creato Display for everything; Adobe Jenson Pro is the serif accent. */
+  --font-sans: "Creato Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-serif: "Adobe Jenson Pro", "AJensonPro", Georgia, "Times New Roman", serif;
+
+  /* ── Type scale (size + paired line-height) ───────────────────────────────
+     Generates: text-callout-xl, text-heading-xl/lg/md/sm,
+     text-title-xl/lg, text-body-xl/lg/md/sm, text-caption. */
+  --text-callout-xl: 5rem; /* 80 / 96 */
+  --text-callout-xl--line-height: 6rem;
+  --text-heading-xl: 3.75rem; /* 60 / 78 */
+  --text-heading-xl--line-height: 4.875rem;
+  --text-heading-lg: 3rem; /* 48 / 64 */
+  --text-heading-lg--line-height: 4rem;
+  --text-heading-md: 2.125rem; /* 34 / 48 */
+  --text-heading-md--line-height: 3rem;
+  --text-heading-sm: 1.75rem; /* 28 / 48 */
+  --text-heading-sm--line-height: 3rem;
+  --text-title-xl: 1.5rem; /* 24 / 29 */
+  --text-title-xl--line-height: 1.8125rem;
+  --text-title-lg: 1.25rem; /* 20 / 30 */
+  --text-title-lg--line-height: 1.875rem;
+  --text-body-xl: 1.125rem; /* 18 / 22 */
+  --text-body-xl--line-height: 1.375rem;
+  --text-body-lg: 1rem; /* 16 / 24 */
+  --text-body-lg--line-height: 1.5rem;
+  --text-body-md: 0.875rem; /* 14 / 20 */
+  --text-body-md--line-height: 1.25rem;
+  --text-body-sm: 0.75rem; /* 12 / 18 */
+  --text-body-sm--line-height: 1.125rem;
+  --text-caption: 0.625rem; /* 10 / 14 */
+  --text-caption--line-height: 0.875rem;
+
+  /* ── Elevation ────────────────────────────────────────────────────────────
+     Generates: shadow-header, shadow-card, shadow-active, shadow-search. */
+  --shadow-header: 0 4px 4px -1px rgba(36, 104, 147, 0.04);
+  --shadow-card: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-active: 0 9px 20px 0 rgba(28, 27, 31, 0.5);
+  --shadow-search: 0 0 17px -3px rgba(0, 0, 0, 0.1);
+
+  /* NOTE on spacing: Tailwind v4's dynamic spacing scale (0.25rem base) already
+     covers the design system's 4px scale — p-5=20px, p-6=24px, p-8=32px,
+     p-12=48px, p-16=64px, p-20=80px, p-24=96px — so no custom spacing needed. */
+}
+
+/* ============================================================================
+   TIER 2 — SEMANTIC TOKENS  (author with these)
+   `@theme inline` makes each utility emit `var(--ui-*)` instead of a literal,
+   so Tier 3 overrides take effect at runtime.
+   ============================================================================ */
+@theme inline {
+  /* Brand roles */
+  --color-primary: var(--ui-primary);
+  --color-primary-hover: var(--ui-primary-hover);
+  --color-primary-active: var(--ui-primary-active);
+  --color-primary-subtle: var(--ui-primary-subtle);
+
+  --color-secondary: var(--ui-secondary);
+  --color-secondary-hover: var(--ui-secondary-hover);
+  --color-secondary-subtle: var(--ui-secondary-subtle);
+
+  /* Surfaces & text */
+  --color-background: var(--ui-background); /* page background */
+  --color-surface: var(--ui-surface); /* cards, header, modals */
+  --color-surface-muted: var(--ui-surface-muted); /* inputs, alt sections */
+  --color-content: var(--ui-content); /* primary text */
+  --color-content-muted: var(--ui-content-muted); /* secondary text */
+  --color-content-ondark: var(--ui-content-ondark); /* text on dark/photos */
+
+  /* Status */
+  --color-success: var(--ui-success);
+  --color-warning: var(--ui-warning);
+  --color-danger: var(--ui-danger);
+
+  /* Themeable radii — rounded-card, rounded-button, rounded-input */
+  --radius-card: var(--ui-radius-card);
+  --radius-button: var(--ui-radius-button);
+  --radius-input: var(--ui-radius-input);
+}
+
+/* ============================================================================
+   TIER 3 — PROFILES (the swappable layer)
+   Default mapping lives on :root. Add/override --ui-* inside a
+   [data-theme="…"] block to create a new profile. Activate by setting
+   `<html data-theme="dark">` (see loader for the toggle hook).
+   ============================================================================ */
+@layer base {
+  :root {
+    /* Primary = KROC red */
+    --ui-primary: var(--color-brand-red-200);
+    --ui-primary-hover: var(--color-brand-red-300);
+    --ui-primary-active: var(--color-brand-red-400);
+    --ui-primary-subtle: var(--color-brand-red-50);
+
+    /* Secondary = KROC navy */
+    --ui-secondary: var(--color-brand-navy-200);
+    --ui-secondary-hover: var(--color-brand-navy-150);
+    --ui-secondary-subtle: var(--color-brand-navy-50);
+
+    /* Surfaces & text */
+    --ui-background: var(--color-brand-bg);
+    --ui-surface: #ffffff;
+    --ui-surface-muted: var(--color-brand-area);
+    --ui-content: var(--color-brand-ink);
+    --ui-content-muted: var(--color-brand-ink-muted);
+    --ui-content-ondark: #ffffff;
+
+    /* Status */
+    --ui-success: var(--color-brand-green);
+    --ui-warning: var(--color-brand-amber);
+    --ui-danger: var(--color-brand-error);
+
+    /* Radius profile (design system: card 20px, button 8px, input 6px) */
+    --ui-radius-card: 20px;
+    --ui-radius-button: 8px;
+    --ui-radius-input: 6px;
+  }
+
+  /* Dark profile — swaps surfaces/content, lightens primary for contrast.
+     Tune these as the dark design matures. */
+  [data-theme="dark"] {
+    --ui-background: #121212;
+    --ui-surface: #1c1b1f;
+    --ui-surface-muted: #2a2a2e;
+    --ui-content: #f5f5f5;
+    --ui-content-muted: #b5b5b5;
+    --ui-primary: var(--color-brand-red-100);
+    --ui-content-ondark: #ffffff;
+  }
+
+  /* Example alternate profile proving radius is swappable independently. */
+  [data-theme="sharp"] {
+    --ui-radius-card: 6px;
+    --ui-radius-button: 4px;
+    --ui-radius-input: 4px;
+  }
+}
+
+/* ============================================================================
+   BASE — global element defaults (design-system.md §1, §2.5, §9.4)
+   ============================================================================ */
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-content);
+    font-family: var(--font-sans);
+    font-size: var(--text-body-lg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Body links: navy with a red underline; grey on hover. */
+  a:not([class]) {
+    color: var(--color-brand-link);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ui-primary);
+  }
+  a:not([class]):hover {
+    color: var(--color-brand-ink-muted);
+    border-bottom-color: var(--color-brand-ink-muted);
+  }
+}
+
+/* ============================================================================
+   COMPONENTS — reusable element classes built from tokens (design-system §7)
+   Hand-written CSS (always emitted, never purged). They reference the semantic
+   --color-* / --radius-* tokens, so they respect runtime theme swaps.
+   ============================================================================ */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 14px 22px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-button);
+    font-size: 0.90625rem; /* 14.5px */
+    font-weight: 400;
+    line-height: 1.2;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-sm { padding: 10px 18px; font-size: 0.8125rem; } /* 13px */
+  .btn-lg { padding: 16px 28px; font-size: 0.96875rem; } /* 15.5px */
+  .btn-block { width: 100%; }
+
+  .btn-primary { background-color: var(--color-primary); color: #fff; }
+  .btn-primary:hover { background-color: var(--color-primary-hover); }
+
+  .btn-secondary { background-color: var(--color-secondary); color: #fff; }
+  .btn-secondary:hover { background-color: var(--color-secondary-hover); }
+
+  /* Tertiary / nav CTA — mid blue-grey (design-system btn-info) */
+  .btn-info { background-color: var(--color-brand-navy-150); color: #fff; }
+  .btn-info:hover { background-color: var(--color-brand-navy-50); color: var(--color-content); }
+
+  /* CTA on dark / photo backgrounds */
+  .btn-light { background-color: #fff; color: var(--color-secondary); }
+  .btn-light:hover { background-color: var(--color-primary); color: #fff; }
+
+  .btn-outline-light { background-color: transparent; color: #fff; border-color: #fff; }
+  .btn-outline-light:hover { background-color: #fff; color: var(--color-content); }
+
+  /* Outline CTA on light surfaces (Intro Band photo variant) */
+  .btn-outline-primary { background-color: transparent; color: var(--color-primary); border-color: var(--color-primary); }
+  .btn-outline-primary:hover { background-color: var(--color-primary); color: #fff; }
+}
+
+/* ============================================================================
+   FONT-FACE STUBS
+   Adobe Jenson Pro is self-hosted in the design system but the .ttf is not yet
+   in this repo. Once the font file is added to the Zesty instance and served,
+   uncomment and point `src` at its URL. Until then, --font-serif falls back to
+   Georgia/Times (see Tier 1).
+   ============================================================================ */
+/*
+@font-face {
+  font-family: "Adobe Jenson Pro";
+  src: url("/path/to/AJensonPro.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+*/

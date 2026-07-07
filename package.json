@@ -1,0 +1,19 @@
+{
+  "name": "kroc-webengine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dev-only build tooling for the KROC Zesty WebEngine project. Compiles the Tailwind CSS design-token stylesheet that gets synced to the Zesty instance. Nothing in here ships to the browser except the compiled webengine/styles/tailwind.css.",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/tailwind.css -o ./webengine/styles/tailwind.css --minify && node ./tools/inline-css.mjs",
+    "watch:css": "tailwindcss -i ./src/tailwind.css -o ./webengine/styles/tailwind.css --watch",
+    "format": "node ./tools/format-views.mjs",
+    "format:check": "node ./tools/format-views.mjs --check",
+    "build": "npm run build:css"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "tailwindcss": "^4.3.0"
+  }
+}

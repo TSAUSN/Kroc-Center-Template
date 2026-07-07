@@ -1,0 +1,14 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/faqs.html?variant=7-b4cda39581-kx42q1')}}
+	<div>{{block('/-/block/people.html?variant=7-ceaef8c2c0-h5rftk')}}</div>
+	{{block('/-/block/people.html?variant=7-cacdaf87e9-p8c5q3')}}
+	{{block('/-/block/donation_block.html?variant=7-f0fbaed0cb-94c579')}}
+	<div>{{block('/-/block/image_gallery.html?variant=7-eac5c3e3b0-7d5fzh')}}</div>
+	<div>{{block('/-/block/image_gallery.html?variant=7-c2a3e9eacf-rhnfnv')}}</div>
+	<div>{{block('/-/block/image_gallery.html?variant=7-c08085c48e-5w2k63')}}</div>
+	{{block('/-/block/facility_section.html?variant=7-d482a09399-smrfvs')}}
+	{{block('/-/block/facility_section.html?variant=7-f886c4beed-ggklkl')}}
+	{{block('/-/block/intro_band.html?variant=7-c8e7d99ab9-xrb0v1')}}
+	<div>{{block('/-/block/intro_band.html?variant=7-90f180f38a-ngq0l3')}}</div>
+	{{block('/-/block/featured_stories.html?variant=7-aeb1ad91d6-6xgsxh')}}
+</div>

@@ -1,0 +1,9 @@
+<section class="mx-4 mt-4 overflow-hidden rounded-lg" id="kroc-homepage-alerts"></section>
+
+{{ this.autolayout(auto) }}
+
+<script type="text/babel" data-presets="react">
+(() => {
+  ReactDOM.createRoot(document.getElementById("kroc-homepage-alerts")).render(<SiteAlert />);
+})();
+</script>

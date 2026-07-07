@@ -1,0 +1,15 @@
+{
+ "site_name": "{{globals.site_name}}",
+ "site_logo": "{{globals.logo.getImage()}}",
+ "facility_name": "{{globals.facility_name}}",
+ "general_hours": "{{globals.general_hours}}",
+ "address": "{{globals.address}}",
+ "phone": "{{globals.phone}}",
+ "email":"{{globals.email}}",
+ "tractionRec": "{{globals.tractionrec}}",
+ "connect_band_hero_image": "{{globals.connect_band_hero_image.getImage()}}",
+ "social_handles": {{globals.social_handles.platform}},
+ "newsletter_signup_url": "{{globals.newsletter_signup_url}}",
+ "footer_links": {{globals.footer_links.site_name}},
+ "territory_links" : {{globals.territory_links.territory_name}}
+}

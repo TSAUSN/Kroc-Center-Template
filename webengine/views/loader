@@ -1,0 +1,72 @@
+{{ include /components/styles.html }}
+
+{{ include /components/icons.html }}
+
+<!-- inert server-rendered page body; adopted by <CurrentView/> (see AGENTS.md §1) -->
+<template id="kroc-current-view">
+  {{ current_view }}
+</template>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<script type="text/babel" data-presets="react" src="/components/shared.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/alert.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/header.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/footer.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/faqs.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/people.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/donation.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/gallery.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/facility.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/introband.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/cards.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/featuredstories.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+function CurrentView() {
+  const mainRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const tpl = document.getElementById("kroc-current-view");
+    if (!tpl || !mainRef.current || mainRef.current.childNodes.length) {
+      return;
+    }
+    mainRef.current.appendChild(tpl.content);
+    // revive block scripts (adopted scripts don't run); compile text/babel here
+    mainRef.current.querySelectorAll("script:not([type='application/json'])").forEach((inert) => {
+      const live = document.createElement("script");
+      try {
+        if (inert.type === "text/babel") {
+          live.textContent = Babel.transform(inert.textContent, { presets: ["react"] }).code;
+        } else {
+          for (const attr of inert.attributes) {
+            live.setAttribute(attr.name, attr.value);
+          }
+          live.textContent = inert.textContent;
+        }
+        inert.replaceWith(live);
+      } catch (err) {
+        console.error("KROC: failed to revive block script", err);
+      }
+    });
+  }, []);
+
+  return <main className="flex-1" ref={mainRef}></main>;
+}
+
+function App() {
+  return (
+    <div className="mx-auto flex min-h-screen flex-col max-w-7xl">
+      <SiteHeader />
+      <CurrentView />
+      <SiteFooter />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
