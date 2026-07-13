@@ -1,2 +1,26 @@
-(** default code https://zesty.org/services/web-engine/introduction-to-parsley/parsley-autolayout **)
-{{this.autolayout()}}
+<section class="mx-4 mt-4" id="kroc-stories-hero"></section>
+
+{{ this.autolayout(auto) }}
+
+<section class="mx-4 mb-12 mt-12" id="kroc-stories-feed"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    eyebrow: "{{!this.eyebrow}}",
+    title: "{{!this.header_title}}",
+    subheader: "{{!this.subheader.escapeForJs()}}",
+    heroDesktop: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
+    heroMobile: "{{!this.hero_image_mobile.getImage(800)}}".trim(),
+    categories: [
+      {{each program_categories as c sort by c.category_name asc}}
+      { zuid: "{{c.zuid}}", name: "{{!c.category_name}}" },
+      {{end-each}}
+      null 
+    ].filter(Boolean)
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-stories-hero")).render(<StoriesHero data={data} />);
+  ReactDOM.createRoot(document.getElementById("kroc-stories-feed")).render(<AllStories data={data} />);
+})();
+</script>

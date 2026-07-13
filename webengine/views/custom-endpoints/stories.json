@@ -1,0 +1,29 @@
+{{if {get_var.start} }}{{ $start = {get_var.start} }}{{else}}{{ $start = 0 }}{{end-if}}
+{{if {get_var.limit} }}{{ $limit = {get_var.limit} }}{{else}}{{ $limit = 9 }}{{end-if}}
+{
+  "meta": {
+    "q": "{{!get_var.q}}",
+    "category": "{{!get_var.category}}",
+    "start": {{$start}},
+    "limit": {{$limit}}
+  },
+  "data": [
+    {{if {get_var.category} }}
+    {{each stories as s where FIND_IN_SET('{get_var.category}', s.related_program_category) and title LIKE '%{get_var.q}%' sort by s.story_date desc limit {$start},{$limit} }}
+    {
+      "item": {{s.toJson()}},
+      "url": "{{s.getUrl()}}"
+    }
+    {{s._arraycomma}}
+    {{end-each}}
+    {{else}}
+    {{each stories as s where s.title LIKE '%{get_var.q}%' sort by s.story_date desc limit {$start},{$limit} }}
+    {
+      "item": {{s.toJson()}},
+      "url": "{{s.getUrl()}}"
+    }
+    {{s._arraycomma}}
+    {{end-each}}
+    {{end-if}}
+  ]
+}
