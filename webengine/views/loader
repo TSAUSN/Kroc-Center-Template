@@ -23,8 +23,11 @@
 <script type="text/babel" data-presets="react" src="/components/gallery.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/facility.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/introband.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/pagination.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/cards.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/featuredstories.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/alltags.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/tagdetail.jsx"></script>
 
 <script type="text/babel" data-presets="react">
 function CurrentView() {

@@ -1,2 +1,15 @@
-(** default code https://zesty.org/services/web-engine/introduction-to-parsley/parsley-autolayout **)
-{{this.autolayout()}}
+<section class="mx-4 mt-4" id="kroc-tags-hero"></section>
+
+<section class="mx-4 mb-12 mt-12" id="kroc-tags-index"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    title: "{{!this.name}}",
+    subheader: "{{!this.description.escapeForJs()}}"
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-tags-hero")).render(<TagsHero data={data} />);
+  ReactDOM.createRoot(document.getElementById("kroc-tags-index")).render(<AllTags />);
+})();
+</script>
