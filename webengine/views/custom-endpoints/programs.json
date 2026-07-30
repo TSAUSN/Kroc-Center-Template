@@ -1,0 +1,44 @@
+{{if {get_var.start} }}{{ $start = {get_var.start} }}{{else}}{{ $start = 0 }}{{end-if}}
+{{if {get_var.limit} }}{{ $limit = {get_var.limit} }}{{else}}{{ $limit = 9 }}{{end-if}}
+{
+  "meta": {
+    "q": "{{!get_var.q}}",
+    "category": "{{!get_var.category}}",
+    "start": {{$start}},
+    "limit": {{$limit}}
+  },
+  "total": [
+    {{if {get_var.category} }}
+    {{each programs as t where FIND_IN_SET('{get_var.category}', t.categories) and t.program_name LIKE '%{get_var.q}%' }}
+    "{{t.zuid}}"
+    {{t._arraycomma}}
+    {{end-each}}
+    {{else}}
+    {{each programs as t where t.program_name LIKE '%{get_var.q}%' }}
+    "{{t.zuid}}"
+    {{t._arraycomma}}
+    {{end-each}}
+    {{end-if}}
+  ],
+  "data": [
+    {{if {get_var.category} }}
+    {{each programs as p where FIND_IN_SET('{get_var.category}', p.categories) and p.program_name LIKE '%{get_var.q}%' sort by p.sort_order asc limit {$start},{$limit} }}
+    {
+      "item": {{p.toJson()}},
+      "url": "{{p.getUrl()}}",
+      "icon": "{{!p.program_icon.getImage(96)}}"
+    }
+    {{p._arraycomma}}
+    {{end-each}}
+    {{else}}
+    {{each programs as p where p.program_name LIKE '%{get_var.q}%' sort by p.sort_order asc limit {$start},{$limit} }}
+    {
+      "item": {{p.toJson()}},
+      "url": "{{p.getUrl()}}",
+      "icon": "{{!p.program_icon.getImage(96)}}"
+    }
+    {{p._arraycomma}}
+    {{end-each}}
+    {{end-if}}
+  ]
+}
