@@ -387,6 +387,13 @@ const krocAvailability = (c) => {
   return String(c.status || "").trim();
 };
 
+// Dropdown values are stored lowercase on this instance ("roster", "open"), so
+// title-case them for display. Already-cased values pass through unchanged.
+const krocLabelCase = (v) =>
+  String(v || "")
+    .trim()
+    .replace(/(^|[\s\-/])([a-z])/g, (m, sep, ch) => sep + ch.toUpperCase());
+
 // Visible text length of a WYSIWYG value — drives "is this field actually
 // empty" and "is this long enough to need Show more". Editors leave &nbsp;
 // behind when copy is deleted, so it counts as whitespace, not content.
@@ -406,7 +413,7 @@ const krocClassToCard = (row) => {
     zuid: (row && row.zuid) || krocZuid(it),
     courseZuid: (row && row.courseZuid) || krocZuid(parent),
     title: krocPick(it, ["class_name", "title", "name"]),
-    kind: String(it.class_type || "").trim(),
+    kind: krocLabelCase(it.class_type),
     day: String(it.day_of_week || "").trim(),
     time: String(it.time || "").trim(),
     dates: krocDateRange(it.class_start_date, it.class_end_date),
@@ -414,7 +421,7 @@ const krocClassToCard = (row) => {
     instructor: String(it.instructors || "").trim(),
     location: String(it.facility_location || "").trim(),
     desc: String(it.description || "").trim(),
-    status: String(it.enrollment_status || "").trim(),
+    status: krocLabelCase(it.enrollment_status),
     spots: it.spots_remaining,
     memberPrice: krocMoney(it.member_price),
     publicPrice: krocMoney(it.public_price),
@@ -683,7 +690,9 @@ function DayGroup(props) {
 }
 
 // Classes for one Course, banded by day of week in calendar order (unknown or
-// missing days fall into a trailing "Schedule" band).
+// missing days fall into a trailing "Schedule" band). `bordered` is for cards
+// sitting on a white surface (the Program-detail course row) — on the page
+// background they separate on their own.
 function ClassList(props) {
   const classes = [].concat(props.classes || []).filter(Boolean);
   const order = [];
@@ -711,7 +720,7 @@ function ClassList(props) {
         <DayGroup key={label} label={label} count={byDay[label].length}>
           <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
             {byDay[label].map((c) => (
-              <ClassCard key={c.zuid || c.title} item={c} bordered />
+              <ClassCard key={c.zuid || c.title} item={c} bordered={props.bordered} />
             ))}
           </div>
         </DayGroup>
@@ -805,7 +814,7 @@ function CourseRow(props) {
               Loading classes…
             </div>
           )}
-          {ready && classes.length > 0 && <ClassList classes={classes} />}
+          {ready && classes.length > 0 && <ClassList classes={classes} bordered />}
           {ready && classes.length === 0 && (
             <div className="rounded-card bg-surface-muted px-5 py-[18px] text-center text-[14px] text-content-muted">
               Class dates for this course haven’t been posted yet — check back soon.
@@ -985,6 +994,177 @@ function CoursesSection(props) {
         <div className="mt-10 flex justify-center">
           <Pagination page={current} pageCount={pageCount} onPage={goPage} />
         </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Course detail — the leaf listing page above the Classes themselves.
+--------------------------------------------------------------------------- */
+
+// Sidebar summary. Every row is rolled up from the Course's Classes, so a row
+// with nothing behind it is dropped rather than rendered as a blank label, and
+// a Course with no Classes at all falls back to a single line.
+function CourseGlance(props) {
+  const rows = [].concat(props.rows || []).filter((r) => r && r[1]);
+  let body = null;
+  if (!props.ready) {
+    body = <div className="text-[14px] text-content-muted">Loading…</div>;
+  } else if (rows.length) {
+    // label left / value right on one line: reads as a spec list at 320px in
+    // the sidebar, and doesn't strand the values when the grid stacks
+    body = (
+      <dl className="divide-y divide-black/5">
+        {rows.map((r) => (
+          <div
+            key={r[0]}
+            className="flex items-baseline justify-between gap-4 py-2.5 first:pt-0 last:pb-0"
+          >
+            <dt className="flex-none text-[13px] text-content-muted">{r[0]}</dt>
+            <dd className="text-right text-[14.5px] text-content">{r[1]}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  } else {
+    body = <div className="text-[14px] text-content-muted">Schedule coming soon</div>;
+  }
+  return (
+    <div className="rounded-card bg-surface p-6">
+      <div className="mb-3 text-[13px] uppercase tracking-[0.08em] text-content-muted">
+        At a glance
+      </div>
+      {body}
+    </div>
+  );
+}
+
+// Sibling Courses under the same Program. The prototype puts an age range next
+// to each one, but that would mean fetching every sibling's Classes purely for
+// decoration — names only keeps this page at two requests.
+function OtherCourses(props) {
+  const list = [].concat(props.courses || []).filter(Boolean);
+  if (!list.length) {
+    return null;
+  }
+  return (
+    <div className="mt-6 rounded-card bg-surface p-6">
+      <div className="mb-3 text-[13px] uppercase tracking-[0.08em] text-content-muted">
+        Other courses
+      </div>
+      {list.map((c) => (
+        <a
+          key={c.zuid || c.title}
+          href={c.url || "#"}
+          className="block py-1.5 text-[14px] text-content hover:underline"
+        >
+          {c.title}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+// Course detail body: the About card + sidebar, then the Course's own Classes
+// in the same day bands the Program page uses. Two independent feeds — this
+// course's classes, and its sibling courses — so neither blocks the other.
+function CourseDetail(props) {
+  const d = props.data || {};
+  const [classes, setClasses] = React.useState({ list: [], ready: false, failed: false });
+  const [siblings, setSiblings] = React.useState([]);
+
+  React.useEffect(() => {
+    if (!d.zuid) {
+      setClasses({ list: [], ready: true, failed: false });
+      return;
+    }
+    const params = new URLSearchParams();
+    params.set("courses", d.zuid);
+    fetch("/custom-endpoints/classes.json?" + params.toString())
+      .then((r) => r.json())
+      .then((json) => {
+        const list = []
+          .concat((json && json.data) || [])
+          .filter(Boolean)
+          .map(krocClassToCard);
+        setClasses({ list: list, ready: true, failed: false });
+      })
+      .catch((err) => {
+        console.error("KROC: classes feed failed", err);
+        setClasses({ list: [], ready: true, failed: true });
+      });
+  }, [d.zuid]);
+
+  React.useEffect(() => {
+    if (!d.programZuid) {
+      return;
+    }
+    const params = new URLSearchParams();
+    params.set("program", d.programZuid);
+    params.set("limit", 20);
+    fetch("/custom-endpoints/courses.json?" + params.toString())
+      .then((r) => r.json())
+      .then((json) => {
+        const rows = []
+          .concat((json && json.data) || [])
+          .filter(Boolean)
+          .map(krocCourseToCard)
+          .filter((c) => c.zuid && c.zuid !== d.zuid);
+        setSiblings(rows);
+      })
+      .catch((err) => {
+        console.error("KROC: sibling courses feed failed", err);
+      });
+  }, [d.programZuid, d.zuid]);
+
+  const glance = [
+    ["Ages", krocRollUp(classes.list, "ages")],
+    ["Location", krocRollUp(classes.list, "location")],
+    ["Classes", classes.list.length ? String(classes.list.length) : ""]
+  ];
+
+  const hasDesc = krocTextLength(d.description) > 0;
+  const descHtml = { __html: d.description };
+
+  let classBody = null;
+  if (!classes.ready) {
+    classBody = "Loading classes…";
+  } else if (classes.failed) {
+    classBody = "Classes couldn’t be loaded right now.";
+  } else if (!classes.list.length) {
+    classBody = "Class dates for this course haven’t been posted yet — check back soon.";
+  }
+
+  return (
+    <div>
+      <div className="mb-11 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_320px]">
+        <div className="rounded-card bg-surface px-6 py-8 sm:px-9">
+          <h2 className="mb-3 text-heading-sm text-content">About this course</h2>
+          {hasDesc ? (
+            <div
+              className="kroc-prose text-[15px] leading-[1.6] text-content"
+              dangerouslySetInnerHTML={descHtml}
+            ></div>
+          ) : (
+            <p className="text-[15px] text-content-muted">
+              A description for this course hasn’t been added yet.
+            </p>
+          )}
+        </div>
+        <aside>
+          <CourseGlance rows={glance} ready={classes.ready} />
+          <OtherCourses courses={siblings} />
+        </aside>
+      </div>
+
+      <h2 className="mb-[18px] text-heading-md text-content">Classes</h2>
+      {classBody ? (
+        <div className="rounded-card bg-surface px-6 py-16 text-center text-content-muted">
+          {classBody}
+        </div>
+      ) : (
+        <ClassList classes={classes.list} />
       )}
     </div>
   );
