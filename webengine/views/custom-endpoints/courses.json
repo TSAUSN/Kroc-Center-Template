@@ -1,0 +1,44 @@
+{{if {get_var.start} }}{{ $start = {get_var.start} }}{{else}}{{ $start = 0 }}{{end-if}}
+{{if {get_var.limit} }}{{ $limit = {get_var.limit} }}{{else}}{{ $limit = 10 }}{{end-if}}
+{
+  "meta": {
+    "q": "{{!get_var.q}}",
+    "program": "{{!get_var.program}}",
+    "start": {{$start}},
+    "limit": {{$limit}}
+  },
+  "total": [
+    {{if {get_var.program} }}
+    {{each courses as t where FIND_IN_SET('{get_var.program}', t.programs) and t.course_name LIKE '%{get_var.q}%' }}
+    "{{t.zuid}}"
+    {{t._arraycomma}}
+    {{end-each}}
+    {{else}}
+    {{each courses as t where t.course_name LIKE '%{get_var.q}%' }}
+    "{{t.zuid}}"
+    {{t._arraycomma}}
+    {{end-each}}
+    {{end-if}}
+  ],
+  "data": [
+    {{if {get_var.program} }}
+    {{each courses as c where FIND_IN_SET('{get_var.program}', c.programs) and c.course_name LIKE '%{get_var.q}%' sort by c.sort_order asc limit {$start},{$limit} }}
+    {
+      "zuid": "{{c.zuid}}",
+      "item": {{c.toJson()}},
+      "url": "{{c.getUrl()}}"
+    }
+    {{c._arraycomma}}
+    {{end-each}}
+    {{else}}
+    {{each courses as c where c.course_name LIKE '%{get_var.q}%' sort by c.sort_order asc limit {$start},{$limit} }}
+    {
+      "zuid": "{{c.zuid}}",
+      "item": {{c.toJson()}},
+      "url": "{{c.getUrl()}}"
+    }
+    {{c._arraycomma}}
+    {{end-each}}
+    {{end-if}}
+  ]
+}
