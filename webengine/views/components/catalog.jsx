@@ -404,6 +404,77 @@ const krocTextLength = (html) =>
     .replace(/\s+/g, " ")
     .trim().length;
 
+// "Thursday" -> "Thursdays" for the Class detail schedule line.
+const krocDayPlural = (v) => {
+  const label = krocDayLabel(v);
+  return krocDayIndex(v) >= 0 ? label + "s" : label === "Schedule" ? "" : label;
+};
+
+// Content URLs are often entered without a scheme, which makes the browser
+// resolve them against the site (AGENTS.md §6). Only promote values that look
+// like a host — a bare word stays relative, since that may well be intended.
+const krocExternalUrl = (v) => {
+  const s = String(v || "").trim();
+  if (!s || /^[a-z][a-z0-9+.-]*:/i.test(s) || s.startsWith("/") || s.startsWith("#")) {
+    return s;
+  }
+  return /^[^\s/]+\.[a-z]{2,}(\/|$)/i.test(s) ? "https://" + s : s;
+};
+
+// "6:00 – 7:00 PM" / "9:00-10:00 AM" / "5:45 PM – 6:30 PM" -> 24h start+end.
+// `time` is free text, so anything that isn't a clear range returns null and
+// the caller hides whatever depended on it rather than guessing.
+const KROC_TIME_RANGE =
+  /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?/i;
+const KROC_TIME_RANGE_TAIL =
+  /(\d{1,2})(?::(\d{2}))?\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?/i;
+
+const krocParseTimeRange = (time) => {
+  const s = String(time || "");
+  const to24 = (h, mer) => (Number(h) % 12) + (String(mer).toLowerCase() === "p" ? 12 : 0);
+  let m = s.match(KROC_TIME_RANGE);
+  if (m) {
+    return {
+      start: { h: to24(m[1], m[3]), m: Number(m[2] || 0) },
+      end: { h: to24(m[4], m[6]), m: Number(m[5] || 0) }
+    };
+  }
+  // only the end carries the meridiem — the start inherits it
+  m = s.match(KROC_TIME_RANGE_TAIL);
+  if (m) {
+    return {
+      start: { h: to24(m[1], m[5]), m: Number(m[2] || 0) },
+      end: { h: to24(m[3], m[5]), m: Number(m[4] || 0) }
+    };
+  }
+  return "";
+};
+
+// Google Calendar template link for a weekly class. Needs a start date and a
+// parseable time range; the date range becomes the recurrence UNTIL.
+const krocCalendarUrl = (c) => {
+  const start = krocParseDate(c.startDate);
+  const range = start && krocParseTimeRange(c.time);
+  if (!range) {
+    return "";
+  }
+  const pad = (n) => (n < 10 ? "0" + n : "" + n);
+  const day = (d) => "" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+  const stamp = (d, hm) => day(d) + "T" + pad(hm.h) + pad(hm.m) + "00";
+  const end = krocParseDate(c.endDate);
+  const params = new URLSearchParams();
+  params.set("action", "TEMPLATE");
+  params.set("text", c.title || "Class");
+  params.set("dates", stamp(start, range.start) + "/" + stamp(start, range.end));
+  if (c.location) {
+    params.set("location", c.location);
+  }
+  if (end && end.getTime() > start.getTime()) {
+    params.set("recur", "RRULE:FREQ=WEEKLY;UNTIL=" + day(end) + "T235959");
+  }
+  return "https://calendar.google.com/calendar/render?" + params.toString();
+};
+
 // { zuid, courseZuid, item: <class toJson()>, url } -> ClassCard props.item
 const krocClassToCard = (row) => {
   const it = (row && row.item) || {};
@@ -417,6 +488,8 @@ const krocClassToCard = (row) => {
     day: String(it.day_of_week || "").trim(),
     time: String(it.time || "").trim(),
     dates: krocDateRange(it.class_start_date, it.class_end_date),
+    startDate: it.class_start_date,
+    endDate: it.class_end_date,
     ages: String(it.age_range || "").trim(),
     instructor: String(it.instructors || "").trim(),
     location: String(it.facility_location || "").trim(),
@@ -426,7 +499,7 @@ const krocClassToCard = (row) => {
     memberPrice: krocMoney(it.member_price),
     publicPrice: krocMoney(it.public_price),
     price: krocMoney(it.price),
-    enrollUrl: String(it.deep_link_url || "").trim(),
+    enrollUrl: krocExternalUrl(it.deep_link_url),
     image: hero && hero.url ? hero.url + "?width=800" : "",
     url: (row && row.url) || ""
   };
@@ -1165,6 +1238,296 @@ function CourseDetail(props) {
         </div>
       ) : (
         <ClassList classes={classes.list} />
+      )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Class detail — the dated leaf (TractionRec's "Course Session").
+--------------------------------------------------------------------------- */
+
+function ShareLinks(props) {
+  const [copied, setCopied] = React.useState(false);
+  const url = props.url || window.location.href;
+  const enc = encodeURIComponent(url);
+  const links = [
+    ["#i-fb", "Share on Facebook", "https://www.facebook.com/sharer/sharer.php?u=" + enc],
+    [
+      "#i-x",
+      "Share on X",
+      "https://twitter.com/intent/tweet?url=" +
+        enc +
+        "&text=" +
+        encodeURIComponent(props.title || "")
+    ],
+    ["#i-li", "Share on LinkedIn", "https://www.linkedin.com/sharing/share-offsite/?url=" + enc]
+  ];
+
+  // Instagram has no share URL, so the prototype's fourth icon is a copy-link
+  // button instead — the same job, and it actually works.
+  const copy = () => {
+    if (!navigator.clipboard) {
+      return;
+    }
+    navigator.clipboard.writeText(url).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      (err) => console.error("KROC: copy link failed", err)
+    );
+  };
+
+  return (
+    <div className="flex items-center gap-3.5 text-[13px] text-content-muted">
+      <span>{copied ? "Link copied" : "Share"}</span>
+      {links.map((l) => (
+        <a
+          key={l[0]}
+          href={l[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={l[1]}
+          className="text-content-muted hover:text-content"
+        >
+          <Icon className="h-4 w-4" id={l[0]} />
+        </a>
+      ))}
+      <button
+        type="button"
+        onClick={copy}
+        aria-label="Copy link"
+        className="cursor-pointer border-0 bg-transparent p-0 text-content-muted hover:text-content"
+      >
+        <Icon className="h-4 w-4" id="#i-arrowur" />
+      </button>
+    </div>
+  );
+}
+
+// One labelled fact in the Class detail sidebar.
+function ClassFact(props) {
+  return (
+    <div className="mb-3.5">
+      <div className="mb-1 text-[13px] text-content-muted">{props.label}</div>
+      {props.children}
+    </div>
+  );
+}
+
+// Class detail body: crumbs + share, title, wide hero, then the facts sidebar
+// beside the description, then the course's other classes. Everything the page
+// can't get from Parsley is fetched here — the category crumb (two relations
+// up, past toJson's hydration depth) and the sibling classes.
+function ClassDetail(props) {
+  const d = props.data || {};
+  const c = d.item || {};
+  const [category, setCategory] = React.useState(null);
+  const [siblings, setSiblings] = React.useState({ list: [], ready: false });
+
+  React.useEffect(() => {
+    if (!d.programZuid) {
+      return;
+    }
+    fetch("/custom-endpoints/catalog-parents.json?program=" + encodeURIComponent(d.programZuid))
+      .then((r) => r.json())
+      .then((json) => {
+        const row = [].concat((json && json.data) || []).filter(Boolean)[0];
+        const cat = krocFirstOf(row && row.item && row.item.categories);
+        if (!cat) {
+          return;
+        }
+        setCategory({
+          label: String(cat.category_name || "").trim(),
+          url: (cat.meta && cat.meta.web && cat.meta.web.uri) || ""
+        });
+      })
+      .catch((err) => console.error("KROC: parent category lookup failed", err));
+  }, [d.programZuid]);
+
+  React.useEffect(() => {
+    if (!d.courseZuid) {
+      setSiblings({ list: [], ready: true });
+      return;
+    }
+    fetch("/custom-endpoints/classes.json?courses=" + encodeURIComponent(d.courseZuid))
+      .then((r) => r.json())
+      .then((json) => {
+        const list = []
+          .concat((json && json.data) || [])
+          .filter(Boolean)
+          .map(krocClassToCard)
+          .filter((x) => x.zuid && x.zuid !== c.zuid);
+        setSiblings({ list: list, ready: true });
+      })
+      .catch((err) => {
+        console.error("KROC: sibling classes feed failed", err);
+        setSiblings({ list: [], ready: true });
+      });
+  }, [d.courseZuid, c.zuid]);
+
+  const crumbs = [
+    { label: "Programs & Classes", url: "/categories/" },
+    category || { label: "" },
+    d.program || { label: "" },
+    d.course || { label: "" },
+    { label: c.title }
+  ].filter((x) => x && x.label);
+
+  const isOpen = krocClassOpen(c);
+  const availability = krocAvailability(c);
+  const schedule = [krocDayPlural(c.day), c.time].filter(Boolean);
+  const singlePrice = !!c.price && !c.memberPrice && !c.publicPrice;
+  const calendarUrl = krocCalendarUrl(c);
+  const hasDesc = krocTextLength(c.desc) > 0;
+  const descHtml = { __html: c.desc };
+  const tags = [].concat(d.tags || []).filter(Boolean);
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <Breadcrumbs items={crumbs} />
+        <ShareLinks title={c.title} />
+      </div>
+
+      <h1 className="mb-4 text-heading-md text-content lg:text-heading-lg">{c.title}</h1>
+
+      <div className="relative aspect-16/7 w-full overflow-hidden rounded-card bg-surface-muted">
+        {d.heroWide && (
+          <img src={d.heroWide} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        )}
+        {!!c.kind && (
+          <span className="absolute left-3.5 top-3.5 z-10 inline-flex rounded-full bg-primary px-[11px] py-[5px] text-[12px] text-content-ondark">
+            {c.kind}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 gap-12 rounded-card bg-surface px-6 py-8 sm:px-12 lg:grid-cols-[320px_1fr]">
+        <aside>
+          {schedule.length > 0 && (
+            <ClassFact label="Date & Time">
+              {schedule.map((s) => (
+                <div key={s} className="text-[16px] text-content">
+                  {s}
+                </div>
+              ))}
+            </ClassFact>
+          )}
+
+          {!!c.dates && (
+            <ClassFact label="Class Dates">
+              <div className="flex items-center gap-2 text-[16px] text-content">
+                <Icon className="h-3.5 w-3.5 flex-none text-content-muted" id="#i-cal" />
+                {c.dates}
+              </div>
+            </ClassFact>
+          )}
+
+          {!!c.instructor && (
+            <ClassFact label="Instructor">
+              <div className="text-[16px] text-content">{c.instructor}</div>
+            </ClassFact>
+          )}
+
+          {!!c.ages && (
+            <ClassFact label="Ages">
+              <span className="inline-flex rounded-full bg-surface-muted px-[11px] py-[5px] text-[12px] text-content-muted">
+                {c.ages}
+              </span>
+            </ClassFact>
+          )}
+
+          {(!!c.memberPrice || !!c.publicPrice || !!c.price) && (
+            <div className="mb-3.5 flex gap-[18px]">
+              {singlePrice && <ClassPrice label="Price" value={c.price} />}
+              {!!c.memberPrice && <ClassPrice label="Members" value={c.memberPrice} />}
+              {!!c.publicPrice && <ClassPrice label="Public" value={c.publicPrice} />}
+            </div>
+          )}
+
+          {!!availability && (
+            <ClassFact label="Availability">
+              <span
+                className={cx(
+                  "inline-flex rounded-full px-[11px] py-[5px] text-[12px]",
+                  isOpen ? "bg-success/10 text-success" : "bg-surface-muted text-content-muted"
+                )}
+              >
+                {availability}
+              </span>
+            </ClassFact>
+          )}
+
+          {!!c.location && (
+            <div className="mt-3.5 border-t border-black/5 pt-3.5">
+              <ClassFact label="Location">
+                <div className="text-[15px] text-content">{c.location}</div>
+              </ClassFact>
+            </div>
+          )}
+
+          <div className="mt-4 border-t border-black/5 pt-4">
+            {isOpen ? (
+              <a href={c.enrollUrl || c.url || "#"} className="btn btn-primary btn-block mb-2">
+                Register Now
+              </a>
+            ) : (
+              <span className="btn btn-block mb-2 cursor-default bg-surface-muted text-content-muted">
+                Enrollment Closed
+              </span>
+            )}
+            {!!calendarUrl && (
+              <a
+                href={calendarUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-info btn-sm btn-block"
+              >
+                <Icon className="h-3.5 w-3.5" id="#i-cal" /> Add to Calendar
+              </a>
+            )}
+          </div>
+        </aside>
+
+        <div>
+          <h2 className="mb-3 text-heading-sm text-content">About this class</h2>
+          {hasDesc ? (
+            <div
+              className="kroc-prose text-[15px] leading-[1.6] text-content"
+              dangerouslySetInnerHTML={descHtml}
+            ></div>
+          ) : (
+            <p className="text-[15px] text-content-muted">
+              A description for this class hasn’t been added yet.
+            </p>
+          )}
+          {tags.length > 0 && (
+            <div className="mt-7 flex flex-wrap gap-1.5">
+              {tags.map((t) => (
+                <a
+                  key={t.label}
+                  href={t.url || "#"}
+                  className="inline-flex rounded-full bg-surface-muted px-[13px] py-[7px] text-[12.5px] text-content hover:text-primary"
+                >
+                  {t.label}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {siblings.list.length > 0 && (
+        <div className="mt-12">
+          <h2 className="mb-[18px] text-heading-md text-content">Other classes in this course</h2>
+          <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {siblings.list.map((s) => (
+              <ClassCard key={s.zuid || s.title} item={s} />
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
