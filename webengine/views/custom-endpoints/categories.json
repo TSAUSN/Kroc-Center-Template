@@ -1,0 +1,26 @@
+{{if {get_var.start} }}{{ $start = {get_var.start} }}{{else}}{{ $start = 0 }}{{end-if}}
+{{if {get_var.limit} }}{{ $limit = {get_var.limit} }}{{else}}{{ $limit = 9 }}{{end-if}}
+{
+  "meta": {
+    "q": "{{!get_var.q}}",
+    "start": {{$start}},
+    "limit": {{$limit}}
+  },
+  "total": [
+    {{each categories as t where t.category_name LIKE '%{get_var.q}%' }}
+    "{{t.zuid}}"
+    {{t._arraycomma}}
+    {{end-each}}
+  ],
+  "data": [
+    {{each categories as c where c.category_name LIKE '%{get_var.q}%' sort by c.sort_order asc limit {$start},{$limit} }}
+    {
+      "zuid": "{{c.zuid}}",
+      "item": {{c.toJson()}},
+      "url": "{{c.getUrl()}}",
+      "icon": "{{!c.category_icon.getImage(96)}}"
+    }
+    {{c._arraycomma}}
+    {{end-each}}
+  ]
+}

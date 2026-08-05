@@ -1,0 +1,39 @@
+(**
+  All Categories — [categories_page] single page · the catalog root (/categories/)
+  Hero fields are authored here; the category grid and the tree-wide class
+  finder are both fetched client-side. Field refs are the instance's own —
+  note the TRIPLE underscore on the hero media, which is how WebEngine renders
+  the " - " in the "Hero Image - Desktop" labels.
+  The CTA band at the foot is a drag-in block, hence the autolayout call.
+**)
+<section class="mx-4 mt-4" id="kroc-catalog-hero"></section>
+
+<section class="mx-4 mt-12" id="kroc-catalog-categories"></section>
+
+<section class="mx-4 mb-12 mt-14" id="kroc-catalog-finder"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    eyebrow: "{{!this.hero_eyebrow}}".trim(),
+    title: "{{!this.header_title}}".trim(),
+    subtitle: "{{!this.subheader.escapeForJs()}}".trim(),
+    heroDesktop: "{{!this.hero_image___desktop.getImage(1400)}}".trim(),
+    heroMobile: "{{!this.hero_image___mobile.getImage(800)}}".trim()
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-catalog-hero")).render(
+    <CatalogHero data={data} />
+  );
+
+  const gridData = { heading: "Browse by Category" };
+  ReactDOM.createRoot(document.getElementById("kroc-catalog-categories")).render(
+    <CategoriesSection data={gridData} />
+  );
+
+  const finderData = { heading: "Search for Classes" };
+  ReactDOM.createRoot(document.getElementById("kroc-catalog-finder")).render(
+    <ClassFinder data={finderData} />
+  );
+})();
+</script>
