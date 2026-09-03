@@ -1,0 +1,20 @@
+<section class="mx-4 mt-9" id="kroc-gallery-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    title: "{{!this.gallery_name}}",
+    layout: "{{!this.layout_variant}}",
+    images: [
+      {{each media.{this.images} as img}}
+      { src: "{{img.image.getImage()}}", alt: "{{img.image.getImageTitle()}}" },
+      {{end-each}}
+      null
+    ].filter(Boolean)
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-gallery-{{this.zuid}}")).render(
+    <ImageGallery data={data} />
+  );
+})();
+</script>
