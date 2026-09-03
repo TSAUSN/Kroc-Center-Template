@@ -1,0 +1,65 @@
+{{if {get_var.limit} }}{{ $limit = {get_var.limit} }}{{else}}{{ $limit = 500 }}{{end-if}}
+{
+  "meta": {
+    "limit": {{$limit}}
+  },
+  "categories": [
+    {{each categories as cat sort by cat.sort_order asc}}
+    {
+      "zuid": "{{cat.zuid}}",
+      "name": "{{!cat.category_name.escapeForJs()}}",
+      "url": "{{cat.getUrl()}}"
+    }
+    {{cat._arraycomma}}
+    {{end-each}}
+  ],
+  "programs": [
+    {{each programs as p sort by p.sort_order asc}}
+    {
+      "zuid": "{{p.zuid}}",
+      "name": "{{!p.program_name.escapeForJs()}}",
+      "categoryZuid": "{{!p.categories}}",
+      "url": "{{p.getUrl()}}"
+    }
+    {{p._arraycomma}}
+    {{end-each}}
+  ],
+  "courses": [
+    {{each courses as c sort by c.sort_order asc}}
+    {
+      "zuid": "{{c.zuid}}",
+      "name": "{{!c.course_name.escapeForJs()}}",
+      "programZuid": "{{!c.programs}}",
+      "url": "{{c.getUrl()}}"
+    }
+    {{c._arraycomma}}
+    {{end-each}}
+  ],
+  "classes": [
+    {{each classes as cl sort by cl.class_start_date asc limit 0,{$limit} }}
+    {
+      "zuid": "{{cl.zuid}}",
+      "courseZuid": "{{!cl.courses}}",
+      "url": "{{cl.getUrl()}}",
+      "name": "{{!cl.class_name.escapeForJs()}}",
+      "type": "{{!cl.class_type.escapeForJs()}}",
+      "day": "{{!cl.day_of_week.escapeForJs()}}",
+      "time": "{{!cl.time.escapeForJs()}}",
+      "start": "{{!cl.class_start_date}}",
+      "end": "{{!cl.class_end_date}}",
+      "ages": "{{!cl.age_range.escapeForJs()}}",
+      "instructors": "{{!cl.instructors.escapeForJs()}}",
+      "location": "{{!cl.facility_location.escapeForJs()}}",
+      "status": "{{!cl.enrollment_status.escapeForJs()}}",
+      "spots": "{{!cl.spots_remaining}}",
+      "member": "{{!cl.member_price}}",
+      "public": "{{!cl.public_price}}",
+      "price": "{{!cl.price}}",
+      "enroll": "{{!cl.deep_link_url.escapeForJs()}}",
+      "image": "{{!cl.hero_image_desktop.getImage(800)}}",
+      "desc": "{{!cl.description.escapeForJs()}}"
+    }
+    {{cl._arraycomma}}
+    {{end-each}}
+  ]
+}

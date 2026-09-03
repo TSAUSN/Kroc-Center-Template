@@ -137,6 +137,137 @@ function ProgramCard(props) {
   );
 }
 
+// { zuid, item: <category toJson()>, url, icon } -> ProgramCard props.card
+// Same card face as a Program, so it reuses ProgramCard.
+const krocCategoryToCard = (row) => {
+  const it = (row && row.item) || {};
+  const iconMedia = krocFirstOf(it.category_icon);
+  return {
+    zuid: (row && row.zuid) || krocZuid(it),
+    title: krocPick(it, ["category_name", "title", "name"]),
+    summary: krocPick(it, ["card_summary", "hero_subtitle"]),
+    iconUrl:
+      (row && row.icon && row.icon.trim()) ||
+      (iconMedia && iconMedia.url ? iconMedia.url + "?width=96" : ""),
+    url: (row && row.url) || "#"
+  };
+};
+
+// "Browse by Category" grid on the catalog root — the same server-side search +
+// numbered pagination as ProgramsSection, against /custom-endpoints/categories.json.
+function CategoriesSection(props) {
+  const d = props.data || {};
+  const PAGE_SIZE = d.pageSize || 9;
+  const heading = d.heading || "Browse by Category";
+
+  const [q, setQ] = React.useState("");
+  const [page, setPage] = React.useState(1);
+  const [cards, setCards] = React.useState([]);
+  const [total, setTotal] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
+  const [failed, setFailed] = React.useState(false);
+  const topRef = React.useRef(null);
+
+  const load = (nextPage, query) => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set("start", (nextPage - 1) * PAGE_SIZE);
+    params.set("limit", PAGE_SIZE);
+    if (query) {
+      params.set("q", query);
+    }
+    fetch("/custom-endpoints/categories.json?" + params.toString())
+      .then((r) => r.json())
+      .then((json) => {
+        const rows = []
+          .concat((json && json.data) || [])
+          .filter(Boolean)
+          .map(krocCategoryToCard);
+        const ids = [].concat((json && json.total) || []).filter(Boolean);
+        setCards(rows);
+        setTotal(ids.length);
+        setFailed(false);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("KROC: categories feed failed", err);
+        setFailed(true);
+        setLoading(false);
+      });
+  };
+
+  React.useEffect(() => {
+    const t = setTimeout(() => load(1, q), q ? 300 : 0);
+    setPage(1);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const current = Math.min(page, pageCount);
+  const goPage = (p) => {
+    setPage(p);
+    load(p, q);
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  let body = null;
+  if (cards.length > 0) {
+    body = (
+      <div
+        className={cx(
+          "grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 lg:grid-cols-3",
+          loading && "opacity-60"
+        )}
+      >
+        {cards.map((c) => (
+          <ProgramCard key={c.zuid || c.title} card={c} ctaLabel={d.ctaLabel || "View Category"} />
+        ))}
+      </div>
+    );
+  } else {
+    let msg = "No categories match your search.";
+    if (loading) {
+      msg = "Loading categories…";
+    } else if (failed) {
+      msg = "Categories couldn’t be loaded right now.";
+    }
+    body = (
+      <div className="rounded-card bg-surface px-6 py-16 text-center text-content-muted">{msg}</div>
+    );
+  }
+
+  return (
+    <div ref={topRef} className="scroll-mt-24">
+      <div className="mb-[18px] flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-heading-md text-content">{heading}</h2>
+        <div className="relative w-full sm:w-60">
+          <Icon
+            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-content-muted"
+            id="#i-search"
+          />
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={d.searchPlaceholder || "Search categories"}
+            className="w-full rounded-input bg-surface py-2.5 pl-10 pr-4 text-[14px] text-content placeholder:text-content-muted focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {body}
+
+      {pageCount > 1 && (
+        <div className="mt-10 flex justify-center">
+          <Pagination page={current} pageCount={pageCount} onPage={goPage} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Programs listing on the Category detail page: server-side search + numbered
 // pagination against /custom-endpoints/programs.json. `data.categoryZuid`
 // scopes the feed to the current category.
@@ -394,15 +525,17 @@ const krocLabelCase = (v) =>
     .trim()
     .replace(/(^|[\s\-/])([a-z])/g, (m, sep, ch) => sep + ch.toUpperCase());
 
-// Visible text length of a WYSIWYG value — drives "is this field actually
-// empty" and "is this long enough to need Show more". Editors leave &nbsp;
-// behind when copy is deleted, so it counts as whitespace, not content.
-const krocTextLength = (html) =>
+// Visible text of a WYSIWYG value — used to decide whether a field is actually
+// empty, how long its copy is, and what the finder searches. Editors leave
+// &nbsp; behind when copy is deleted, so it counts as whitespace, not content.
+const krocPlainText = (html) =>
   String(html || "")
     .replace(/<[^>]*>/g, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/\s+/g, " ")
-    .trim().length;
+    .trim();
+
+const krocTextLength = (html) => krocPlainText(html).length;
 
 // "Thursday" -> "Thursdays" for the Class detail schedule line.
 const krocDayPlural = (v) => {
@@ -1533,6 +1666,392 @@ function ClassDetail(props) {
   );
 }
 
+/* ---------------------------------------------------------------------------
+   Class finder — the tree-wide search on the catalog root.
+
+   A Class can't carry its Category: that is three relations up, and toJson()
+   hydrates one level. So /custom-endpoints/class-finder.json ships four slim,
+   flat arrays (categories, programs, courses, classes, each row carrying its
+   parent's zuid) and the join happens here. Slim rows also keep the payload
+   sane — the hydrated class rows the other pages use run ~5 KB each.
+
+   Everything past that point is client-side: filtering, search and pagination
+   all work off the one feed, which is what lets the Category filter exist at
+   all (the server can't express it).
+--------------------------------------------------------------------------- */
+
+const KROC_ALL_CATEGORIES = "All Categories";
+const KROC_DATE_FILTERS = ["Any time", "This week", "Next week", "This month"];
+
+// slim class-finder row -> ClassCard props.item
+const krocSlimClassToCard = (row) => {
+  const r = row || {};
+  return {
+    zuid: r.zuid || "",
+    courseZuid: r.courseZuid || "",
+    title: String(r.name || "").trim(),
+    kind: krocLabelCase(r.type),
+    day: String(r.day || "").trim(),
+    time: String(r.time || "").trim(),
+    dates: krocDateRange(r.start, r.end),
+    startDate: r.start,
+    endDate: r.end,
+    ages: String(r.ages || "").trim(),
+    instructor: String(r.instructors || "").trim(),
+    location: String(r.location || "").trim(),
+    desc: String(r.desc || "").trim(),
+    status: krocLabelCase(r.status),
+    spots: r.spots,
+    memberPrice: krocMoney(r.member),
+    publicPrice: krocMoney(r.public),
+    price: krocMoney(r.price),
+    enrollUrl: krocExternalUrl(r.enroll),
+    image: String(r.image || "").trim(),
+    url: r.url || ""
+  };
+};
+
+// Calendar windows, not rolling ones: "This week" is Sun–Sat of the current
+// week, "This month" the 1st to the last of this month.
+const krocDateWindow = (key) => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const shift = (base, days) => {
+    const d = new Date(base);
+    d.setDate(base.getDate() + days);
+    return d;
+  };
+  if (key === "This week" || key === "Next week") {
+    const from = shift(today, -today.getDay() + (key === "Next week" ? 7 : 0));
+    return { from: from, to: shift(from, 6) };
+  }
+  if (key === "This month") {
+    return {
+      from: new Date(today.getFullYear(), today.getMonth(), 1),
+      to: new Date(today.getFullYear(), today.getMonth() + 1, 0)
+    };
+  }
+  return null;
+};
+
+// A class matches a window when its run overlaps it. An undated class can only
+// ever show under "Any time" — better than asserting it runs now.
+const krocInWindow = (c, win) => {
+  if (!win) {
+    return true;
+  }
+  const start = krocParseDate(c.startDate);
+  if (!start) {
+    return false;
+  }
+  const end = krocParseDate(c.endDate) || start;
+  return start.getTime() <= win.to.getTime() && end.getTime() >= win.from.getTime();
+};
+
+function FilterSelect(props) {
+  return (
+    <label className="inline-flex items-center gap-2 rounded-full bg-surface py-2 pl-3.5 pr-2 text-[13px]">
+      <span className="text-content-muted">{props.label}</span>
+      <select
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+        className="cursor-pointer border-0 bg-transparent pr-1 text-[13px] text-content focus:outline-none"
+      >
+        {props.options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function ClassFinderTable(props) {
+  const rows = props.rows || [];
+  const th = "px-5 py-3 text-[11.5px] font-semibold uppercase tracking-[0.05em] text-content-muted";
+  const td = "px-5 py-3.5 align-middle text-[14px] text-content";
+  return (
+    <div className="overflow-x-auto rounded-card bg-surface">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-b border-black/5 text-left">
+            <th className={th}>Class</th>
+            <th className={th}>Category</th>
+            <th className={th}>Type</th>
+            <th className={th}>Schedule</th>
+            <th className={th}>Price</th>
+            <th className={th}></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((c) => (
+            <tr key={c.zuid || c.title} className="border-b border-black/5 last:border-0">
+              <td className={td}>
+                {c.url ? (
+                  <a href={c.url} className="text-content hover:text-primary">
+                    {c.title}
+                  </a>
+                ) : (
+                  c.title
+                )}
+              </td>
+              <td className={cx(td, "text-content-muted")}>{c.categoryName}</td>
+              <td className={td}>
+                {!!c.kind && (
+                  <span className="inline-flex rounded-full bg-surface-muted px-[11px] py-[5px] text-[12px] text-content-muted">
+                    {c.kind}
+                  </span>
+                )}
+              </td>
+              <td className={cx(td, "text-content-muted")}>
+                <div>
+                  {[krocDayIndex(c.day) >= 0 ? krocDayLabel(c.day) : c.day, c.time]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </div>
+                {!!c.dates && <div className="mt-0.5 text-[12.5px]">{c.dates}</div>}
+              </td>
+              <td className={td}>
+                {c.memberPrice || c.publicPrice ? (
+                  <div className="leading-[1.45]">
+                    {!!c.memberPrice && (
+                      <div>
+                        <span className="text-[11px] text-content-muted">Members </span>
+                        {c.memberPrice}
+                      </div>
+                    )}
+                    {!!c.publicPrice && (
+                      <div>
+                        <span className="text-[11px] text-content-muted">Public </span>
+                        {c.publicPrice}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  c.price
+                )}
+              </td>
+              <td className={cx(td, "text-right")}>
+                {krocClassOpen(c) ? (
+                  <a href={c.enrollUrl || c.url || "#"} className="btn btn-primary btn-sm">
+                    Register
+                  </a>
+                ) : (
+                  <span className="text-[13px] text-content-muted">Closed</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ClassFinder(props) {
+  const d = props.data || {};
+  const PAGE_SIZE = d.pageSize || 12;
+  const heading = d.heading || "Search for Classes";
+
+  const [feed, setFeed] = React.useState({
+    classes: [],
+    categories: [],
+    loading: true,
+    failed: false
+  });
+  const [view, setView] = React.useState("card");
+  const [catF, setCatF] = React.useState(KROC_ALL_CATEGORIES);
+  const [dateF, setDateF] = React.useState(KROC_DATE_FILTERS[0]);
+  const [typeF, setTypeF] = React.useState("All");
+  const [q, setQ] = React.useState("");
+  const [page, setPage] = React.useState(1);
+  const topRef = React.useRef(null);
+
+  React.useEffect(() => {
+    fetch("/custom-endpoints/class-finder.json")
+      .then((r) => r.json())
+      .then((json) => {
+        const byZuid = (rows) => {
+          const map = {};
+          []
+            .concat(rows || [])
+            .filter(Boolean)
+            .forEach((r) => {
+              if (r.zuid) {
+                map[r.zuid] = r;
+              }
+            });
+          return map;
+        };
+        const categories = [].concat((json && json.categories) || []).filter(Boolean);
+        const catBy = byZuid(categories);
+        const programBy = byZuid(json && json.programs);
+        const courseBy = byZuid(json && json.courses);
+
+        const classes = []
+          .concat((json && json.classes) || [])
+          .filter(Boolean)
+          .map((row) => {
+            const card = krocSlimClassToCard(row);
+            const course = courseBy[card.courseZuid];
+            const program = course ? programBy[course.programZuid] : null;
+            const cat = program ? catBy[program.categoryZuid] : null;
+            card.courseName = course ? course.name : "";
+            card.programName = program ? program.name : "";
+            card.categoryName = cat ? cat.name : "";
+            card.searchText = [
+              card.title,
+              krocPlainText(card.desc),
+              card.instructor,
+              card.location,
+              card.courseName,
+              card.programName
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+            return card;
+          });
+
+        setFeed({ classes: classes, categories: categories, loading: false, failed: false });
+      })
+      .catch((err) => {
+        console.error("KROC: class finder feed failed", err);
+        setFeed({ classes: [], categories: [], loading: false, failed: true });
+      });
+  }, []);
+
+  // any filter change returns to page 1
+  React.useEffect(() => {
+    setPage(1);
+  }, [catF, dateF, typeF, q]);
+
+  const catOptions = [KROC_ALL_CATEGORIES].concat(
+    feed.categories.map((c) => c.name).filter(Boolean)
+  );
+  const kinds = feed.classes.map((c) => c.kind).filter(Boolean);
+  const typeOptions = ["All"].concat(kinds.filter((k, i) => kinds.indexOf(k) === i).sort());
+
+  const win = krocDateWindow(dateF);
+  const needle = q.trim().toLowerCase();
+  const shown = feed.classes.filter(
+    (c) =>
+      (typeF === "All" || c.kind === typeF) &&
+      (catF === KROC_ALL_CATEGORIES || c.categoryName === catF) &&
+      krocInWindow(c, win) &&
+      (!needle || c.searchText.indexOf(needle) !== -1)
+  );
+
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const current = Math.min(page, pageCount);
+  const rows = shown.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const goPage = (p) => {
+    setPage(p);
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  let body = null;
+  if (feed.loading) {
+    body = (
+      <div className="rounded-card bg-surface px-6 py-16 text-center text-content-muted">
+        Loading classes…
+      </div>
+    );
+  } else if (feed.failed) {
+    body = (
+      <div className="rounded-card bg-surface px-6 py-16 text-center text-content-muted">
+        Classes couldn’t be loaded right now.
+      </div>
+    );
+  } else if (!rows.length) {
+    body = (
+      <div className="rounded-card bg-surface px-6 py-14 text-center text-[14.5px] text-content-muted">
+        No classes match your search. Try a different filter or clear the search.
+      </div>
+    );
+  } else if (view === "table") {
+    body = <ClassFinderTable rows={rows} />;
+  } else {
+    body = (
+      <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {rows.map((c) => (
+          <ClassCard key={c.zuid || c.title} item={c} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div ref={topRef} className="scroll-mt-24">
+      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-heading-md text-content">{heading}</h2>
+        <div className="inline-flex rounded-full bg-surface p-[3px]">
+          {[
+            ["card", "Cards"],
+            ["table", "Table"]
+          ].map((v) => (
+            <button
+              key={v[0]}
+              type="button"
+              onClick={() => setView(v[0])}
+              className={cx(
+                "cursor-pointer rounded-full border-0 px-4 py-[7px] text-[13px]",
+                view === v[0] ? "bg-primary text-content-ondark" : "bg-transparent text-content"
+              )}
+            >
+              {v[1]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-[18px] flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterSelect label="Category" value={catF} options={catOptions} onChange={setCatF} />
+          <FilterSelect
+            label="Date"
+            value={dateF}
+            options={KROC_DATE_FILTERS}
+            onChange={setDateF}
+          />
+          <FilterSelect label="Type" value={typeF} options={typeOptions} onChange={setTypeF} />
+        </div>
+        <div className="relative w-full sm:w-60">
+          <Icon
+            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-content-muted"
+            id="#i-search"
+          />
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={d.searchPlaceholder || "Search all classes"}
+            className="w-full rounded-input bg-surface py-2.5 pl-10 pr-4 text-[14px] text-content placeholder:text-content-muted focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {!feed.loading && !feed.failed && (
+        <div className="mb-3.5 text-[13px] text-content-muted">
+          Showing {shown.length} of {feed.classes.length}{" "}
+          {feed.classes.length === 1 ? "class" : "classes"}
+        </div>
+      )}
+
+      {body}
+
+      {pageCount > 1 && (
+        <div className="mt-8 flex justify-center">
+          <Pagination page={current} pageCount={pageCount} onPage={goPage} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Catalog hero shared by Category / Program / Course detail: optional kroc-icon
 // chip, H1, and a subtitle, over a photo with a navy scrim.
 function CatalogHero(props) {
@@ -1551,6 +2070,11 @@ function CatalogHero(props) {
           <span className="mb-3.5 inline-flex h-12 w-12 items-center justify-center rounded-[14px] bg-white/15 text-white">
             <CatalogIcon url={d.iconUrl} name={d.icon || d.title} size="h-6 w-6" />
           </span>
+        )}
+        {d.eyebrow && (
+          <div className="mb-2.5 text-[12px] uppercase tracking-[0.14em] text-white/70">
+            {d.eyebrow}
+          </div>
         )}
         <h1 className="mb-3 text-heading-md text-content-ondark lg:text-heading-lg">{d.title}</h1>
         {d.subtitle && <p className="text-[17px] text-white/85">{d.subtitle}</p>}
