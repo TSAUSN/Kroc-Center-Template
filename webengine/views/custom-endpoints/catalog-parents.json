@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "program": "{{!get_var.program}}"
+  },
+  "data": [
+    {{if {get_var.program} }}
+    {{each programs as p where FIND_IN_SET(p.zuid, '{get_var.program}') }}
+    {
+      "zuid": "{{p.zuid}}",
+      "item": {{p.toJson()}},
+      "url": "{{p.getUrl()}}"
+    }
+    {{p._arraycomma}}
+    {{end-each}}
+    {{end-if}}
+  ]
+}

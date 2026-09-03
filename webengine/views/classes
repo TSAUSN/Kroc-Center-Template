@@ -1,2 +1,56 @@
-(** default code https://zesty.org/services/web-engine/introduction-to-parsley/parsley-autolayout **)
-{{this.autolayout()}}
+(**
+  Class detail — [classes] pageset · the dated leaf (TR "Course Session")
+  toJson() hydrates relations one level only ("max hydration depth hit" beyond
+  that), so the crumb trail is assembled in three steps: the class and its
+  Course come from this item, the Program from a loop rooted at [courses], and
+  the Category from /custom-endpoints/catalog-parents.json — that query has to
+  be rooted at [programs] for its category to hydrate at all.
+**)
+<section class="mx-4 mb-12 mt-4" id="kroc-class-detail"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const classRow = {
+    zuid: "{{this.zuid}}",
+    item: {{this.toJson()}},
+    url: "{{this.getUrl()}}"
+  };
+
+  const parents = [
+    {{each courses as c where FIND_IN_SET(c.zuid, '{this.courses}')}}
+    { item: {{c.toJson()}}, url: "{{c.getUrl()}}" }
+    {{c._arraycomma}}
+    {{end-each}}
+  ];
+
+  const tagRows = [
+    {{each tags as t where FIND_IN_SET(t.zuid, '{this.tags}')}}
+    { label: "{{!t.name}}".trim(), url: "{{t.getUrl()}}" }
+    {{t._arraycomma}}
+    {{end-each}}
+  ];
+
+  const parent = parents[0] || {};
+  const course = parent.item || {};
+  const program = krocFirstOf(course.programs);
+
+  const data = {
+    item: krocClassToCard(classRow),
+    heroWide: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
+    courseZuid: krocZuid(course),
+    programZuid: krocZuid(program),
+    course: { label: String(course.course_name || "").trim(), url: parent.url || "" },
+    program: {
+      label: program ? String(program.program_name || "").trim() : "",
+      url: (program && program.meta && program.meta.web && program.meta.web.uri) || ""
+    },
+    tags: tagRows.filter((t) => t.label)
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-class-detail")).render(
+    <ClassDetail data={data} />
+  );
+})();
+</script>
+
+{{ this.autolayout(auto) }}
