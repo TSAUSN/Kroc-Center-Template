@@ -30,6 +30,7 @@
 <script type="text/babel" data-presets="react" src="/components/allstories.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/alltags.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/tagdetail.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/catalog.jsx"></script>
 
 <script type="text/babel" data-presets="react">
 function CurrentView() {

@@ -1,0 +1,54 @@
+(**
+  Category detail — [categories] pageset · /categories/:category
+  Hero + intro are page fields; the Programs listing is fetched client-side from
+  /custom-endpoints/programs.json, scoped to this category's zuid.
+  NOTE: no autolayout call here, so drag-in blocks (featured_programs,
+  featured_stories, donation_block) will not render until one is added back.
+**)
+<section class="mx-4 mt-4" id="kroc-category-crumbs"></section>
+
+<section class="mx-4 mt-3" id="kroc-category-hero"></section>
+
+<section class="mx-4 mt-12" id="kroc-category-intro"></section>
+
+<section class="mx-4 mb-12 mt-12" id="kroc-category-programs"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    zuid: "{{this.zuid}}",
+    title: "{{!this.category_name}}".trim(),
+    subtitle: "{{!this.hero_subtitle.escapeForJs()}}".trim(),
+    iconUrl: "{{!this.category_icon.getImage(96)}}".trim(),
+    heroDesktop: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
+    intro: "{{!this.intro_content.escapeForJs()}}".trim()
+  };
+
+  const crumbs = [{ label: "Programs & Classes", url: "/categories/" }, { label: data.title }];
+
+  ReactDOM.createRoot(document.getElementById("kroc-category-crumbs")).render(
+    <Breadcrumbs items={crumbs} />
+  );
+
+  ReactDOM.createRoot(document.getElementById("kroc-category-hero")).render(
+    <CatalogHero data={data} />
+  );
+
+  if (data.intro) {
+    const intro = { __html: data.intro };
+    ReactDOM.createRoot(document.getElementById("kroc-category-intro")).render(
+      <div className="rounded-card bg-surface px-6 py-10 sm:px-12">
+        <div
+          className="kroc-prose max-w-none md:columns-2 md:gap-12"
+          dangerouslySetInnerHTML={intro}
+        ></div>
+      </div>
+    );
+  }
+
+  const programsData = { categoryZuid: data.zuid, heading: "Programs" };
+  ReactDOM.createRoot(document.getElementById("kroc-category-programs")).render(
+    <ProgramsSection data={programsData} />
+  );
+})();
+</script>
