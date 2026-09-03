@@ -1,0 +1,17 @@
+<section class="mx-4 mt-9" id="kroc-faqs-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = { title: "{{!this.block_name}}", qa: [{{ this.qa }}] };
+
+  const items = []
+    .concat(data.qa || [])
+    .flat()
+    .sort((a, b) => parseInt(a.sort_order) - parseInt(b.sort_order))
+    .map((row) => ({ question: row.question, answerHtml: { __html: row.answer } }));
+
+  ReactDOM.createRoot(document.getElementById("kroc-faqs-{{this.zuid}}")).render(
+    <FaqList title={data.title || "Frequently Asked Questions"} items={items} />
+  );
+})();
+</script>
