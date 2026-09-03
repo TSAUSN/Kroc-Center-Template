@@ -1,0 +1,17 @@
+<section class="mx-4 mt-9" id="kroc-people-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    title: "{{!this.block_name}}",
+    layout: "{{!this.layout_variant}}",
+    featureHeading: "{{!this.feature_heading}}",
+    leadIn: "{{!this.lead_in}}",
+    people: [{{ this.people_details }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-people-{{this.zuid}}")).render(
+    <PeopleBlock data={data} />
+  );
+})();
+</script>
