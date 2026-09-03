@@ -1,0 +1,18 @@
+{
+  "tags": [
+    {{each tags as t sort by t.name asc}}
+    {
+      "name": "{{!t.name}}",
+      "url": "{{t.getUrl()}}",
+      "icon": "{{!t.tag_icon.getImage(48)}}"
+    }
+    {{t._arraycomma}}
+    {{end-each}}
+  ],
+  "storyTags": [
+    {{each stories as s}}
+    [{{!s.hashtag}}]
+    {{s._arraycomma}}
+    {{end-each}}
+  ]
+}
