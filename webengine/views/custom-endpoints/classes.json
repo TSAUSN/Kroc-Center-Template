@@ -1,0 +1,20 @@
+{{if {get_var.limit} }}{{ $limit = {get_var.limit} }}{{else}}{{ $limit = 200 }}{{end-if}}
+{
+  "meta": {
+    "courses": "{{!get_var.courses}}",
+    "limit": {{$limit}}
+  },
+  "data": [
+    {{if {get_var.courses} }}
+    {{each classes as cl where FIND_IN_SET(cl.courses, '{get_var.courses}') sort by cl.class_start_date asc limit 0,{$limit} }}
+    {
+      "zuid": "{{cl.zuid}}",
+      "courseZuid": "{{!cl.courses}}",
+      "item": {{cl.toJson()}},
+      "url": "{{cl.getUrl()}}"
+    }
+    {{cl._arraycomma}}
+    {{end-each}}
+    {{end-if}}
+  ]
+}
