@@ -1,2 +1,23 @@
-(** default code https://zesty.org/services/web-engine/introduction-to-parsley/parsley-autolayout **)
-{{this.autolayout()}}
+<section class="mx-4 mt-6" id="kroc-story-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    item: {{this.toJson()}},
+    url: "{{this.getUrl()}}",
+    recent: [
+      {{each stories as s where s.zuid != '{this.zuid}' sort by s.story_date desc limit 3}}
+      {
+        item: {{s.toJson()}},
+        url: "{{s.getUrl()}}"
+      },
+      {{end-each}}
+      null
+    ].filter(Boolean)
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-story-{{this.zuid}}")).render(
+    <StoryDetail data={data} />
+  );
+})();
+</script>

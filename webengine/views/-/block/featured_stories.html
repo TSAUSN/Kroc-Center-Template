@@ -1,0 +1,24 @@
+<section class="mx-4 mt-9" id="kroc-featured-stories-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    title: "{{!this.block_name}}",
+    displayMode: "{{!this.display_mode}}",
+    zuids: "{{!this.featured_stories}}",
+    stories: [
+      {{each stories as s where FIND_IN_SET(s.zuid, '{this.featured_stories}')}}
+      {
+        item: {{s.toJson()}},
+        url: "{{s.getUrl()}}"
+      },
+      {{end-each}}
+      null
+    ].filter(Boolean)
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-featured-stories-{{this.zuid}}")).render(
+    <FeaturedStories data={data} />
+  );
+})();
+</script>

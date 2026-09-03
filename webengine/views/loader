@@ -25,6 +25,8 @@
 <script type="text/babel" data-presets="react" src="/components/introband.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/cards.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/featuredstories.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/storydetail.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/allstories.jsx"></script>
 
 <script type="text/babel" data-presets="react">
 function CurrentView() {
