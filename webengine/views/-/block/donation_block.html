@@ -1,0 +1,19 @@
+<section class="mx-4 mt-9" id="kroc-donation-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    title: "{{!this.title}}",
+    body: "{{!this.body}}",
+    primaryCta: "{{!this.primary_cta_label}}",
+    primaryUrl: "{{!this.primary_cta_url}}".trim() || "{{!globals.donation_link}}".trim(),
+    secondaryCta: "{{!this.secondary_cta_label}}",
+    secondaryUrl: "{{!this.secondary_cta_url}}",
+    variant: "{{!this.background_variant}}"
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-donation-{{this.zuid}}")).render(
+    <DonationBlock data={data} />
+  );
+})();
+</script>
