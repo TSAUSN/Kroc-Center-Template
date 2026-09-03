@@ -1,8 +1,8 @@
 {
   "data": [
-    {{each global_site_alert_banner as alert}}
-    {{alert.toJson()}}
-    {{alert._arraycomma}}
+    {{each stories as s limit 1}}
+    {{s.toJson()}}
+    {{s._arraycomma}}
     {{end-each}}
   ]
 }
