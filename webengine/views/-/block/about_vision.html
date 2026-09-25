@@ -1,0 +1,21 @@
+<section class="mx-4 mt-12" id="kroc-about-vision-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is WYSIWYG — toJson() escapes its quotes/newlines (AGENTS.md §6)
+  const item = {{this.toJson()}};
+
+  const data = {
+    title: item.title,
+    bodyHtml: { __html: item.body || "" },
+    image: "{{!this.image.getImage(1200)}}".trim(),
+    imageAlt: "{{!this.image.getImageTitle()}}".trim(),
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    checklist: [{{ this.checklist_items }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-about-vision-{{this.zuid}}")).render(
+    <AboutVision data={data} />
+  );
+})();
+</script>

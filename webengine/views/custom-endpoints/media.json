@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "zuids": "{{!get_var.zuids}}"
+  },
+  "data": [
+    {{if {get_var.zuids} }}
+    {{each media.{get_var.zuids} as m}}
+    {
+      "zuid": "{{!m.image.getZUID()}}",
+      "url": "{{!m.image.getImage()}}",
+      "url_sized": "{{!m.image.getImage(400)}}",
+      "title": "{{!m.image.getImageTitle()}}"
+    },
+    {{end-each}}
+    {{end-if}}
+    null
+  ]
+}

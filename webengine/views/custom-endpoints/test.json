@@ -1,8 +1,24 @@
 {
-  "data": [
-    {{each stories as s limit 1}}
-    {{s.toJson()}}
-    {{s._arraycomma}}
-    {{end-each}}
-  ]
+  "step_8_documented_loop": {
+    "_what": "docs.zesty.io repeater loop: {{each api.json.get({ this.field }) as obj}} — AGENTS.md says it does not work on this instance. Everything bang-guarded so a failure cannot 400 the view.",
+    "blocks": [
+      {{each featured_pages as b}}
+      {
+        "zuid": "{{b.zuid}}",
+        "rows": [
+          {{each api.json.get({ b.featured_pages }) as obj}}
+          {
+            "page_title": "{{!obj.page_title}}",
+            "page_logo_raw": "{{!obj.page_logo}}",
+            "page_logo_getImage": "{{!obj.page_logo.getImage(400)}}",
+            "page_logo_getZUID": "{{!obj.page_logo.getZUID()}}"
+          },
+          {{end-each}}
+          null
+        ]
+      }
+      {{b._arraycomma}}
+      {{end-each}}
+    ]
+  }
 }

@@ -1,0 +1,20 @@
+<!-- Block renderer for blocks_catalog_page.
+
+     Despite the .json name (kept so the existing instance view is reused) this
+     emits the block's RAW HTML, not JSON. Deliberate: a block view contains
+     quotes, newlines and <script> bodies, and wrapping that in a JSON string
+     needs an escaper Parsley does not offer. HTML round-trips losslessly and
+     fetch().text() ignores the content type.
+
+     ?block=<view name>   required — resolves /-/block/<block>.html
+     ?variant=<7-zuid>    optional — omitted falls through to the default
+
+     The caller must revive the <script type="text/babel"> tags in the response;
+     innerHTML does not execute scripts. blocks_catalog_page does this the same
+     way the loader's CurrentView does.
+
+     NB: this is an HTML comment. Parsley parses comments too, so a Parsley
+     tag must never appear inside one — writing one here would error the whole
+     response. (A Parsley-style comment would not help: the bang-prefixed form
+     is this codebase's output modifier, so it would be read as a variable.) -->
+{{if {get_var.block} }}{{if {get_var.variant} }}{{ block('/-/block/{get_var.block}.html?variant={get_var.variant}') }}{{else}}{{ block('/-/block/{get_var.block}.html') }}{{end-if}}{{end-if}}

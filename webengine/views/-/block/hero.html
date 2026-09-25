@@ -1,0 +1,35 @@
+<section class="mx-4 mt-6" id="kroc-hero-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // subheading is Multi Line Text — toJson() escapes its newlines/quotes
+  const item = {{this.toJson()}};
+
+  const data = {
+    eyebrow: item.eyebrow,
+    heading: item.heading,
+    subheading: item.subheading,
+    badgeText: item.badge_text,
+    primaryCtaLabel: item.primary_cta_label,
+    primaryCtaUrl: item.primary_cta_link,
+    secondaryCtaLabel: item.secondary_cta_label,
+    secondaryCtaUrl: item.secondary_cta_link,
+    showSocialLinks: item.show_social_links,
+    media: item.media,
+    backgroundColor: item.background_color,
+    artworkMode: item.artwork_mode,
+    alignment: item.alignment,
+    height: item.height,
+    videoUrl: item.video_url,
+    // media fields ship as ZUIDs inside toJson(), so resolve each one here
+    badgeIcon: "{{!this.badge_icon.getImage(96)}}".trim(),
+    imageDesktop: "{{!this.hero_image_desktop.getImage(1600)}}".trim(),
+    imageMobile: "{{!this.hero_image_mobile.getImage(900)}}".trim(),
+    imageAlt: "{{!this.hero_image_desktop.getImageTitle()}}".trim()
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-hero-{{this.zuid}}")).render(
+    <HeroBlock data={data} />
+  );
+})();
+</script>

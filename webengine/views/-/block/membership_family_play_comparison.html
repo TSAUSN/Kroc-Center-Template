@@ -1,0 +1,25 @@
+<section class="mx-4 mt-14" id="kroc-family-play-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is WYSIWYG — toJson() escapes its quotes/newlines
+  const item = {{this.toJson()}};
+
+  const data = {
+    eyebrow: item.eyebrow,
+    title: item.title,
+    bodyHtml: { __html: item.body || "" },
+    headings: [item.column_heading_1, item.column_heading_2, item.column_heading_3],
+    footnote: item.footnote_line,
+    ctaLabel: item.cta_label,
+    ctaUrl: item.cta_url,
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    checklist: [{{ this.checklist_items }}],
+    comparison: [{{ this.comparison_rows }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-family-play-{{this.zuid}}")).render(
+    <MembershipFamilyPlay data={data} />
+  );
+})();
+</script>

@@ -170,3 +170,102 @@ function StoryCarousel(props) {
     </div>
   );
 }
+
+// Volunteer opportunity card (prototype OppCard / B_FeaturedVolunteerOpps):
+// 16:9 hero, title, muted mono dateline, 3-line excerpt, secondary CTA. With
+// no hero a tinted panel of the same footprint keeps the row aligned.
+// card = { title, dateline, excerpt, ctaLabel, url, image }
+function OppCard(props) {
+  const c = props.card;
+  return (
+    <div className="flex flex-col overflow-hidden rounded-card bg-surface">
+      {c.image ? (
+        <img
+          src={c.image}
+          alt={c.title}
+          className="aspect-video w-full bg-surface-muted object-cover"
+        />
+      ) : (
+        <div className="flex aspect-video w-full items-center justify-center bg-secondary-subtle text-secondary">
+          <Icon className="h-[54px] w-[54px]" id="#i-users" />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col px-[22px] pb-[22px] pt-[18px]">
+        <h3 className="mb-1 text-[17px] leading-[1.3] text-content">{c.title}</h3>
+        {c.dateline && (
+          <div className="mb-2 font-mono text-[12.5px] tracking-[0.02em] text-content-muted">
+            {c.dateline}
+          </div>
+        )}
+        {c.excerpt && (
+          <p className="mb-3.5 line-clamp-3 text-[13.5px] leading-[1.5] text-content">
+            {c.excerpt}
+          </p>
+        )}
+        {c.url && (
+          <a href={c.url} className="btn btn-secondary btn-sm mt-auto self-start">
+            {c.ctaLabel || "Learn More"}
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Membership tier row (prototype TierCard / Figma `Card · Membership` 424:531):
+// compact row, name + age note left, rate + period right. No CTA and no
+// eyebrow — the Figma master has neither, so the v5 §21 per-tier CTA fields
+// were modelled for a card that was never designed.
+// Content is vertically centred per quick-win A1 (Miranda Tsadilas, 2026-07-30)
+// — the prototype's original `align-items: baseline` was the reported bug.
+//
+// Price is 28px, NOT the design's 24px — a deliberate deviation, asked for
+// 2026-09-10. Root cause of "the price looks small": these rows render 86.5px
+// tall against the Figma master's 360x70, because the design's tight Figma
+// leading becomes line-height 1.5 in CSS. `leading-none` keeps the larger
+// price from growing the row further. Tightening the left block's leading is
+// the other half of that fix and has NOT been done.
+// card = { name, note, price (preformatted), period }
+function TierCard(props) {
+  const c = props.card;
+  return (
+    <div className="flex flex-row items-center justify-between gap-3 rounded-card bg-surface px-[22px] py-5">
+      <div>
+        <div className="mb-0.5 text-[17px] text-content">{c.name}</div>
+        {c.note && <div className="text-[12.5px] text-content-muted">{c.note}</div>}
+      </div>
+      {c.price && (
+        <div className="whitespace-nowrap text-right">
+          <span className="text-[28px] leading-none text-secondary">{c.price}</span>
+          {c.period && <span className="text-[12.5px] text-content-muted">{c.period}</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Day Pass card (prototype Page_DayPass / Figma `Card · Day Pass` 424:4492):
+// centred stack — "<Audience> <Label>", a large navy price, an age note, and
+// its own Purchase CTA. Sibling of TierCard: that one is a compact priced row,
+// this is the big centred card.
+// card = { audience, label, price (preformatted), ages, ctaLabel, ctaUrl }
+function PassCard(props) {
+  const c = props.card;
+  return (
+    <div className="flex flex-col items-center rounded-card bg-surface px-10 py-11 text-center">
+      <div className="mb-1.5 text-[26px] text-content">
+        <strong className="font-semibold">{c.audience}</strong>
+        {c.label ? " " + c.label : ""}
+      </div>
+      {c.price && (
+        <div className="mb-1 mt-1.5 text-[64px] leading-none text-secondary">{c.price}</div>
+      )}
+      {c.ages && <div className="mb-6 text-[14px] text-content-muted">{c.ages}</div>}
+      {c.ctaLabel && (
+        <a href={c.ctaUrl || "#"} className="btn btn-primary btn-lg mt-auto">
+          {c.ctaLabel}
+        </a>
+      )}
+    </div>
+  );
+}

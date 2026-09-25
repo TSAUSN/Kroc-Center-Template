@@ -1,0 +1,22 @@
+<section class="mx-4 mt-12" id="kroc-about-joan-kroc-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is WYSIWYG — toJson() escapes its quotes/newlines (AGENTS.md §6)
+  const item = {{this.toJson()}};
+
+  const data = {
+    title: item.title,
+    titleEmphasis: item.title_emphasis,
+    bodyHtml: { __html: item.body || "" },
+    videoUrl: item.video_url,
+    // full-bleed behind the copy, so it is sized to the container, not a column
+    image: "{{!this.background_image.getImage(1600)}}".trim(),
+    imageAlt: "{{!this.background_image.getImageTitle()}}".trim()
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-about-joan-kroc-{{this.zuid}}")).render(
+    <AboutJoanKrocStory data={data} />
+  );
+})();
+</script>

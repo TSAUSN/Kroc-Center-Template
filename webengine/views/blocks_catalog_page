@@ -1,0 +1,272 @@
+<!-- Blocks Catalog — internal preview page.
+
+     Nothing is hardcoded and nothing reloads. The block list is discovered at
+     runtime, and switching block/variant fetches the rendered block over AJAX
+     and swaps it in, pushing a history entry so the URL still reproduces the
+     exact preview (and back/forward work). -->
+
+<div class="mx-4 mt-6" id="kroc-catalog"></div>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // ── Discovery ───────────────────────────────────────────────────────────
+  // Zesty exposes no block-listing route (/-/block/ 404s, and so do
+  // /-/blocks[.json], /-/block.json, /-/instant/blocks.json). But:
+  //   /-/gql/      every content model — zuid, label, name, field schema
+  //   /-/instant/  PAGE models only
+  // so BLOCK MODELS = gql − instant. Verified against the repo: the difference
+  // is exactly the files in /-/block/, `unknown` included (dropped below as the
+  // WebEngine fallback, not a real block).
+  //
+  // Variants come from /-/gql/<name>.json. That feed returns every variant but
+  // omits the ZUID — it accepts ?zuid= as a filter yet never reports one — so
+  // the ZUID is recovered from the og_image screenshot URL, which embeds
+  // `variant=7-...`. Dedupe is mandatory: a duplicated variant whose screenshot
+  // was never regenerated still carries the ORIGINAL's og_image, so two items
+  // can report one ZUID (seen on membership_family_play_comparison). When that
+  // happens the bar reports the shortfall rather than hiding it.
+  const UNLISTED = ["unknown"];
+
+  const json = (u) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+  const zuidFromOg = (og) => {
+    const m = /variant=(7-[0-9a-z]+-[0-9a-z]+)/.exec(og || "");
+    return m ? m[1] : null;
+  };
+
+  const readUrl = () => {
+    const p = new URLSearchParams(window.location.search);
+    return { block: p.get("block") || "", variant: p.get("variant") || "" };
+  };
+  const toSearch = (sel) => {
+    const p = new URLSearchParams();
+    if (sel.block) p.set("block", sel.block);
+    if (sel.variant) p.set("variant", sel.variant);
+    const q = p.toString();
+    return q ? "?" + q : window.location.pathname;
+  };
+
+  function Field(props) {
+    return (
+      <label className="flex min-w-[220px] flex-1 flex-col gap-1.5">
+        <span className="text-[11px] uppercase tracking-[0.14em] text-content-muted">
+          {props.label}
+        </span>
+        {props.children}
+      </label>
+    );
+  }
+
+  function Catalog() {
+    const [sel, setSel] = React.useState(readUrl);
+    const [blocks, setBlocks] = React.useState(null);
+    const [gql, setGql] = React.useState(null);
+    const [status, setStatus] = React.useState("discovering…");
+    const [stageState, setStageState] = React.useState("idle");
+    const stage = React.useRef(null);
+
+    // back/forward must drive the preview too
+    React.useEffect(() => {
+      const onPop = () => setSel(readUrl());
+      window.addEventListener("popstate", onPop);
+      return () => window.removeEventListener("popstate", onPop);
+    }, []);
+
+    const navigate = (block, variant) => {
+      const next = { block: block, variant: variant };
+      window.history.pushState(null, "", toSearch(next));
+      setSel(next);
+    };
+
+    React.useEffect(() => {
+      let alive = true;
+      Promise.all([json("/-/gql/"), json("/-/instant/")])
+        .then(([g, instant]) => {
+          if (!alive) return;
+          const pages = instant.endpoints || {};
+          const list = (g.models || [])
+            .filter((m) => !(m.name in pages) && UNLISTED.indexOf(m.name) === -1)
+            .map((m) => ({ name: m.name, label: m.label || m.name }))
+            .sort((a, b) => a.label.localeCompare(b.label));
+          setBlocks(list);
+          setStatus(list.length + " blocks discovered");
+        })
+        .catch((e) => alive && setStatus("discovery failed (" + e + ")"));
+      return () => {
+        alive = false;
+      };
+    }, []);
+
+    React.useEffect(() => {
+      if (!sel.block) {
+        setGql(null);
+        return;
+      }
+      let alive = true;
+      setGql(null);
+      json("/-/gql/" + sel.block + ".json")
+        .then((items) => {
+          if (!alive) return;
+          const all = items || [];
+          const seen = {};
+          const rows = [];
+          all.forEach((it) => {
+            const z = zuidFromOg(it.og_image);
+            if (z && !seen[z]) {
+              seen[z] = true;
+              rows.push({ zuid: z, name: it.block_name || "" });
+            }
+          });
+          setGql({ rows: rows, total: all.length });
+        })
+        .catch(() => alive && setGql({ rows: [], total: null }));
+      return () => {
+        alive = false;
+      };
+    }, [sel.block]);
+
+    // ── Preview: fetch the rendered block and revive its scripts ───────────
+    // innerHTML never executes <script>, so each one is replaced with a live
+    // node — text/babel compiled first — exactly as the loader's CurrentView
+    // does for server-rendered blocks.
+    React.useEffect(() => {
+      const el = stage.current;
+      if (!el) return;
+      if (!sel.block) {
+        el.innerHTML = "";
+        setStageState("idle");
+        return;
+      }
+      let alive = true;
+      setStageState("loading");
+      const qs = "?block=" + encodeURIComponent(sel.block) +
+        (sel.variant ? "&variant=" + encodeURIComponent(sel.variant) : "");
+      fetch("/custom-endpoints/blocks.json" + qs)
+        .then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
+        .then((html) => {
+          if (!alive) return;
+          el.innerHTML = html;
+          el.querySelectorAll("script").forEach((inert) => {
+            const live = document.createElement("script");
+            try {
+              if (inert.type === "text/babel") {
+                live.textContent = Babel.transform(inert.textContent, { presets: ["react"] }).code;
+              } else {
+                for (const attr of inert.attributes) live.setAttribute(attr.name, attr.value);
+                live.textContent = inert.textContent;
+              }
+              inert.replaceWith(live);
+            } catch (err) {
+              console.error("KROC catalog: failed to revive block script", err);
+            }
+          });
+          setStageState(el.textContent.trim() || el.querySelector("section") ? "ok" : "empty");
+        })
+        .catch((e) => {
+          if (!alive) return;
+          el.innerHTML = "";
+          setStageState("error " + e);
+        });
+      return () => {
+        alive = false;
+      };
+    }, [sel.block, sel.variant]);
+
+    const rows = (gql && gql.rows) || [];
+    const known = rows.map((r) => r.zuid);
+    const list = sel.variant && known.indexOf(sel.variant) === -1 ? [sel.variant].concat(known) : known;
+    const nameOf = {};
+    rows.forEach((r) => (nameOf[r.zuid] = r.name));
+    const unresolved = gql && gql.total !== null ? Math.max(0, gql.total - rows.length) : 0;
+    const select =
+      "rounded-input border border-black/15 bg-surface px-3 py-2.5 text-[14px] text-content";
+
+    return (
+      <div>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-black/10 pb-4">
+          <div>
+            <div className="mb-1 flex items-center gap-2">
+              <span className="rounded-full bg-primary px-2 py-[3px] text-[10px] font-medium uppercase tracking-[0.12em] text-white">
+                Internal
+              </span>
+              <span className="text-[11px] uppercase tracking-[0.14em] text-content-muted">
+                Not a live page
+              </span>
+            </div>
+            <h1 className="text-heading-sm text-content">Blocks Catalog</h1>
+          </div>
+          <p className="max-w-[420px] text-[12.5px] leading-relaxed text-content-muted">
+            Previews any block and variant in the instance. Header and footer are
+            suppressed here; the URL reproduces the exact preview.
+          </p>
+        </div>
+        <div className="rounded-card bg-surface px-5 py-4">
+          <div className="flex flex-wrap items-end gap-4">
+            <Field label="Block">
+              <select
+                className={select}
+                value={sel.block}
+                onChange={(e) => navigate(e.target.value, "")}
+              >
+                <option value="">{blocks ? "— select a block —" : "discovering…"}</option>
+                {(blocks || []).map((b) => (
+                  <option key={b.name} value={b.name}>
+                    {b.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Variant">
+              <select
+                className={select}
+                value={sel.variant}
+                disabled={!sel.block || !list.length}
+                onChange={(e) => navigate(sel.block, e.target.value)}
+              >
+                <option value="">{list.length ? "Default (first variant)" : "No variants found"}</option>
+                {list.map((z) => (
+                  <option key={z} value={z}>
+                    {nameOf[z] ? nameOf[z] + " — " + z : z}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={() => navigator.clipboard && navigator.clipboard.writeText(window.location.href)}
+            >
+              Copy link
+            </button>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-4 text-[12.5px] text-content-muted">
+            {sel.block && (
+              <span>
+                {"/-/block/" + sel.block + ".html" + (sel.variant ? "?variant=" + sel.variant : "")}
+              </span>
+            )}
+            <span>{status}</span>
+            {sel.block && gql && (
+              <span>
+                {rows.length + " variant" + (rows.length === 1 ? "" : "s") +
+                  (unresolved > 0
+                    ? " · " + unresolved + " unresolved (duplicate or missing screenshot)"
+                    : "")}
+              </span>
+            )}
+            <span>{stageState === "loading" ? "rendering…" : stageState.indexOf("error") === 0 ? stageState : ""}</span>
+          </div>
+        </div>
+
+        {!sel.block && (
+          <div className="mt-6 rounded-card bg-surface px-7 py-10 text-center text-content-muted">
+            Pick a block above to preview it.
+          </div>
+        )}
+        <div className="mt-2" ref={stage}></div>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("kroc-catalog")).render(<Catalog />);
+})();
+</script>

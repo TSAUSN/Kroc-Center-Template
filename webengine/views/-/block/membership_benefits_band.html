@@ -1,0 +1,26 @@
+<section class="mx-4 mt-9" id="kroc-membership-benefits-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is WYSIWYG — toJson() escapes its quotes/newlines, so the whole item
+  // ships that way rather than as hand-built strings (AGENTS.md §6).
+  const item = {{this.toJson()}};
+
+  const data = {
+    eyebrow: item.eyebrow,
+    title: item.title,
+    bodyHtml: { __html: item.body || "" },
+    columns: "{{!this.checklist_columns}}".trim(),
+    primaryCtaLabel: item.primary_cta_label,
+    primaryCtaUrl: item.primary_cta_url,
+    secondaryCtaLabel: item.secondary_cta_label,
+    secondaryCtaUrl: item.secondary_cta_url,
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    checklist: [{{ this.checklist_items }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-membership-benefits-{{this.zuid}}")).render(
+    <MembershipBenefitsBand data={data} />
+  );
+})();
+</script>

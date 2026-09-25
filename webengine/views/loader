@@ -31,6 +31,18 @@
 <script type="text/babel" data-presets="react" src="/components/alltags.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/tagdetail.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/catalog.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/featuredpages.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/featuredvolunteers.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/membershipbenefits.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/membershiptiers.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/membershipfamilyplay.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/daypassintro.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/daypasspasses.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/aboutvision.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/aboutjoankrocstory.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/aboutimpact.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/hero.jsx"></script>
+
 
 <script type="text/babel" data-presets="react">
 function CurrentView() {
@@ -64,12 +76,28 @@ function CurrentView() {
   return <main className="flex-1" ref={mainRef}></main>;
 }
 
+// Internal tool pages render without site chrome so a preview is unobstructed
+// and cannot be mistaken for a live page. Parsley supplies the page identity
+// server-side through the page.zuid accessor (the same one shared.jsx uses);
+// the pathname is a second, human-readable signal in case the page is
+// recreated and its ZUID changes. The comparison runs in JS rather than a
+// Parsley conditional because equality inside a Parsley if-tag is unverified
+// here — every conditional in this repo tests truthiness only.
+//
+// NEVER write a Parsley tag inside a comment in a view. Parsley parses
+// comments too: an earlier version of this note spelled out a literal if-tag
+// and took every page on the instance down with a WebEngine Parsley error.
+const KROC_CHROMELESS_PAGES = ["7-bcd1dfbfcc-jrj0vm"]; // Blocks Catalog
+const KROC_NO_CHROME =
+  KROC_CHROMELESS_PAGES.indexOf("{{!page.zuid}}".trim()) !== -1 ||
+  window.location.pathname.indexOf("/blocks-catalog-page") === 0;
+
 function App() {
   return (
     <div className="mx-auto flex min-h-screen flex-col max-w-7xl">
-      <SiteHeader />
+      {!KROC_NO_CHROME && <SiteHeader />}
       <CurrentView />
-      <SiteFooter />
+      {!KROC_NO_CHROME && <SiteFooter />}
     </div>
   );
 }

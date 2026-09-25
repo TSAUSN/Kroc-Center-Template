@@ -11,4 +11,12 @@
 	{{block('/-/block/intro_band.html?variant=7-c8e7d99ab9-xrb0v1')}}
 	<div>{{block('/-/block/intro_band.html?variant=7-90f180f38a-ngq0l3')}}</div>
 	{{block('/-/block/featured_stories.html?variant=7-aeb1ad91d6-6xgsxh')}}
+	{{block('/-/block/featured_pages.html?variant=7-92aca7d1db-6xhc6p')}}
+	{{block('/-/block/featured_volunteer_opportunities.html?variant=7-c0e8e5d395-lqn50z')}}
+	{{block('/-/block/membership_benefits_band.html?variant=7-d6baa0c7bf-w0vkzf')}}
+	{{block('/-/block/membership_tiers.html?variant=7-e09de29d81-g5j19d')}}
+	{{block('/-/block/membership_family_play_comparison.html?variant=7-dce2dae3a3-j1khws')}}
+	{{block('/-/block/day_pass_intro_band.html?variant=7-9ce082bf88-17pqrb')}}
+	{{block('/-/block/day_pass_passes.html?variant=7-c48fc1b485-sk9t7x')}}
+	{{block('/-/block/about_vision.html?variant=7-98f686f293-jdrk8t')}}
 </div>

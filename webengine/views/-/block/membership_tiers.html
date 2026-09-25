@@ -1,0 +1,20 @@
+<section class="mx-4 mt-14" id="kroc-membership-tiers-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // fine_print is Multi Line Text — toJson() escapes its newlines/quotes
+  const item = {{this.toJson()}};
+
+  const data = {
+    eyebrow: item.eyebrow,
+    heading: item.heading,
+    finePrint: item.fine_print,
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    tiers: [{{ this.tiers }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-membership-tiers-{{this.zuid}}")).render(
+    <MembershipTiers data={data} />
+  );
+})();
+</script>

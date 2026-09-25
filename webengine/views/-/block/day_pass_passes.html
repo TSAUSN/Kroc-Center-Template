@@ -1,0 +1,14 @@
+<section class="mx-4 mt-12" id="kroc-daypass-passes-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    passes: [{{ this.passes }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-daypass-passes-{{this.zuid}}")).render(
+    <DayPassPasses data={data} />
+  );
+})();
+</script>
