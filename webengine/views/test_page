@@ -1,2 +1,553 @@
-(** default code https://zesty.org/services/web-engine/introduction-to-parsley/parsley-autolayout **)
-{{this.autolayout()}}
+(** Live runner (kroc-tractionrec-sync/src/parsley-runner.js): with kroc_run=1 this view renders ONLY the
+   scratch view's draft, inside this page so that this means this page's item. The include sits in an if,
+   which Parsley does not evaluate when false, so a crashing draft cannot break the normal page. **)
+{{if {get_var.kroc_run} == (1)}}{{ include /_runner/run.html }}{{else}}(**
+  Relationship rendering WITHOUT a Zesty relational field.
+  Basketball program: TR a31a6000000EhmvAAC / Zesty item 7-feeac0fae9-28d0cs
+  Data: /tractionrec/courses.json — Salesforce records, fields at the row root, one file per tier.
+  Write-up: kroc-tractionrec-sync/docs/relationships-without-zesty-fields.md
+**)
+<style>
+.trp{--ink:#1c1b1f;--muted:#5f6368;--line:#e3e3e6;--ok:#12825F;--warn:#8a6100;--bad:#c5000e;
+  font:15px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink);max-width:880px;margin:0 auto;padding:40px 20px 80px}
+.trp h1{font-size:30px;line-height:1.2;font-weight:650;margin:0 0 10px;letter-spacing:-.015em}
+.trp .lede{font-size:17px;color:var(--muted);margin:0 0 28px}
+.trp h2{font-size:19px;font-weight:620;margin:0 0 4px;letter-spacing:-.01em}
+.trp .card{border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin:0 0 18px;background:#fff}
+.trp .card.best{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok) inset}
+.trp .card.bad{border-color:#f3c9c9}
+.trp .why{color:var(--muted);font-size:14px;margin:0 0 14px}
+.trp .badge{display:inline-block;font:600 11.5px/1 ui-sans-serif,sans-serif;letter-spacing:.04em;
+  text-transform:uppercase;padding:5px 9px;border-radius:999px;vertical-align:2px;margin-left:8px}
+.trp .b-ok{background:#e7f5ee;color:var(--ok)}
+.trp .b-warn{background:#fff6e0;color:var(--warn)}
+.trp .b-bad{background:#fdeaea;color:var(--bad)}
+.trp pre{background:#f6f6f7;border:1px solid var(--line);border-radius:7px;padding:12px 14px;margin:0 0 14px;
+  overflow-x:auto;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#25262b}
+.trp .out{background:#fbfbfc;border:1px dashed var(--line);border-radius:7px;padding:12px 14px;font-size:14px}
+.trp .out-label{font:600 11.5px/1 ui-sans-serif,sans-serif;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted);display:block;margin:0 0 8px}
+.trp .out a{color:#0b57d0;text-decoration:none;border-bottom:1px solid #cfe0fb}
+.trp table{width:100%;border-collapse:collapse;margin:0 0 30px;font-size:14.5px}
+.trp th{text-align:left;font-weight:600;padding:9px 10px;background:#f6f6f7;border-bottom:1px solid var(--line)}
+.trp td{padding:9px 10px;border-bottom:1px solid var(--line)}
+.trp td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.trp tr.win td{background:#f2fbf6;font-weight:550}
+.trp .note{border-left:3px solid var(--warn);background:#fffdf5;padding:12px 16px;border-radius:0 7px 7px 0;
+  margin:0 0 16px;font-size:14px;color:#4a4a4a}
+.trp .note b{color:var(--warn)}
+.trp code{font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:#f0f0f2;padding:1.5px 5px;border-radius:4px}
+.trp footer{margin-top:38px;padding-top:18px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+.trp footer a{color:#0b57d0;text-decoration:none}
+@media(max-width:640px){.trp{padding:24px 16px 60px}.trp h1{font-size:24px}.trp .card{padding:16px}}
+/* include output as TEXT: the JSON carries HTML strings, which a pre would parse as markup. */
+.trp textarea.raw{display:block;width:100%;box-sizing:border-box;height:130px;resize:vertical;margin:0;border:0;background:transparent;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#25262b;white-space:pre;overflow:auto}
+@media(max-width:640px){.trp table{display:block;overflow-x:auto}}
+/* Traction Rec rich text arrives as long unbroken spans; let it, and long ids, wrap at phone width. */
+.trp .out,.trp .note,.trp td,.trp p{overflow-wrap:anywhere}
+.trp .out{overflow-x:auto}
+.trp .rn{margin:0 0 14px}
+.trp .rn-code{display:block;width:100%;box-sizing:border-box;resize:vertical;min-height:64px;background:#f6f6f7;border:1px solid var(--line);
+  border-radius:7px 7px 0 0;padding:12px 14px;margin:0;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#25262b;
+  white-space:pre;overflow:auto;tab-size:2;outline:none}
+.trp .rn-code:focus{border-color:#0b57d0;box-shadow:0 0 0 1px #0b57d0 inset}
+.trp .rn-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;border:1px solid var(--line);border-top:0;border-radius:0 0 7px 7px;
+  background:#fbfbfc;padding:7px 10px;font-size:12.5px;color:var(--muted)}
+.trp .rn-btn{font:600 12.5px/1 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;border:1px solid var(--line);background:#fff;color:var(--ink);
+  border-radius:6px;padding:7px 11px;cursor:pointer}
+.trp .rn-btn:hover{border-color:#b9b9c0}
+.trp .rn-btn.go{background:#0b57d0;border-color:#0b57d0;color:#fff}
+.trp .rn-btn.go:hover{background:#0a4cb8}
+.trp .rn-btn[disabled]{opacity:.55;cursor:progress}
+.trp .rn-btn.sm{padding:4px 8px;font-size:11.5px;margin-top:6px}
+.trp .rn-meta{margin-left:auto;font-variant-numeric:tabular-nums}
+.trp .rn-meta.ok{color:var(--ok)}
+.trp .rn-meta.err{color:var(--bad)}
+.trp .rn-out{border:1px dashed var(--line);border-radius:7px;margin-top:10px;background:#fff}
+.trp .rn-tabs{display:flex;gap:4px;padding:6px 8px 0}
+.trp .rn-tab{font:600 11.5px/1 ui-sans-serif,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:none;
+  border:0;border-bottom:2px solid transparent;padding:6px 6px 7px;cursor:pointer}
+.trp .rn-tab[aria-selected="true"]{color:var(--ink);border-bottom-color:#0b57d0}
+.trp .rn-frame{display:block;width:100%;border:0;min-height:40px}
+.trp .rn-src{margin:0;border:0;border-radius:0 0 7px 7px;max-height:260px}
+.trp .rn-msg{padding:12px 14px;font-size:13.5px;color:var(--bad)}
+.trp .rn-msg code{color:var(--ink)}
+.trp tr.rn-row > td{background:#fbfbfc;padding:12px}
+</style>
+
+<div class="trp">
+<div class="card" id="kroc-runner">
+  <h2>Live Parsley runner <span class="badge b-warn">local runner required</span></h2>
+  <p class="why"><b>Every Parsley code block on this page is editable.</b> Change it and press <b>Run</b> (or <kbd>Ctrl</kbd>/<kbd>&#8984;</kbd>+<kbd>Enter</kbd>). Part&nbsp;2&rsquo;s rows have an <b>edit &amp; run</b> button holding the exact code behind each result.</p>
+  <p class="why">Code runs on Zesty&rsquo;s <b>stage</b> server as a <b>draft</b> of a scratch view, rendered <i>inside this page</i>, so <code>this</code> is this page&rsquo;s item. Nothing is published. Because writing a view needs a Zesty token, the call goes through a small runner on your machine that holds it:</p>
+<pre style="margin:0 0 14px">cd kroc-tractionrec-sync &amp;&amp; npm run runner     # http://127.0.0.1:8787</pre>
+  <p class="why">Chrome may ask to let this page reach your local network the first time. Safari blocks pages from calling <code>http://127.0.0.1</code>, so use Chrome or Firefox. Scripts in the output do not run (sandboxed).</p>
+<pre class="run">&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/program_categories.json) as c&#125;&#125;
+  &lt;b&gt;&#123;&#123;c.Name&#125;&#125;&lt;/b&gt; &lt;code&gt;&#123;&#123;c.Id&#125;&#125;&lt;/code&gt;&lt;br&gt;
+&#123;&#123;end-each&#125;&#125;</pre>
+</div>
+
+<h1>Part 1 &middot; The courses under a program, with no Zesty relational field</h1>
+<p class="lede">Program <b>Basketball</b>. The data is Salesforce&rsquo;s records, one file per tier, with Traction Rec&rsquo;s fields at the <b>root</b> of each row. Each course already carries <code>TREX1__Program__c</code> &mdash; the relationship was never missing, it just had to be reachable in one request.</p>
+
+<table>
+  <tr><th>Approach</th><th class="n">Requests</th><th>Notes</th></tr>
+  <tr class="win"><td>1 &middot; JavaScript filters the tier file</td><td class="n">1</td><td>what the catalog components already do</td></tr>
+  <tr><td>2 &middot; Zesty relational field (today)</td><td class="n">0</td><td>the field we are removing</td></tr>
+  <tr class="win"><td>3 &middot; Parsley <code>api.json.get</code> on the synced file</td><td class="n">1</td><td><b>server-rendered</b> &mdash; works since the files changed shape (&sect;0)</td></tr>
+  <tr><td>4 &middot; Class&rsquo;s nested fields</td><td class="n">1</td><td>read in JavaScript (decided 2026-10-02)</td></tr>
+  <tr><td>6 &middot; Native <code>each</code> + per-item <code>api.json.get</code></td><td class="n">119</td><td>works, but one fetch per row &mdash; 71&nbsp;s for every course</td></tr>
+  <tr class="win"><td>7 &middot; Parent &rarr; children file</td><td class="n">1</td><td><b>a page reads only its own children</b> &mdash; small, no filter (&sect;7)</td></tr>
+</table>
+
+<div class="card">
+  <h2>0 &middot; Why the synced files changed shape <span class="badge b-warn">2026-09-30</span></h2>
+  <p class="why">Until 30 Sep every file wrapped the record: <code>&#123; meta, data &#125;</code>. Parsley could fetch those files and loop them, but reading any field <b>crashed the page</b>. We isolated why on small fixtures, one probe per render (a crash takes the whole page down):</p>
+  <table style="margin:0 0 14px">
+  <tr><th>Probe inside <code>each api.json.get(&hellip;) as r</code></th><th>Result</th></tr>
+  <tr><td>a top-level value, on a row that ALSO holds nested objects &mdash; <code>r.Id</code></td><td style="background:#e7f5ee">&#9989; renders</td></tr>
+  <tr><td>a dotted read into a nested object &mdash; <code>r.data.Name</code></td><td style="background:#fdeaea">&#10060; page crash</td></tr>
+  <tr><td>printing a nested object &mdash; <code>r.data</code></td><td style="background:#fdeaea">&#10060; page crash</td></tr>
+  <tr><td>printing a nested array &mdash; <code>r.list</code></td><td style="background:#fff6e0">&#9888; the literal word <code>Array</code></td></tr>
+  <tr><td>looping a nested object &mdash; <code>each r.data as d</code></td><td style="background:#fff6e0">&#9888; zero passes, no error</td></tr>
+  <tr><td>an object root instead of an array root</td><td style="background:#e7f5ee">&#9989; one pass, top-level values render</td></tr>
+  </table>
+  <p class="why"><b>Conclusion:</b> Parsley binds each fetched row one level deep &mdash; a flat map of key &rarr; value. Nested values are harmless while nothing reads them, but nothing below the root is reachable. The old files had <b>no</b> top-level values at all: every field Salesforce returned sat one level down, inside <code>data</code>.</p>
+  <p class="why"><b>So we removed the envelope, not the data.</b> Salesforce&rsquo;s fields moved to the root, unchanged in name and value; the sync&rsquo;s own bookkeeping stays nested under <code>meta</code>, where nobody needs Parsley to read it.</p>
+<pre>before  &#123; "meta": &#123; "hash": &hellip; &#125;, "data": &#123; "Id": "a1za&hellip;", "Name": "Adult Basketball League", "TREX1__Program__c": "a31a&hellip;" &#125; &#125;
+after   &#123; "Id": "a1za&hellip;", "Name": "Adult Basketball League", "TREX1__Program__c": "a31a&hellip;", "meta": &#123; "hash": &hellip; &#125; &#125;</pre>
+  <div class="note"><b>Why not a second, flat copy of every file?</b> That was the earlier plan (<code>course.flat.json</code>). One set of files is simpler, the cron keeps it current with no extra step, and three of the four tiers are already completely flat once the envelope goes. The flat copy of courses has been deleted. Only <code>class</code> still nests &mdash; see &sect;4.</div>
+</div>
+
+<div class="card best">
+  <h2>1 &middot; JavaScript, one fetch <span class="badge b-ok">client-rendered</span></h2>
+  <p class="why">No Zesty field of any kind beyond <code>tractionrec_id</code>. No index, no per-parent file, no parent column. The parent is Salesforce&rsquo;s own <code>TREX1__Program__c</code>, read straight off the record.</p>
+<pre>fetch("/tractionrec/courses.json")
+  .then(r =&gt; r.json())
+  .then(rows =&gt; rows.filter(r =&gt; r.TREX1__Program__c === programTrId));</pre>
+  <div class="out"><span class="out-label">Live output &mdash; rendered in your browser</span>
+    <div id="kroc-js-out">loading&hellip;</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>2 &middot; Zesty relational field <span class="badge b-warn">control</span></h2>
+  <p class="why">Today&rsquo;s approach, shown so the others can be compared. It holds a Zesty ZUID, is written once at create, and never follows a re-parent in Traction Rec.</p>
+<pre class="run">&#123;&#123;each courses as zc where FIND_IN_SET('7-feeac0fae9-28d0cs', zc.programs) sort by zc.course_name asc&#125;&#125;
+  &#123;&#123;zc.course_name&#125;&#125;
+&#123;&#123;end-each&#125;&#125;</pre>
+  <div class="out"><span class="out-label">Output &mdash; rendered server-side by Parsley</span>
+  {{each courses as zc where FIND_IN_SET('7-feeac0fae9-28d0cs', zc.programs) sort by zc.course_name asc}}<b>{{!zc.course_name}}</b> &middot; {{end-each}}
+  </div>
+</div>
+
+<div class="card best">
+  <h2>3 &middot; Parsley <code>api.json.get</code>, on the synced file <span class="badge b-ok">server-rendered</span></h2>
+  <p class="why">The same relationship, rendered by Parsley from the <b>same</b> file &sect;1 reads. Before &sect;0&rsquo;s change this crashed the page; now it is an ordinary loop.</p>
+<pre class="run">&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/courses.json) as c&#125;&#125;
+  &#123;&#123;if &#123;c.TREX1__Program__c&#125; == (a31a6000000EhmvAAC)&#125;&#125;
+    &#123;&#123;c.Name&#125;&#125;
+  &#123;&#123;end-if&#125;&#125;
+&#123;&#123;end-each&#125;&#125;</pre>
+  <div class="out"><span class="out-label">Output &mdash; server-rendered, same 8 courses as &sect;1 and &sect;2</span>
+  {{each api.json.get(https://kroc.zesty.dev/tractionrec/courses.json) as c}}{{if {c.TREX1__Program__c} == (a31a6000000EhmvAAC)}}<b>{{!c.Name}}</b> &middot; {{end-if}}{{end-each}}
+  </div>
+  <div class="out" style="margin-top:12px"><span class="out-label">Per-item files work the same way &mdash; /tractionrec/courses/a1za60000026CewAAE.json</span>
+  {{each api.json.get(https://kroc.zesty.dev/tractionrec/courses/a1za60000026CewAAE.json) as r}}<b>{{!r.Name}}</b> &middot; program <code>{{!r.TREX1__Program__c}}</code>{{end-each}}
+  </div>
+  <div class="note" style="margin-top:14px"><b><code>include</code> still works too</b>, and is still different: it puts the file&rsquo;s raw JSON into the HTML &mdash; a server-rendered <i>payload</i> to hand to JavaScript, not content a crawler reads.<br><code>&#123;&#123; include /tractionrec/courses/&#123;this.tractionrec_id&#125;.json &#125;&#125;</code></div>
+  <div class="out"><span class="out-label">include, on the same per-item file</span>
+  <textarea readonly class="raw" aria-label="include output, raw text">{{ include /tractionrec/courses/a1za60000026CewAAE.json }}</textarea>
+  </div>
+</div>
+
+<div class="card">
+  <h2>4 &middot; What is still out of Parsley&rsquo;s reach: Class <span class="badge b-warn">nested by Salesforce</span></h2>
+  <p class="why">Removing the envelope made every field readable on <code>program_category</code>, <code>program</code> and <code>course</code>. <code>class</code> is different: most of what a class card shows lives inside Salesforce&rsquo;s own relationship objects, <code>TREX1__Course_Option__r</code> and <code>TREX1__cso_Course_Session__r</code>, which is how the query returns them. That nesting is Traction Rec&rsquo;s structure, so the sync keeps it &mdash; and Parsley cannot reach it.</p>
+  <table style="margin:0 0 14px">
+  <tr><th>From <code>classes.json</code></th><th>Parsley</th><th>JavaScript</th></tr>
+  <tr><td><code>Id</code>, <code>Deep_Link_URL__c</code>, <code>TREX1__Course_Option__c</code> &hellip; (root)</td><td>&#9989;</td><td>&#9989;</td></tr>
+  <tr><td>name, dates, days, ages, capacity &mdash; under <code>TREX1__Course_Option__r</code></td><td>&#10060;</td><td>&#9989;</td></tr>
+  <tr><td>the parent course &mdash; <code>TREX1__cso_Course_Session__r.TREX1__Course__c</code></td><td>&#10060; so no course&rarr;class filter</td><td>&#9989;</td></tr>
+  <tr><td><code>prices</code> (array) &middot; Program&rsquo;s <code>TREX1__Program_Category__c</code> (array)</td><td>&#10060;</td><td>&#9989;</td></tr>
+  </table>
+  <div class="out"><span class="out-label">Root fields of a class, from classes.json &mdash; server-rendered</span>
+  {{each api.json.get(https://kroc.zesty.dev/tractionrec/classes.json) as cl}}{{if {cl.Id} == (a1ua600000p4VMQAA2)}}<code>{{!cl.Id}}</code> &middot; option <code>{{!cl.TREX1__Course_Option__c}}</code> &middot; <a href="{{!cl.Deep_Link_URL__c}}">register</a>{{end-if}}{{end-each}}
+  </div>
+  <div class="note" style="margin-top:14px"><b>Decided 2026-10-02: nested class fields are read in JavaScript</b>, not flattened for Parsley. The sync keeps Traction Rec&rsquo;s structure, and &sect;7 shows a course&rsquo;s classes read that way. The earlier hand-published <code>class.flat.json</code> demo is gone.</div>
+</div>
+
+<div class="card">
+  <h2>5 &middot; A detail page, server-rendered by Parsley <span class="badge b-ok">1 fetch</span></h2>
+  <p class="why">A detail page needs no file of its own shape: it fetches the tier file and keeps the row whose <code>Id</code> matches the item&rsquo;s <code>tractionrec_id</code>. Below is a course page&rsquo;s body, rendered from <code>courses.json</code> &mdash; real HTML a crawler reads, not an embedded JSON blob.</p>
+<pre class="run">&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/courses.json) as c&#125;&#125;
+  &#123;&#123;if &#123;c.Id&#125; == (a1za60000026CewAAE)&#125;&#125;
+    &lt;h3&gt;&#123;&#123;c.Name&#125;&#125;&lt;/h3&gt; &#123;&#123;c.TREX1__Rich_Description__c&#125;&#125;
+  &#123;&#123;end-if&#125;&#125;
+&#123;&#123;end-each&#125;&#125;</pre>
+  <div class="out"><span class="out-label">Output &mdash; course a1za60000026CewAAE</span>
+  {{each api.json.get(https://kroc.zesty.dev/tractionrec/courses.json) as c}}{{if {c.Id} == (a1za60000026CewAAE)}}<h3 style="margin:0 0 6px">{{!c.Name}}</h3>{{!c.TREX1__Rich_Description__c}}{{end-if}}{{end-each}}
+  </div>
+  <div class="note" style="margin-top:14px"><b>On a real course page the literal id is <code>(&#123;this.tractionrec_id&#125;)</code></b>; it is written out here so the runner can execute it, since this page&rsquo;s own item has no <code>tractionrec_id</code>. <b>Those parentheses are safe only because Salesforce ids contain no hyphen.</b> Against a Zesty ZUID the same form silently matches nothing (Part&nbsp;2 &sect;B).</div>
+  <table style="margin-top:16px">
+  <tr><th>file</th><th><code>include</code></th><th><code>api.json.get</code> root field</th><th><code>api.json.get</code> nested field</th></tr>
+  <tr><td>per-item (<code>/tractionrec/courses/&lt;id&gt;.json</code>)</td><td>&#9989; as text</td><td>&#9989;</td><td>&#10060; crash</td></tr>
+  <tr><td>tier (<code>/tractionrec/courses.json</code>)</td><td>&#9989; as text</td><td>&#9989;</td><td>&#10060; crash</td></tr>
+  <tr><td>before 30 Sep, either layout</td><td>&#9989; as text</td><td>&#10060; there were none</td><td>&#10060; crash</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>6 &middot; Native <code>each</code> + <code>api.json.get</code> on each course&rsquo;s own file <span class="badge b-warn">works &middot; one fetch per row</span></h2>
+  <p class="why">The earlier test, restored against the real per-item files. Loop Zesty&rsquo;s own <code>courses</code> model, and inside each row fetch that course&rsquo;s Traction Rec file by its <code>tractionrec_id</code>. A <b>loop alias does interpolate into the <code>api.json.get</code> URL</b> &mdash; unlike <code>include</code> (Part&nbsp;2 &sect;C). It used to read <code>/tractionrec/_flat/course/</code> copies; since &sect;0 the real files are readable as they are.</p>
+<pre class="run">&#123;&#123;each courses as c sort by c.course_name asc limit 0,3&#125;&#125;
+  &lt;b&gt;&#123;&#123;c.course_name&#125;&#125;&lt;/b&gt; &lt;a href="&#123;&#123;c.getUrl()&#125;&#125;"&gt;&#123;&#123;c.getUrl()&#125;&#125;&lt;/a&gt;
+  &#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/courses/&#123;c.tractionrec_id&#125;.json) as s&#125;&#125;
+    &rarr; TR &lt;code&gt;&#123;&#123;s.Name&#125;&#125;&lt;/code&gt;, program &lt;code&gt;&#123;&#123;s.TREX1__Program__c&#125;&#125;&lt;/code&gt;
+  &#123;&#123;end-each&#125;&#125;&lt;br&gt;
+&#123;&#123;end-each&#125;&#125;</pre>
+  <div class="out"><span class="out-label">Output &mdash; server-rendered, first 3 courses (3 fetches)</span>
+  {{each courses as c sort by c.course_name asc limit 0,3}}<b>{{!c.course_name}}</b> <a href="{{c.getUrl()}}">{{c.getUrl()}}</a> {{each api.json.get(https://kroc.zesty.dev/tractionrec/courses/{c.tractionrec_id}.json) as s}}&rarr; TR <code>{{!s.Name}}</code>, program <code>{{!s.TREX1__Program__c}}</code>{{end-each}}<br>{{end-each}}
+  </div>
+  <div class="note" style="margin-top:14px"><b>Inside the inner loop, the outer alias is gone.</b> <code>c.course_name</code> renders empty there, and <code>c.getUrl()</code> returns <i>this</i> page&rsquo;s URL (<code>/test-page/</code>), silently. Read anything you need from <code>c</code> <b>before</b> opening the inner loop, as above. (<code>this.*</code> does survive inside a fetched loop.)</div>
+  <p class="why" style="margin-top:14px"><b>The same relationship this way &mdash; the Basketball courses &mdash; is correct but slow.</b> It fetches all 119 course files, one after another: <b>measured 71&nbsp;seconds</b> to render on stage (2026-10-01), against about 1&nbsp;second for &sect;3&rsquo;s single <code>courses.json</code> fetch. So it is <b>not rendered on this page</b>. Run it here if you want to see it:</p>
+<pre class="run">&#123;&#123;each courses as c sort by c.course_name asc&#125;&#125;
+  &#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/courses/&#123;c.tractionrec_id&#125;.json) as s&#125;&#125;
+    &#123;&#123;if &#123;s.TREX1__Program__c&#125; == (a31a6000000EhmvAAC)&#125;&#125;&lt;b&gt;&#123;&#123;s.Name&#125;&#125;&lt;/b&gt; &middot; &#123;&#123;end-if&#125;&#125;
+  &#123;&#123;end-each&#125;&#125;
+&#123;&#123;end-each&#125;&#125;</pre>
+  <div class="note" style="margin-top:14px"><b>When the per-row pattern is the right one:</b> a <i>few</i> rows that are already chosen in Zesty, such as a curated &ldquo;featured courses&rdquo; one-to-many field, where each row needs its live Traction Rec data. For &ldquo;every child of X&rdquo;, use its children file (&sect;7).</div>
+</div>
+
+<div class="card best">
+  <h2>7 &middot; Parent &rarr; children files <span class="badge b-ok">1 small fetch &middot; no filter</span></h2>
+  <p class="why">Built by the sync next to the tier files (2026-10-02): for every parent, a file holding only its own children, as full rows. A page reads its own small file instead of filtering a whole tier file, and needs no <code>&#123;&#123;if&#125;&#125;</code>.</p>
+<pre style="margin:0 0 14px">/tractionrec/
+  program_categories/&lt;id&gt;/programs.json   9 files   programs tagged into that category
+  programs/&lt;id&gt;/courses.json             20 files   that program's courses
+  courses/&lt;id&gt;/classes.json             118 files   that course's classes
+                                      ---------
+                                      147 files, every parent has one, [] when empty</pre>
+<pre class="run">&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/programs/a31a6000000EhmvAAC/courses.json) as c&#125;&#125;
+  &lt;b&gt;&#123;&#123;c.Name&#125;&#125;&lt;/b&gt; &middot;
+&#123;&#123;end-each&#125;&#125;</pre>
+  <div class="out"><span class="out-label">Basketball&rsquo;s courses &mdash; server-rendered from programs/a31a6000000EhmvAAC/courses.json</span>
+  {{each api.json.get(https://kroc.zesty.dev/tractionrec/programs/a31a6000000EhmvAAC/courses.json) as c}}<b>{{!c.Name}}</b> &middot; {{end-each}}
+  </div>
+  <p class="why" style="margin-top:16px"><b>Category &rarr; programs now works in Parsley too.</b> From the tier file it could not, because a program&rsquo;s categories are an array. The sync resolves membership while it builds the file, so the page reads a flat list:</p>
+<pre class="run">&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/program_categories/a2za6000000GGX6AAO/programs.json) as p&#125;&#125;
+  &lt;b&gt;&#123;&#123;p.Name&#125;&#125;&lt;/b&gt; &middot;
+&#123;&#123;end-each&#125;&#125;</pre>
+  <div class="out"><span class="out-label">Sports&rsquo; programs &mdash; server-rendered from program_categories/a2za6000000GGX6AAO/programs.json</span>
+  {{each api.json.get(https://kroc.zesty.dev/tractionrec/program_categories/a2za6000000GGX6AAO/programs.json) as p}}<b>{{!p.Name}}</b> &middot; {{end-each}}
+  </div>
+  <p class="why" style="margin-top:16px"><b>Course &rarr; classes is read in JavaScript</b>, because class rows keep Salesforce&rsquo;s nested <code>TREX1__Course_Option__r</code> (decided 2026-10-02: no flattening). The file is still small and still only that course&rsquo;s classes:</p>
+<pre style="margin:0 0 14px">fetch("/tractionrec/courses/a1za6000009AQIbAAO/classes.json")
+  .then(r =&gt; r.json())
+  .then(rows =&gt; rows.map(k =&gt; k.TREX1__Course_Option__r.Name));</pre>
+  <div class="out"><span class="out-label">Learn-To-Swim Level 2&rsquo;s classes &mdash; rendered in your browser</span>
+    <div id="kroc-children-js">loading&hellip;</div>
+  </div>
+  <div class="note" style="margin-top:14px"><b>A parent with no children still has a file: <code>[]</code>.</b> Adult Basketball League has no classes, so <code>courses/a1za60000026CewAAE/classes.json</code> holds an empty array. That way a course that loses its last class is emptied rather than left listing old classes, and a page never has to tell &ldquo;no children&rdquo; from &ldquo;file missing&rdquo; (a missing URL is one silent empty pass).</div>
+  <div class="out" style="margin-top:12px"><span class="out-label">Raw content of courses/a1za60000026CewAAE/classes.json</span>
+  <textarea readonly class="raw" style="height:40px" aria-label="empty children file">{{ include /tractionrec/courses/a1za60000026CewAAE/classes.json }}</textarea>
+  </div>
+  <div class="note" style="margin-top:14px"><b>Many-to-many.</b> A program tagged into two categories is copied in full into both categories&rsquo; files, and the copies are identical: Traction Rec&rsquo;s link object carries no data of its own. Every file is rebuilt from all the rows on every run, so untagging a program drops it from that one file only. No program is in more than one category today, so the unit tests cover it with a fixture.</div>
+</div>
+
+<h1 style="font-size:24px;margin:44px 0 6px;padding-top:28px;border-top:2px solid var(--line)">Part 2 &middot; What Parsley can and cannot do</h1>
+<p class="lede" style="margin-bottom:22px">The capability matrix behind Part&nbsp;1. Green works, red returns empty, amber works but wrongly &mdash; and the amber ones are the dangerous ones, because they look like working code.</p>
+
+<div class="card">
+  <h2>A &middot; <code>json()</code> &mdash; reads a content FIELD</h2>
+  <p class="why">Reads JSON stored in a Zesty field. This page&rsquo;s <code>integration_test</code> field holds the probe object dumped at the bottom.</p>
+  <table>
+  <tr><th>expression</th><th>result</th></tr>
+  <tr data-run="&#123;&#123;!this.integration_test.json(n)&#125;&#125;"><td><code>&#123;&#123;this.integration_test.json(n)&#125;&#125;</code></td><td style="background:#e7f5ee">&#9989; "{{!this.integration_test.json(n)}}"</td></tr>
+  <tr data-run="&#123;&#123;!this.integration_test.json(meta.label)&#125;&#125;"><td><code>&#123;&#123;this.integration_test.json(meta.label)&#125;&#125;</code><br><span class="why">one dotted level</span></td><td style="background:#e7f5ee">&#9989; "{{!this.integration_test.json(meta.label)}}"</td></tr>
+  <tr data-run="&quot;&#123;&#123;!this.integration_test.json(programs.0.title)&#125;&#125;&quot;"><td><code>&#123;&#123;this.integration_test.json(programs.0.title)&#125;&#125;</code><br><span class="why">indexed path</span></td><td style="background:#fdeaea">&#10060; empty</td></tr>
+  <tr data-run="&#123;&#123;each &#123;this.integration_test&#125;.json(programs) as p&#125;&#125;&lt;b&gt;&#123;&#123;!p.title&#125;&#125;&lt;/b&gt; &#123;&#123;end-each&#125;&#125;"><td><code>&#123;&#123;each &#123;this.integration_test&#125;.json(programs) as p&#125;&#125;</code><br><span class="why">TOP-LEVEL array key</span></td><td style="background:#e7f5ee">&#9989; {{each {this.integration_test}.json(programs) as p}}<b>{{!p.title}}</b> {{end-each}}</td></tr>
+  <tr data-run="&#123;&#123;each &#123;this.integration_test&#125;.json(tiers.programs) as p&#125;&#125;&#123;&#123;!p.title&#125;&#125;&#123;&#123;end-each&#125;&#125;"><td><code>&#123;&#123;each &#123;this.integration_test&#125;.json(tiers.programs) as p&#125;&#125;</code><br><span class="why">NESTED array</span></td><td style="background:#fdeaea">&#10060; {{each {this.integration_test}.json(tiers.programs) as p}}{{!p.title}}{{end-each}}empty &mdash; nested arrays unreachable</td></tr>
+  <tr data-run="&#123;&#123;each &#123;this.integration_test&#125; as p&#125;&#125;&#123;&#123;!p.title&#125;&#125;&#123;&#123;end-each&#125;&#125;"><td><code>&#123;&#123;each &#123;this.integration_test&#125; as p&#125;&#125;</code><br><span class="why">without .json()</span></td><td style="background:#fdeaea">&#10060; {{each {this.integration_test} as p}}{{!p.title}}{{end-each}}empty &mdash; .json() is mandatory</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>B &middot; Filtering a fetched loop &mdash; two silent traps</h2>
+  <table>
+  <tr><th>expression</th><th>result</th></tr>
+  <tr data-run="&#123;&#123;each &#123;this.integration_test&#125;.json(programs) as p&#125;&#125;&#123;&#123;if &#123;p.parent&#125; == 'cat-sports'&#125;&#125;&lt;b&gt;&#123;&#123;!p.title&#125;&#125;&lt;/b&gt; &#123;&#123;end-if&#125;&#125;&#123;&#123;end-each&#125;&#125;"><td><code>&#123;&#123;if &#123;p.parent&#125; == 'cat-sports'&#125;&#125;</code><br><span class="why">inner if, value QUOTED</span></td><td style="background:#e7f5ee">&#9989; {{each {this.integration_test}.json(programs) as p}}{{if {p.parent} == 'cat-sports'}}<b>{{!p.title}}</b> {{end-if}}{{end-each}}&mdash; correctly filtered, 2 of 3</td></tr>
+  <tr data-run="&#123;&#123;each &#123;this.integration_test&#125;.json(programs) as p&#125;&#125;&#123;&#123;if &#123;p.parent&#125; == (cat-sports)&#125;&#125;&lt;b&gt;&#123;&#123;!p.title&#125;&#125;&lt;/b&gt; &#123;&#123;end-if&#125;&#125;&#123;&#123;end-each&#125;&#125;"><td><code>&#123;&#123;if &#123;p.parent&#125; == (cat-sports)&#125;&#125;</code><br><span class="why">same value, PARENTHESES &mdash; note the hyphen</span></td><td style="background:#fdeaea">&#128680; {{each {this.integration_test}.json(programs) as p}}{{if {p.parent} == (cat-sports)}}<b>{{!p.title}}</b> {{end-if}}{{end-each}}<br><b>matches EVERYTHING</b> &mdash; the hyphen breaks the parens form</td></tr>
+  <tr data-run="&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/program_categories.json) as i&#125;&#125;&#123;&#123;if &#123;i.Name&#125; == (Sports)&#125;&#125;&lt;b&gt;&#123;&#123;!i.Name&#125;&#125;&lt;/b&gt; &#123;&#123;end-if&#125;&#125;&#123;&#123;end-each&#125;&#125;"><td><code>&#123;&#123;if &#123;i.Name&#125; == (Sports)&#125;&#125;</code><br><span class="why">parens, no hyphen in the value</span></td><td style="background:#e7f5ee">&#9989; {{each api.json.get(https://kroc.zesty.dev/tractionrec/program_categories.json) as i}}{{if {i.Name} == (Sports)}}<b>{{!i.Name}}</b> {{end-if}}{{end-each}}&mdash; parens are fine when the value is clean</td></tr>
+  <tr data-run="&#123;&#123;each &#123;this.integration_test&#125;.json(programs) as p where p.parent == 'cat-sports'&#125;&#125;&lt;b&gt;&#123;&#123;!p.title&#125;&#125;&lt;/b&gt; &#123;&#123;end-each&#125;&#125;"><td><code>&#123;&#123;each &#8230; as p where p.parent == 'cat-sports'&#125;&#125;</code></td><td style="background:#fff6e0">&#9888; {{each {this.integration_test}.json(programs) as p where p.parent == 'cat-sports'}}<b>{{!p.title}}</b> {{end-each}}<br><b>where is IGNORED</b> &mdash; every row, including cat-aquatics</td></tr>
+  </table>
+  <div class="note" style="border-left-color:var(--bad);background:#fffafa"><b style="color:var(--bad)">The hyphen trap.</b> A value containing <code>-</code> inside parentheses is not compared &mdash; it matches every row. Quote it instead. This matters because <b>Zesty ZUIDs contain hyphens</b> (<code>7-feeac0fae9-28d0cs</code>) while <b>Salesforce ids do not</b> (<code>a31a6000000EhmvAAC</code>), so the parens form is safe for Traction Rec ids and unsafe for ZUIDs. Part&nbsp;1&nbsp;&sect;2 compares a Salesforce id, which is why it is correct.</div>
+  <div class="note"><b>Two more of the same family.</b> <code>limit</code> is ignored on a fetched loop just like <code>where</code>. And <code>FIND_IN_SET</code> inside an <code>if</code> on fetched JSON is <b>always true</b> &mdash; it returns every row while looking like a filter. On a <i>content model</i> the same function evaluates correctly. Same spelling, opposite behaviour.<br><br>Also: in a <code>where</code> clause use a <b>single</b> <code>=</code>; the doubled <code>==</code> matches nothing, silently.</div>
+</div>
+
+<div class="card">
+  <h2>C &middot; <code>include</code> &mdash; reads a snapshot FILE, as text</h2>
+  <p class="why">This is the live mechanism for server-rendering a detail page. Path interpolation works for <code>&#123;this.*&#125;</code> and <code>&#123;get_var.*&#125;</code>, but not for a loop alias or a <code>$</code> variable.</p>
+  <table>
+  <tr><th>expression</th><th>result</th></tr>
+  <tr data-run="&#123;&#123; include /tractionrec/courses/a1za60000026CewAAE.json &#125;&#125;"><td><code>&#123;&#123; include /tractionrec/courses/a1za&#8230;.json &#125;&#125;</code><br><span class="why">literal path &mdash; a real synced record</span></td><td style="background:#e7f5ee">&#9989; see the block below</td></tr>
+  <tr><td><code>&#123;&#123; include &#8230;/&#123;this.zuid&#125;.json &#125;&#125;</code><br><span class="why">path from an ITEM FIELD &mdash; how a detail page uses <code>&#123;this.tractionrec_id&#125;</code></span></td><td style="background:#e7f5ee">&#9989; proven in Part&nbsp;1 &sect;3</td></tr>
+  <tr data-run="&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/courses.json) as c&#125;&#125;&#123;&#123;if &#123;c.Id&#125; == (a1za60000026CewAAE)&#125;&#125;[&#123;&#123; include /tractionrec/courses/&#123;c.Id&#125;.json &#125;&#125;]&#123;&#123;end-if&#125;&#125;&#123;&#123;end-each&#125;&#125;"><td><code>&#123;&#123; include &#8230;/&#123;c.tractionrec_id&#125;.json &#125;&#125;</code> in a loop</td><td style="background:#fdeaea">&#10060; empty &mdash; loop aliases do not interpolate</td></tr>
+  <tr data-run="&#123;&#123; include /tractionrec/courses/NOSUCH.json &#125;&#125;"><td><code>&#123;&#123; include &#8230;/NOSUCH.json &#125;&#125;</code></td><td style="background:#fff6e0">&#9888; "{{ include /tractionrec/courses/NOSUCH.json }}" &mdash; empty, <b>no error</b>. A typo is invisible.</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>D &middot; <code>api.json.get</code> &mdash; Parsley makes an HTTP call</h2>
+  <p class="why" style="color:var(--warn)"><b>This overturns a recorded assumption.</b> The integration spec says Parsley has no outbound HTTP. It does &mdash; including to external domains. Needs a FULL url, and must sit inside an <code>each</code>.</p>
+  <table>
+  <tr><th>expression</th><th>result</th></tr>
+  <tr data-run="&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/program_categories.json) as i&#125;&#125;&lt;b&gt;&#123;&#123;!i.Name&#125;&#125;&lt;/b&gt; &#123;&#123;end-each&#125;&#125;"><td><code>api.json.get(&#8230;/tractionrec/program_categories.json)</code><br><span class="why">root array, own domain</span></td><td style="background:#e7f5ee">&#9989; {{each api.json.get(https://kroc.zesty.dev/tractionrec/program_categories.json) as i}}<b>{{!i.Name}}</b> {{end-each}}</td></tr>
+  <tr data-run="&#123;&#123;each api.json.get(https://jsonplaceholder.typicode.com/users) as u&#125;&#125;&#123;&#123;!u.name&#125;&#125;; &#123;&#123;end-each&#125;&#125;"><td><code>api.json.get(https://jsonplaceholder.typicode.com/users)</code><br><span class="why">EXTERNAL domain</span></td><td style="background:#e7f5ee">&#9989; {{each api.json.get(https://jsonplaceholder.typicode.com/users) as u}}{{!u.name}}; {{end-each}}</td></tr>
+  <tr data-run="&#123;&#123;each api.json.get(/tractionrec/courses.json) as c&#125;&#125;&#123;&#123;c.Name&#125;&#125;; &#123;&#123;end-each&#125;&#125;"><td><code>api.json.get(/tractionrec/&#8230;)</code><br><span class="why">relative path</span></td><td style="background:#fdeaea">&#10060; <code>error:call:1</code> &mdash; needs a full URL</td></tr>
+  <tr data-run="&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/classes.json) as cl&#125;&#125;&#123;&#123;cl.TREX1__Course_Option__r.Name&#125;&#125;&#123;&#123;end-each&#125;&#125;"><td>a value that is a <b>nested object</b></td><td style="background:#fdeaea">&#10060; <b>crashes the whole page.</b> This is why the synced files now put Salesforce&rsquo;s fields at the root (Part&nbsp;1 &sect;0); <code>class</code>&rsquo;s <code>__r</code> objects still nest. Not rendered inline, for obvious reasons &mdash; <b>edit &amp; run</b> it to see the crash safely.</td></tr>
+  <tr data-run="&#123;&#123;each api.json.get(https://kroc.zesty.dev/tractionrec/NOSUCH.json) as i&#125;&#125;&#123;&#123;!i.Name&#125;&#125;&#123;&#123;end-each&#125;&#125;"><td><code>api.json.get(&#8230;/NOSUCH.json)</code></td><td style="background:#fff6e0">&#9888; "{{each api.json.get(https://kroc.zesty.dev/tractionrec/NOSUCH.json) as i}}{{!i.Name}}{{end-each}}" &mdash; one empty pass, no error</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>E &middot; Why the proxy service is still required</h2>
+  <p class="why">Parsley can reach the internet &mdash; but not Traction Rec:</p>
+  <ul style="margin:0 0 4px;padding-left:20px;color:#333;font-size:14px">
+    <li><code>api.json.get(url)</code> sends <b>no headers</b>, and TR returns 401 for <code>?access_token=</code> in the query string (verified).</li>
+    <li>Minting a token is a <b>POST</b>; this is GET-only.</li>
+    <li>A Zesty view is a <b>public URL</b>, so the client secret could never live in one.</li>
+  </ul>
+  <p style="margin:10px 0 0;font-size:14px">The conclusion survives; the reason recorded for it was wrong.</p>
+</div>
+
+<div class="card">
+  <h2>F &middot; the field Part 2 &sect;A reads</h2>
+  <pre style="margin:0;max-height:160px;overflow:auto">{{this.integration_test}}</pre>
+  <div class="note" style="margin-top:12px">Probe data, not real content. The original Traction Rec record this field held (from the Integration-field test) is backed up and can be restored on request.</div>
+</div>
+
+<footer>
+  Tier files: <a href="/tractionrec/program_categories.json">program_category</a> &middot;
+  <a href="/tractionrec/programs.json">program</a> &middot;
+  <a href="/tractionrec/courses.json">course</a> &middot;
+  <a href="/tractionrec/classes.json">class</a> &mdash; ~49&nbsp;KB gzipped for the whole catalog.<br>
+  Write-up: <code>kroc-tractionrec-sync/docs/relationships-without-zesty-fields.md</code>
+</footer>
+</div>
+
+<script>
+(function () {
+  var PROGRAM = "a31a6000000EhmvAAC";
+  var el = document.getElementById("kroc-js-out");
+  var t0 = performance.now();
+  fetch("/tractionrec/courses.json")
+    .then(function (r) { return r.json(); })
+    .then(function (rows) {
+      var ms = Math.round(performance.now() - t0);
+      var kids = rows.filter(function (r) {
+        return r.TREX1__Program__c === PROGRAM;
+      });
+      kids.sort(function (a, b) { return a.Name.localeCompare(b.Name); });
+      el.innerHTML =
+        kids.map(function (k) {
+          return '<a href="' + (k.meta.zestyItemZuid ? "#" : "#") + '"><b>' +
+            k.Name + "</b></a>";
+        }).join(" &middot; ") +
+        '<div style="font-size:13px;color:#5f6368;margin-top:10px">' +
+        kids.length + " of " + rows.length + " courses &middot; one request, " + ms + "ms" +
+        "</div>";
+    })
+    .catch(function (err) {
+      el.textContent = "failed: " + err.message;
+    });
+})();
+</script>
+
+<script>
+(function () {
+  var RUNNER = "http://127.0.0.1:8787";
+  var FRAME_CSS =
+    "<base target='_blank'><style>body { margin: 10px 12px; font: 14px/1.55 ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1c1b1f; }" +
+    " a { color: #0b57d0; } code, pre { font: 12.5px/1.5 ui-monospace, Menlo, monospace; } pre { white-space: pre-wrap; }</style>";
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (text != null) { n.textContent = text; }
+    return n;
+  }
+
+  function autosize(ta) {
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight + 2, 640) + "px";
+  }
+
+  function run(code) {
+    return fetch(RUNNER + "/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: code })
+    }).then(function (r) { return r.json(); });
+  }
+
+  function editor(initial) {
+    var wrap = el("div", "rn");
+    var ta = el("textarea", "rn-code");
+    ta.value = initial;
+    ta.spellcheck = false;
+    ta.setAttribute("aria-label", "Parsley code");
+    var bar = el("div", "rn-bar");
+    var go = el("button", "rn-btn go", "▶ Run");
+    var reset = el("button", "rn-btn", "Reset");
+    var meta = el("span", "rn-meta", "Ctrl/⌘+Enter");
+    go.type = reset.type = "button";
+    bar.appendChild(go);
+    bar.appendChild(reset);
+    bar.appendChild(meta);
+    var out = el("div", "rn-out");
+    out.hidden = true;
+    wrap.appendChild(ta);
+    wrap.appendChild(bar);
+    wrap.appendChild(out);
+
+    function show(result) {
+      out.innerHTML = "";
+      out.hidden = false;
+      if (!result.ok) {
+        var msg = el("div", "rn-msg");
+        msg.textContent = result.error;
+        out.appendChild(msg);
+        return;
+      }
+      var tabs = el("div", "rn-tabs");
+      var tR = el("button", "rn-tab", "Rendered");
+      var tH = el("button", "rn-tab", "HTML");
+      tR.type = tH.type = "button";
+      tabs.appendChild(tR);
+      tabs.appendChild(tH);
+      var frame = el("iframe", "rn-frame");
+      frame.setAttribute("sandbox", "allow-same-origin");
+      frame.setAttribute("title", "Parsley output");
+      var src = el("pre", "rn-src", result.html.trim() || "(empty output)");
+      function pick(rendered) {
+        tR.setAttribute("aria-selected", String(rendered));
+        tH.setAttribute("aria-selected", String(!rendered));
+        frame.hidden = !rendered;
+        src.hidden = rendered;
+      }
+      tR.onclick = function () { pick(true); };
+      tH.onclick = function () { pick(false); };
+      frame.onload = function () {
+        try {
+          // Measure the body, not the document: an iframe document is never
+          // shorter than the frame itself, so it would report the 150px default.
+          frame.style.height = Math.ceil(frame.contentDocument.body.getBoundingClientRect().bottom + 12) + "px";
+        } catch (e) { frame.style.height = "220px"; }
+      };
+      frame.srcdoc = FRAME_CSS + (result.html.trim() ? result.html : "<p style='color:#5f6368'>(empty output)</p>");
+      out.appendChild(tabs);
+      out.appendChild(frame);
+      out.appendChild(src);
+      pick(true);
+    }
+
+    function execute() {
+      go.disabled = true;
+      meta.className = "rn-meta";
+      meta.textContent = "running on stage…";
+      run(ta.value)
+        .then(function (result) {
+          show(result);
+          meta.className = "rn-meta " + (result.ok ? "ok" : "err");
+          var t = result.ms ? " · saved " + result.ms.save + "ms, rendered " + result.ms.render + "ms" : "";
+          meta.textContent = (result.ok ? "ok" : "Parsley error") + t;
+        })
+        .catch(function () {
+          show({
+            ok: false,
+            error: "Runner not reachable at " + RUNNER + ". Start it with: cd kroc-tractionrec-sync && npm run runner " +
+              "(and allow local network access if the browser asks)."
+          });
+          meta.className = "rn-meta err";
+          meta.textContent = "runner offline";
+        })
+        .then(function () { go.disabled = false; });
+    }
+
+    go.onclick = execute;
+    reset.onclick = function () { ta.value = initial; autosize(ta); };
+    ta.addEventListener("input", function () { autosize(ta); });
+    ta.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        execute();
+      } else if (e.key === "Tab" && !e.shiftKey) {
+        e.preventDefault();
+        ta.setRangeText("  ", ta.selectionStart, ta.selectionEnd, "end");
+      }
+    });
+    setTimeout(function () { autosize(ta); }, 0);
+    return wrap;
+  }
+
+  // Every Parsley code block becomes an editor, seeded with its own text.
+  var pres = document.querySelectorAll(".trp pre.run");
+  for (var i = 0; i < pres.length; i++) {
+    pres[i].replaceWith(editor(pres[i].textContent));
+  }
+
+  // Part 2 rows: the code behind each result, opened on demand below the row.
+  // The site shell can execute page scripts more than once, so each row is
+  // marked when wired; the pre blocks above are already gone after one pass.
+  var rows = document.querySelectorAll(".trp tr[data-run]:not([data-rn-ready])");
+  for (var j = 0; j < rows.length; j++) {
+    (function (tr) {
+      tr.setAttribute("data-rn-ready", "");
+      var btn = el("button", "rn-btn sm", "✎ edit & run");
+      btn.type = "button";
+      tr.cells[0].appendChild(document.createElement("br"));
+      tr.cells[0].appendChild(btn);
+      var open = null;
+      btn.onclick = function () {
+        if (open) {
+          open.remove();
+          open = null;
+          return;
+        }
+        open = el("tr", "rn-row");
+        var td = el("td");
+        td.colSpan = tr.cells.length;
+        td.appendChild(editor(tr.getAttribute("data-run")));
+        open.appendChild(td);
+        tr.after(open);
+        td.querySelector("textarea").focus();
+      };
+    })(rows[j]);
+  }
+})();
+</script>
+
+<script>
+(function () {
+  var el = document.getElementById("kroc-children-js");
+  if (!el) { return; }
+  var t0 = performance.now();
+  fetch("/tractionrec/courses/a1za6000009AQIbAAO/classes.json")
+    .then(function (r) { return r.json(); })
+    .then(function (rows) {
+      var ms = Math.round(performance.now() - t0);
+      el.innerHTML = rows.map(function (k) {
+        var o = k.TREX1__Course_Option__r || {};
+        return "<b>" + o.Name + "</b> <span style='color:#5f6368'>" +
+          String(o.TREX1__Day_of_Week__c || "").replace(/;/g, ", ") + "</span>";
+      }).join("<br>") +
+        '<div style="font-size:13px;color:#5f6368;margin-top:10px">' + rows.length +
+        " classes &middot; one request, " + ms + "ms</div>";
+    })
+    .catch(function (err) { el.textContent = "failed: " + err.message; });
+})();
+</script>
+
+{{end-if}}

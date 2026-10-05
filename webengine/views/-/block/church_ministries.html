@@ -1,0 +1,23 @@
+<section class="mx-4 mt-12" id="kroc-church-ministries-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // prayer_request_body is Multi Line Text: toJson() escapes its quotes and
+  // newlines, which a hand-built string literal would break on (AGENTS.md §3)
+  const item = {{this.toJson()}};
+
+  const data = {
+    ministriesHeading: item.ministries_heading,
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    ministries: [{{ this.ministries }}],
+    prayerHeading: item.prayer_request_heading,
+    prayerBody: item.prayer_request_body,
+    prayerCtaLabel: item.prayer_request_cta_label,
+    prayerCtaUrl: item.prayer_request_cta_link
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-church-ministries-{{this.zuid}}")).render(
+    <ChurchMinistries data={data} />
+  );
+})();
+</script>

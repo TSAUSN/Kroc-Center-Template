@@ -42,6 +42,8 @@
 <script type="text/babel" data-presets="react" src="/components/aboutjoankrocstory.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/aboutimpact.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/hero.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/churchconnect.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/churchministries.jsx"></script>
 
 
 <script type="text/babel" data-presets="react">

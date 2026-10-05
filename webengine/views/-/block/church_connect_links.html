@@ -1,0 +1,15 @@
+<section class="mx-4 mt-9" id="kroc-church-connect-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    heading: "{{!this.heading}}".trim(),
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    items: [{{ this.items }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-church-connect-{{this.zuid}}")).render(
+    <ChurchConnectLinks data={data} />
+  );
+})();
+</script>

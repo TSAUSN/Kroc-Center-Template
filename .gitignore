@@ -4,3 +4,13 @@ zesty.config.json
 # Node / Tailwind build tooling (dev-only, never synced to Zesty)
 node_modules/
 .node_modules
+# Written by kroc-tractionrec-sync, never by hand: the instance is the source
+# and the Zesty extension pulls copies down. Not tracked, so a stale local copy
+# can never be committed (or mistaken for something to push back).
+webengine/views/tractionrec/
+# Scratch view for the live Parsley runner (kroc-tractionrec-sync/src/parsley-runner.js).
+webengine/views/_runner/
+
+# zesty-sync baseline + lock (tools/zesty-sync.mjs)
+.zesty-sync.json
+.zesty-sync.lock

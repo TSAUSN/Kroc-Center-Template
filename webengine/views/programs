@@ -33,6 +33,10 @@
     {{end-each}}
   ];
 
+  const parents1 = [
+    { label: "{{!categories.filter("{this.categories}").category_name}}".trim(), url: "{{categories.filter("{this.categories}").getUrl()}}" }
+  ];
+
   const crumbs = [{ label: "Programs & Classes", url: "/categories/" }]
     .concat(parents.filter((c) => c.label))
     .concat([{ label: data.title }]);
