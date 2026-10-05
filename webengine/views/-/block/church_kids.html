@@ -1,0 +1,26 @@
+<section class="mx-4 mt-7 lg:mt-12" id="kroc-church-kids-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is Multi Line Text: toJson() escapes its quotes and newlines, which a
+  // hand-built string literal would break on (AGENTS.md §3)
+  const item = {{this.toJson()}};
+
+  const data = {
+    eyebrow: item.eyebrow,
+    heading: item.heading,
+    body: item.body,
+    ctaLabel: item.cta_label,
+    ctaLink: item.cta_link,
+    troopsHeading: item.troops_heading,
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    troops: [{{ this.troops }}],
+    awardsHeading: item.awards_heading,
+    awards: [{{ this.awards }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-church-kids-{{this.zuid}}")).render(
+    <ChurchKids data={data} />
+  );
+})();
+</script>

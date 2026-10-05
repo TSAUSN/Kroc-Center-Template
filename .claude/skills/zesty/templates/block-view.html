@@ -1,0 +1,22 @@
+<section class="mx-4 mt-7 lg:mt-12" id="kroc-<slug>-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // toJson() escapes quotes and newlines, which a hand-built string literal
+  // would break on (AGENTS.md §3)
+  const item = {{this.toJson()}};
+
+  const data = {
+    heading: item.heading,
+    body: item.body,
+    ctaLabel: item.cta_label,
+    ctaLink: item.cta_link,
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    items: [{{ this.items }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-<slug>-{{this.zuid}}")).render(
+    <BlockName data={data} />
+  );
+})();
+</script>

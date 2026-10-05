@@ -1,0 +1,11 @@
+{
+  "model": "card_grid",
+  "name": "Careers Values",
+  "data": {
+    "heading": "Why work with us?",
+    "cards": [
+      { "title": "Meaningful Work", "body": "Every role plays a vital part…", "icon": "3-161f2cfb-w5mf29" },
+      { "title": "Inclusive Culture", "body": "We strive to create…", "icon": "3-161f2cfd-7zfj57", "pills": "One pill per line\nSecond pill" }
+    ]
+  }
+}

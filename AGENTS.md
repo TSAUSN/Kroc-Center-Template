@@ -87,6 +87,36 @@ standalone entirely without changing the authoring model.
   regenerated `components/styles.html` along with the code change. Tailwind
   purges: a class not present in a scanned file has no CSS. (Scan globs:
   `webengine/views/**/*` and `webengine/scripts` — see `src/tailwind.css`.)
+- **Syncing with the instance** (`tools/zesty-*.mjs`, 2026-10-05). The VS Code
+  extension uploads only on an editor save, so files written by scripts, git
+  or an agent never reached the instance. `zesty-sync.mjs` closes that: a
+  Claude Code PostToolUse hook runs it after every edit and command, pushing
+  each changed `webengine/` file after a three-way check against the last
+  agreed content (`.zesty-sync.json`). A file changed on both sides is a
+  conflict and isn't pushed; >15 files at once (a branch switch) pushes
+  nothing; gitignored paths are skipped. **A scan never creates a file** —
+  a new component needs `node tools/zesty-sync.mjs push <file>`, and block
+  views only come from creating the model. `pull` brings instance changes
+  down without overwriting an unpushed edit. **Every API write must be
+  followed by a pull**; the model and variant tools do it themselves.
+- **Models and variants via the API.** `zesty-model.mjs` validates a whole
+  spec before the first request (no relations or nesting inside a repeater,
+  dropdowns need options), takes `--dry-run`, and never deletes or renames.
+  Its settings round-trip all 45 live models identically, and it adds the
+  Manager's `og_image` field to blocks, which the API alone doesn't.
+  `zesty-variant.mjs` writes a variant's data in the shape the Manager
+  stores (yes_no 0/1, currency string, images/relations comma-joined ZUIDs,
+  repeaters as row arrays), names it via `web.metaTitle`, and doesn't
+  publish: dev renders the latest saved version. **An API-made variant gets
+  no screenshot** (the Manager requests it on save), and `og_image` is the
+  only place `blocks_catalog_page` reads a variant ZUID from — so the tool
+  stamps `og_image` with the Manager's URL shape (`…!variant=<zuid>&version=…`);
+  the Manager overwrites it with a real screenshot on the first save there.
+  ⚠ **An item PUT that omits `meta.listed` UNLISTS the item**, and an unlisted
+  variant vanishes from `/-/gql/` and fails to render (`{{!this.zuid}}` →
+  "field does not exist"). The tool sends `listed: true` +
+  `sitemapPriority: -1` (what all 31 Manager-made variants carry) on every
+  write. The catalog labels a variant by `block_name`, else `meta_title`.
 - All Babel script tags carry `type="text/babel" data-presets="react"`.
 - IDE errors on Parsley lines in `.jsx`/`.json` files are pre-render noise
   (the TS/JSON linters can't know Parsley) — ignore them; verify with the
@@ -205,6 +235,40 @@ since `toJson()` leaves media as ZUIDs.
 string breaks on a double quote. `toJson()` is the safe transport; hand-built
 strings are acceptable for short plain-text fields only.
 
+**Fetched JSON — `api.json.get`** (verified 2026-09-30 → 10-02 on
+`/test-page/`, which runs each case live). Parsley **does** make outbound HTTP
+calls: `{{each api.json.get(https://kroc.zesty.dev/tractionrec/courses.json) as c}}`
+fetches any URL, external domains included. This is how pages read the
+Traction Rec files under `views/tractionrec/` (paths and shapes:
+`../kroc-tractionrec-sync/AGENTS.md`).
+
+- It needs a **full URL** (a relative one gives `error:call:1`) and must sit
+  inside an `each`. A missing URL gives one empty pass, with no error.
+- **It reads one level deep only.** `{{c.Name}}` works. A dotted read
+  (`{{c.TREX1__Course_Option__r.Name}}`) or printing an object **crashes the
+  whole page**, an array prints as `Array`, and `{{each c.obj}}` loops zero
+  times. Nested Traction Rec fields are read in JavaScript instead.
+- `where` and `limit` are **silently ignored** on a fetched loop; filter with
+  an inner `{{if {c.TREX1__Program__c} == (a31a…)}}`. `FIND_IN_SET` there is
+  always true.
+- ⚠ **Hyphen trap:** in an `{{if}}`, a value in parentheses that contains a
+  hyphen is not compared: `== (cat-sports)` matched *every* row and
+  `== (7-feeac0fae9-28d0cs)` matched none. Salesforce ids (no hyphen) are safe
+  in parentheses; **quote Zesty ZUIDs**: `== '7-…'`.
+- Inside a fetched loop, an outer loop's alias is gone, and `c.getUrl()` there
+  silently returns the *current* page's URL; read what you need first.
+  `this.*` survives. A loop alias *does* interpolate into the URL
+  (`…/courses/{c.tractionrec_id}.json`), but that's one fetch per row: 71 s
+  for 119 courses. Read a parent's children file
+  (`…/programs/{this.tractionrec_id}/courses.json`) instead.
+- `{{ include /path.json }}` inlines a file as **raw text** (a payload for
+  JS), not markup. Path interpolation works for `{this.*}` / `{get_var.*}`,
+  not loop aliases.
+- Debugging: the stage domain `https://6wz46m14-dev.webengine.zesty.io`
+  renders **unpublished drafts**; a Parsley crash there is an HTTP 500 with no
+  message. `/test-page/`'s code blocks are editable and run through
+  `npm run runner` in the sync repo.
+
 ---
 
 ## 4. Mount patterns
@@ -241,6 +305,13 @@ view, alongside `{{ this.autolayout(auto) }}`. Components own their data
 src/tailwind.css          Tailwind v4 token source (see README for the 3-tier system)
 tools/inline-css.mjs      inlines compiled CSS into components/styles.html
 tools/format-views.mjs    Parsley-safe formatter (npm run format — see §2)
+tools/zesty-sync.mjs      webengine/ ↔ instance: status | pull | push | scan (see below)
+tools/zesty-model.mjs     models + fields from a JSON spec: list | show | create | add-fields | update-field
+tools/zesty-variant.mjs   block variants (content items): list | show | create | update
+tools/zesty-media.mjs     media library: list | upload (prints the 3-… ZUIDs variants take)
+.claude/skills/zesty/     the Zesty workflow as a Claude Code skill: tools, rules, new-block
+                          procedure, API facts, conventions, ssr-check.cjs — keep it current
+tools/zesty-api.mjs       shared setup for the two above (token, model lookups, pull)
 webengine/
   views/
     loader                app shell (see §1)
@@ -295,9 +366,10 @@ webengine/
       featuredstories.jsx FeaturedStories — grid 3-up | carousel, curation order
                           restored from one-to-many CSV
       featuredpages.jsx   FeaturedPages — compact chips | grid cards from the
-                          `featured_pages` repeater; owns the shared repeater
-                          helpers (krocMediaRef, useKrocMediaUrls two-pass media
-                          resolve, krocSizedMedia, krocExternalUrl, krocSortRows)
+                          `featured_pages` repeater; owns krocSortRows.
+                          Repeater media still falls back to placeholders —
+                          the two-pass resolver lives in cardgrid.jsx
+                          (useKrocMediaUrls); krocExternalUrl is in catalog.jsx
       membershipbenefits.jsx MembershipBenefitsBand — navy band + 2 CTAs +
                           CheckList column (block: membership_benefits_band).
                           Background is NOT a field — see the header comment
@@ -335,6 +407,18 @@ webengine/
                           Prayer half presence-driven. Two layouts sharing
                           markup: When inline-right vs own line; Prayer head
                           above the card vs inside it
+      churchkids.jsx      ChurchKids — K.R.O.C. Kids card: eyebrow, heading,
+                          CTA, body, troop pills (7fr) beside tinted award
+                          boxes (5fr) (block: church_kids). Either half
+                          presence-driven; CTA top-right on desktop, bottom
+                          on mobile (rendered twice, display:none-toggled)
+      cardgrid.jsx        CardGrid — white cards under an optional heading
+                          (block: card_grid; variants "Church Groups",
+                          "Careers Values"). Icon/Photo → media face (band
+                          over a 19px title), else plain face (28px title +
+                          pills). Columns follow the card count. Owns
+                          useKrocMediaUrls, the two-pass repeater media
+                          resolver (custom-endpoints/media.json)
       membershipfamilyplay.jsx MembershipFamilyPlay + ComparisonTable — white
                           card: checklist + 3-col Standard-vs-Family-Play table
                           + serif accent line + centred CTA (block:
@@ -373,7 +457,7 @@ webengine/
 `featured_pages`, `featured_volunteer_opportunities`, `membership_benefits_band`,
 `membership_tiers`, `membership_family_play_comparison`, `day_pass_intro_band`, `day_pass_passes`, `about_vision`,
 `about_joan_kroc_story`, `about_impact`, `hero`, `church_connect_links`,
-`church_ministries`.
+`church_ministries`, `church_kids`, `card_grid`.
 `[featured_volunteer_opportunities]` (block fields assumed:
 `block_name`, `block_title`, `view_all_link`, `display_mode`, one-to-many
 `featured_opportunities` → `[volunteer_opportunities]`; confirm the built
@@ -612,6 +696,53 @@ that substitution. Descriptions use `text-content-muted`, which IS the design's
 it is Multi Line Text, so it can carry quotes and newlines. ⚠ **Repeater
 sub-field IDs are unverified** — the model has no content item yet.
 
+`[church_kids]` as built 2026-10-05 (blocks-doc §3.5, ticket 2454; model
+`6-88aff6e990-2b59gd`, the first created with `tools/zesty-model.mjs`, so it
+has no auto `og_image` field — the Manager adds that, the API doesn't):
+`eyebrow`, `heading`, `body` (Multi Line Text), `cta_label`, `cta_link`
+(External URL), `troops_heading`, `troops` repeater {`label`},
+`awards_heading`, `awards` repeater {`title`, `description` (Multi Line Text),
+`tone` (dropdown `red` | `amber`)}. Pills and tinted boxes are why this is a
+block, not Page Content. **Two sub-heading fields the ticket omitted** —
+"Troops · 4–5 PM" and "Award Ceremonies" are in the design, and the time is
+content. `heading`, not the ticket's Title, matching the other Church blocks.
+No `sort_order` on either repeater: nobody asked for one. **Tone:** `red` =
+brand-red-50 #FFEBEB, `amber` = the design's #FFF6E8 (a brand-amber tint, no
+token); empty/unknown alternates red, amber in row order, the design's
+sequence. **Either half is presence-driven** — troops alone or awards alone run
+full width. **Desktop and mobile both followed:** the CTA sits top-right of the
+heading on desktop and at the bottom of the card on mobile, rendered twice and
+`display:none`-toggled; pills shrink to the mobile `.pill.sm` size. ⚠ The
+eyebrow renders red-300 #C5000E, not `--kroc-red` (3.86:1 fails AA at 11px) —
+same substitution as `[hero]` / `[church_ministries]`. Body ships via
+`toJson()` (quotes, newlines). Repeater sub-field IDs are verified here —
+they came from the spec the tool created the model from.
+
+`[card_grid]` as built 2026-10-05 (model `6-8891ccd8fc-zxrpdq`; variant
+"Church Groups" `7-86f0b1c5fe-zst4tm`, both made through the API): `cards`
+repeater {`title`, `body` (Multi Line Text), `pills` (Multi Line Text, one pill
+per line)}. **A general block, not the catalog's `[church_groups]`** — Japheth
+2026-10-05: `[careers_values]` is the same white-card grid and gets its
+optional Icon + section Heading added HERE (each rendered only when filled),
+not a second model. NOT `[featured_cards]` 7.20 either, which the catalog named:
+that is the homepage class/event/promo card block, built on references a
+repeater can't hold. **Pills is flat text** because the ticket's
+Pills-repeater-inside-Items nests a repeater, which Zesty disallows. **No
+Columns field** — desktop columns follow the card count (1 → full, 2 or 4 →
+2-up, else 3-up); mobile stacks. No Sort Order: cards keep repeater order.
+**`[careers_values]` joined 2026-10-05** as variant "Careers Values"
+`7-849a8ae2c0-v0kj18`, adding `heading` (block, sort 10000) and `cards.icon` /
+`cards.photo` (Media). Everything presence-driven: Heading → section head plus
+16px more top space (headed sections sit 48px down in the design, follow-on rows
+32px); Icon or Photo → the ValueCard media face, a 160px band (140 mobile) over a
+19px title, Photo full-bleed (Erin's ask, 💬1871730857) else the navy-50 → area
+gradient with the icon in a red-50 chip. Icon/Photo are repeater Media, so bare
+ZUIDs, resolved client-side by `useKrocMediaUrls` → `custom-endpoints/media.json`
+(keyed by ZUID: the endpoint's order isn't guaranteed). Icons render as
+uploaded — colour comes from the file. The three design icons were uploaded from
+the `icons.html` sprite, stroked #EF3E42: `kroc-icon-heart.svg`
+3-161f2cfb-w5mf29, `-users` 3-161f2cfd-7zfj57, `-star` 3-161f2cfc-llf6b5.
+
 **Still placeholder:** `external_embed`, `featured_classes`, `custom_forms`,
 `custom_navigation`. **Models not yet created** (v3): `featured_events`,
 `featured_programs`, `map_block`, `rate_cards`, `job_postings`,
@@ -699,9 +830,10 @@ The 4 blocks that are still empty scaffolds (`custom_forms`,
   `[connect_block]`.
 - `globals.donation_link` referenced by the donation block but not yet in
   the schema (bang-guarded).
-- People block headshots: repeater media sub-field = bare ZUIDs. No longer a
-  dead end — resolve them the way `featuredpages.jsx` does (§3, two-pass
-  `media.{csv}` lookup via `custom-endpoints/media.json`). Not yet applied.
+- Repeater media (bare ZUIDs) is resolved only in `card_grid` so far, by
+  `useKrocMediaUrls` in `cardgrid.jsx` (§3, two-pass `media.{csv}` lookup via
+  `custom-endpoints/media.json`). Not yet applied to People headshots or
+  `featured_pages` logos/heroes, which still fall back to placeholders.
 - Long-text fields in hand-built JS strings need a Parsley escape modifier
   eventually (or migrate those payloads to toJson transport).
 - Content URLs entered without protocol (`facebook.com`) resolve relative to

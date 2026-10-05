@@ -17,6 +17,7 @@
 //
 // Usage:
 //   node tools/zesty-sync.mjs status          compare every file (writes nothing to the instance)
+//   node tools/zesty-sync.mjs pull            bring instance changes down (never over an unpushed edit)
 //   node tools/zesty-sync.mjs push <file…>    push these files; --force overrides a conflict
 //   node tools/zesty-sync.mjs scan            push files modified since the last scan;
 //                                             --allow-many lifts the MANY_FILES guard
@@ -32,9 +33,10 @@ import {
   readdirSync,
   openSync,
   closeSync,
-  unlinkSync
+  unlinkSync,
+  mkdirSync
 } from "node:fs";
-import { join, relative, resolve, extname, sep } from "node:path";
+import { join, relative, resolve, extname, dirname, sep } from "node:path";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 
@@ -173,11 +175,14 @@ async function fetchRemoteCode(kind, zuid) {
   return data.code ?? "";
 }
 
-async function fetchAllRemote(config) {
+async function fetchDevRecords(kind) {
+  return (await api("GET", API[kind])).filter((item) => item.status === "dev");
+}
+
+async function fetchAllRemote() {
   const byZuid = {};
   for (const kind of KINDS) {
-    const list = await api("GET", API[kind]);
-    for (const item of list) if (item.status === "dev") byZuid[item.ZUID] = item.code ?? "";
+    for (const item of await fetchDevRecords(kind)) byZuid[item.ZUID] = item.code ?? "";
   }
   return byZuid;
 }
@@ -261,7 +266,7 @@ async function syncAll(paths, ctx, opts) {
 // ---------- commands ----------
 
 async function baseline(config) {
-  const remote = await fetchAllRemote(config);
+  const remote = await fetchAllRemote();
   const state = { lastScan: Date.now(), base: {}, created: { views: {}, styles: {}, scripts: {} } };
   for (const kind of KINDS) {
     for (const [key, entry] of Object.entries(config.instance[kind])) {
@@ -295,7 +300,7 @@ async function scan(ctx) {
 }
 
 async function status(ctx) {
-  const remote = await fetchAllRemote(ctx.config);
+  const remote = await fetchAllRemote();
   const rows = [];
   for (const kind of KINDS) {
     const map = { ...ctx.state.created[kind], ...ctx.config.instance[kind] };
@@ -333,8 +338,64 @@ async function status(ctx) {
   return rows.sort((a, b) => a[0].localeCompare(b[0]));
 }
 
+// Instance → local, the safe half of the extension's Sync to Instance: a file
+// is only overwritten when the local copy still matches the baseline, so an
+// edit that hasn't been pushed yet is never lost. New instance files are
+// written and mapped; mappings whose ZUID is gone are dropped (the local file
+// stays).
+async function pull(ctx) {
+  const lines = [];
+  const show = (kind, key) => `${kind}/${key.replace(/^\//, "")}`;
+  for (const kind of KINDS) {
+    const records = await fetchDevRecords(kind);
+    const map = ctx.config.instance[kind];
+    const live = new Set(records.map((r) => r.ZUID));
+    for (const [key, entry] of Object.entries(map)) {
+      if (live.has(entry.zuid)) continue;
+      delete map[key];
+      delete ctx.state.created[kind][key];
+      delete ctx.state.base[`${kind}:${key}`];
+      ctx.configDirty = true;
+      lines.push(`gone from instance: ${show(kind, key)} (mapping dropped, local file kept)`);
+    }
+    for (const r of records) {
+      const key = r.fileName;
+      const stateKey = `${kind}:${key}`;
+      const path = localPathFor(kind, key);
+      const code = r.code ?? "";
+      const remote = sha(code);
+      if (map[key]?.zuid !== r.ZUID) {
+        map[key] = { zuid: r.ZUID, type: r.type, updatedAt: r.updatedAt, createdAt: r.createdAt };
+        ctx.configDirty = true;
+      }
+      const write = (what) => {
+        mkdirSync(dirname(path), { recursive: true });
+        writeFileSync(path, code);
+        ctx.state.base[stateKey] = remote;
+        lines.push(`${what}: ${show(kind, key)}`);
+      };
+      if (!existsSync(path)) {
+        write("new from instance");
+        continue;
+      }
+      const local = sha(readFileSync(path, "utf8"));
+      const base = ctx.state.base[stateKey];
+      if (local === remote) ctx.state.base[stateKey] = remote;
+      else if (base && local === base) write("pulled");
+      else if (!base) lines.push(`differs, no baseline: ${show(kind, key)} (left alone; see status)`);
+      else if (remote === base) lines.push(`local change not pushed yet: ${show(kind, key)} (kept)`);
+      else lines.push(`CONFLICT: ${show(kind, key)} changed on both sides (local kept)`);
+    }
+  }
+  return lines;
+}
+
 function summarise(results) {
-  const notable = results.filter((r) => !["unchanged", "in-sync"].includes(r.result));
+  // A style/script that was never on the instance (build:css's tailwind.css)
+  // is skipped on every build; `status` still lists it.
+  const notable = results.filter(
+    (r) => !["unchanged", "in-sync"].includes(r.result) && !(r.result === "skipped" && r.file.startsWith("styles/"))
+  );
   return notable.map((r) => `${r.result}: ${r.file}${r.note ? ` (${r.note})` : ""}`);
 }
 
@@ -389,6 +450,10 @@ async function main() {
       saveState(ctx.state);
       if (rows.length === 0) console.log("Everything matches the instance's dev versions.");
       for (const [file, what, note] of rows) console.log(`${what.padEnd(16)} ${file}${note ? `  — ${note}` : ""}`);
+    } else if (CMD === "pull") {
+      const lines = await pull(ctx);
+      saveState(ctx.state);
+      console.log(lines.length ? lines.join("\n") : "Local files already match the instance.");
     } else if (CMD === "push") {
       if (FILE_ARGS.length === 0) throw new SyncError("push needs one or more files");
       const results = await syncAll(FILE_ARGS.map((f) => resolve(f)), ctx, { scanMode: false });
@@ -408,7 +473,7 @@ async function main() {
       if (CMD === "hook") emitHook(lines, results);
       else console.log(lines.length ? lines.join("\n") : "Nothing to push.");
     } else {
-      throw new SyncError(`unknown command "${CMD ?? ""}" (status | push | scan | init | hook)`);
+      throw new SyncError(`unknown command "${CMD ?? ""}" (status | pull | push | scan | init | hook)`);
     }
 
     if (ctx.configDirty) writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 4));

@@ -113,7 +113,9 @@
             const z = zuidFromOg(it.og_image);
             if (z && !seen[z]) {
               seen[z] = true;
-              rows.push({ zuid: z, name: it.block_name || "" });
+              // meta_title is the variant's name in the Manager; block_name
+              // only exists on the blocks that carry that field
+              rows.push({ zuid: z, name: it.block_name || it.meta_title || "" });
             }
           });
           setGql({ rows: rows, total: all.length });
