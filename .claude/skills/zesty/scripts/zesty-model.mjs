@@ -5,10 +5,12 @@
 // extension's developer token (.vscode/settings.json, or $ZESTY_TOKEN).
 //
 // Safety: every write command validates the whole spec before the first
-// request and takes --dry-run (prints the exact payloads). Nothing is deleted
-// or renamed: removing a model, field, option or sub-field stays a Manager
-// action, since content already stored under it would go with it. Every write
-// ends with `zesty-sync pull`, so files the change generated land locally.
+// request and takes --dry-run (prints the exact payloads). Nothing is renamed.
+// Deleting is only for a model or field the user named: `delete` and
+// `delete-field` need --confirm=<exact name>, and `delete` counts the items
+// first and refuses while another model still relates to the target. Options
+// and sub-fields are never removed. Every write ends with `zesty-sync pull`,
+// so files the change generated land locally.
 //
 // Usage:
 //   node .claude/skills/zesty/scripts/zesty-model.mjs list
@@ -16,6 +18,9 @@
 //   node .claude/skills/zesty/scripts/zesty-model.mjs create <spec.json>               model + fields, then pulls its view
 //   node .claude/skills/zesty/scripts/zesty-model.mjs add-fields <model> <spec.json>   append fields; existing names skipped
 //   node .claude/skills/zesty/scripts/zesty-model.mjs update-field <model> <field> <patch.json>
+//   node .claude/skills/zesty/scripts/zesty-model.mjs delete <model> --confirm=<model name>        model + items + fields + views, permanent
+//   node .claude/skills/zesty/scripts/zesty-model.mjs delete-field <model> <field> --confirm=<field name> [--hard]
+//                                                    deactivate (restorable); --hard erases it and its values
 //   <model> is a name or a 6-… ZUID.
 //
 // Spec:
@@ -397,6 +402,63 @@ async function cmdUpdateField(modelRef, fieldRef, patchPath) {
   pullToLocal();
 }
 
+// Deletes are only for a target the user named. --confirm=<exact name> is the
+// proof, and the model's content is counted first, so the cost is on screen.
+const CONFIRM = (argv.find((a) => a.startsWith("--confirm=")) || "").slice("--confirm=".length);
+const HARD = argv.includes("--hard");
+
+function requireConfirm(name) {
+  if (DRY) return;
+  if (CONFIRM !== name) throw new UsageError(`refusing: add --confirm=${name} (the exact name) to delete it`);
+}
+
+// Fields on OTHER models whose relation points at this one; deleting it would
+// leave them pointing at nothing.
+async function inboundRelations(model) {
+  const out = [];
+  for (const m of await models()) {
+    if (m.ZUID === model.ZUID) continue;
+    for (const f of await fieldsOf(m)) {
+      if (RELATIONAL.includes(f.datatype) && f.relatedModelZUID === model.ZUID) out.push(`${m.name}.${f.name}`);
+    }
+  }
+  return out;
+}
+
+// DELETE content/models/<6-zuid> removes the model with its items, fields and
+// views (docs.zesty.io/reference/delete-content-model). It cannot be undone.
+async function cmdDelete(modelRef) {
+  const model = await requireModel(modelRef);
+  const items = (await api("GET", `content/models/${model.ZUID}/items?limit=5000`)) || [];
+  const inbound = await inboundRelations(model);
+  console.log(`${model.type} model ${model.name} (${model.ZUID}) "${model.label}": ${items.length} item(s)`);
+  if (inbound.length) {
+    throw new UsageError(`refusing: related to by ${inbound.join(", ")}. Delete or repoint those first.`);
+  }
+  if (model.type === "block") console.log("Its block view -/block/" + model.name + ".html goes with it.");
+  if (DRY) return console.log(`Would delete ${model.name}, its ${items.length} item(s), fields and views.`);
+  requireConfirm(model.name);
+  await api("DELETE", `content/models/${model.ZUID}`);
+  await models({ fresh: true });
+  console.log(`Deleted ${model.name}.`);
+  pullToLocal();
+}
+
+// DELETE …/fields/<12-zuid> deactivates (the Manager can restore it);
+// --hard then erases it and the values stored under it.
+async function cmdDeleteField(modelRef, fieldRef) {
+  const model = await requireModel(modelRef);
+  const field = (await fieldsOf(model)).find((f) => f.ZUID === fieldRef || f.name === fieldRef);
+  if (!field) throw new UsageError(`${model.name} has no field "${fieldRef}"`);
+  const how = HARD ? "deactivate, then hard-delete (permanent)" : "deactivate (restorable)";
+  if (DRY) return console.log(`Would ${how} ${model.name}.${field.name} (${field.ZUID}, ${field.datatype}).`);
+  requireConfirm(field.name);
+  await api("DELETE", `content/models/${model.ZUID}/fields/${field.ZUID}`);
+  if (HARD) await api("DELETE", `content/models/${model.ZUID}/fields/${field.ZUID}?hardDelete=true`);
+  console.log(`${HARD ? "Hard-deleted" : "Deactivated"} ${model.name}.${field.name}.`);
+  pullToLocal();
+}
+
 async function main() {
   requireSetup();
   if (CMD === "list") {
@@ -416,8 +478,14 @@ async function main() {
     await cmdAddFields(ARGS[0], ARGS[1]);
   } else if (CMD === "update-field") {
     await cmdUpdateField(ARGS[0], ARGS[1], ARGS[2]);
+  } else if (CMD === "delete") {
+    await cmdDelete(ARGS[0]);
+  } else if (CMD === "delete-field") {
+    await cmdDeleteField(ARGS[0], ARGS[1]);
   } else {
-    throw new UsageError(`unknown command "${CMD ?? ""}" (list | show | create | add-fields | update-field)`);
+    throw new UsageError(
+      `unknown command "${CMD ?? ""}" (list | show | create | add-fields | update-field | delete | delete-field)`
+    );
   }
 }
 

@@ -1,0 +1,11 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-96c3a1dbe3-cwpvnw')}}
+	{{block('/-/block/featured_pages.html?variant=7-9ca0c89d8f-1gzxc9')}}
+	{{block('/-/block/membership_benefits_band.html?variant=7-d6baa0c7bf-w0vkzf')}}
+	{{block('/-/block/faqs.html?variant=7-dcfff0b3b6-8wv2fn')}}
+	{{block('/-/block/membership_tiers.html?variant=7-e09de29d81-g5j19d')}}
+	{{block('/-/block/membership_family_play_comparison.html?variant=7-f4a9ababc5-8s4101')}}
+	{{block('/-/block/service_band.html?variant=7-e8ab87c18f-mgs3mf')}}
+	{{block('/-/block/quote.html?variant=7-de96e7ecff-rg714q')}}
+	{{block('/-/block/intro_band.html?variant=7-caafc0ece2-7dgxdf')}}
+</div>

@@ -1,0 +1,13 @@
+<section class="mx-4 mt-7" id="kroc-anchor-links-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    items: [{{ this.items }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-anchor-links-{{this.zuid}}")).render(
+    <AnchorLinks data={data} />
+  );
+})();
+</script>

@@ -1,0 +1,21 @@
+<section class="mx-4 mt-9" id="kroc-quote-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // the quote is Multi Line Text — toJson() escapes its quotes and newlines
+  // (AGENTS.md §3); the photo is overlaid resolved, since toJson() leaves a ZUID
+  const item = {{this.toJson()}};
+
+  const data = {
+    eyebrow: item.eyebrow,
+    quote: item.quote,
+    attribution: item.attribution,
+    videoUrl: item.video_url,
+    photo: "{{!this.photo.getImage(1000)}}".trim()
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-quote-{{this.zuid}}")).render(
+    <Quote data={data} />
+  );
+})();
+</script>

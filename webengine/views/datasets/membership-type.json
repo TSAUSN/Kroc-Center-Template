@@ -1,0 +1,57 @@
+(**
+  One tr_membership_types row as a JSON object, for the membership blocks
+  (krocTrMembershipIndex, membershipdata.jsx). Include it inside a loop over
+  tr_membership_types whose alias is mt; the caller separates rows.
+  Output is strict JSON (keys quoted, rows in nested lists separated with
+  _arraycomma), so it parses as JSON and as JavaScript. Every value is a
+  string ("" for empty, "1"/"0" for yes/no) and is converted in JavaScript; text
+  goes through escapeForJs, which round-trips Traction Rec copy exactly and
+  stays valid JSON. A single related value is read with filter, never a
+  one-row loop: z.zuid for a ZUID, the bare field name for any other field
+  (the short filter form matches an arbitrary item when its value is empty).
+  prices are the type's Product's price levels, each with its billing
+  schedules (tr_billing_schedules, through the price_level relation).
+**)
+{
+  "zuid": "{{mt.zuid}}",
+  "tractionrec_id": "{{!mt.tractionrec_id}}",
+  "active": "{{!mt.active}}",
+  "inactive_reason": "{{!mt.inactive_reason.escapeForJs()}}",
+  "name": "{{!mt.name.escapeForJs()}}",
+  "term_type": "{{!mt.term_type}}",
+  "term_length": "{{!mt.term_length}}",
+  "min_age": "{{!mt.min_age}}",
+  "max_age": "{{!mt.max_age}}",
+  "is_group": "{{!mt.is_group}}",
+  "group_1_name": "{{!mt.group_1_name.escapeForJs()}}",
+  "group_1_plural_name": "{{!mt.group_1_plural_name.escapeForJs()}}",
+  "group_1_min_age": "{{!mt.group_1_min_age}}",
+  "group_1_max_age": "{{!mt.group_1_max_age}}",
+  "group_1_max_allowed": "{{!mt.group_1_max_allowed}}",
+  "group_2_name": "{{!mt.group_2_name.escapeForJs()}}",
+  "group_2_plural_name": "{{!mt.group_2_plural_name.escapeForJs()}}",
+  "group_2_min_age": "{{!mt.group_2_min_age}}",
+  "group_2_max_age": "{{!mt.group_2_max_age}}",
+  "group_2_max_allowed": "{{!mt.group_2_max_allowed}}",
+  "group_3_name": "{{!mt.group_3_name.escapeForJs()}}",
+  "group_3_plural_name": "{{!mt.group_3_plural_name.escapeForJs()}}",
+  "group_3_min_age": "{{!mt.group_3_min_age}}",
+  "group_3_max_age": "{{!mt.group_3_max_age}}",
+  "group_3_max_allowed": "{{!mt.group_3_max_allowed}}",
+  "prices": [
+    {{each tr_price_levels as mtLevel where mtLevel.product = '{mt.product}'}}
+    {
+      "tractionrec_id": "{{!mtLevel.tractionrec_id}}",
+      "amount": "{{!mtLevel.amount}}",
+      "initial_fee": "{{!mtLevel.initial_fee}}",
+      "schedules": [
+        {{each tr_billing_schedules as mtSchedule where mtSchedule.price_level = '{mtLevel.zuid}'}}
+        { "term_type": "{{!mtSchedule.term_type}}", "amount": "{{!mtSchedule.amount}}" }
+        {{mtSchedule._arraycomma}}
+        {{end-each}}
+      ]
+    }
+    {{mtLevel._arraycomma}}
+    {{end-each}}
+  ]
+}

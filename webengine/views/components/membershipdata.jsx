@@ -1,20 +1,20 @@
 // Traction Rec memberships for [membership_tiers] and [day_pass_passes].
-// Loaded after catalogdata.jsx (krocTrInline, krocTrRows, krocTrText) and before
+// Loaded after catalogdata.jsx (krocTrRows, krocTrText, krocDsYes) and before
 // membershiptiers.jsx / daypasspasses.jsx.
 //
-// Source: /tractionrec/membership_types.json, published by kroc-tractionrec-sync
-// (files only — memberships have no Zesty model or items, Japheth 2026-10-08).
+// Source: the tr_membership_types dataset (kroc-tractionrec-sync's dataset
+// sync), printed by the block view through views/datasets/membership-type.json.
 // Only types sold online are in it: the type AND its category must be
-// available online and for purchase. Each row is the Salesforce
-// TREX1__Membership_Type__c record plus `prices`: its Price Levels, each with
-// its Planned Billing Schedules.
+// available online and for purchase. Each row has the Zesty field names, every
+// value a string ("" empty, "1"/"0" yes/no), plus `prices`: its Product's price
+// levels, each with its billing schedules.
 //
 // A block row points at a type by `tractionrec_id`. When it does, Traction Rec
 // supplies the price, period and ages and the row's typed values are ignored;
 // the typed name, if any, overrides the name (it is wording, not data, so a
 // stale one cannot show a wrong price). A row with no id renders as typed.
 //
-// Where the price is depends on the kind (verified on all 24 types 2026-10-08):
+// Where the price is depends on the kind (verified on all 24 types):
 //
 //   Autopay            schedule Term Type "Monthly", its Amount ($46) — the
 //                      level's total ($552) is a year's worth
@@ -25,7 +25,7 @@
 // On the first two the level's Initial Fee is the one-time registration fee
 // ($20), so it is never the price there.
 
-// Purchase links (Japheth 2026-10-08): never a block's own link field
+// Purchase links: never a block's own link field
 // (cta_link, primary_cta_url, cta_url are not read). The link belongs to
 // Traction Rec, like the catalog's Register (the class's Deep_Link_URL__c), but
 // no membership has one yet: the class link is an org-made formula with no
@@ -70,13 +70,17 @@ const krocTrFillFee = (text, fee) => {
     .trim();
 };
 
-// The block view inlines the whole tier file (about 58 KB) next to the mount.
-// A missing file (an instance without the sync) includes as nothing, so every
-// row falls back to its typed values.
-const krocTrMembershipIndex = (inlineId) => {
+// The block view prints every membership type (24 today) into its script.
+// Repeater rows point at a type by its Traction Rec Id, so that is the key. An
+// instance whose dataset is empty prints nothing, and every row falls back to
+// its typed values.
+const krocTrMembershipIndex = (rows) => {
   const index = {};
-  for (const row of krocTrRows(krocTrInline(inlineId))) {
-    index[row.Id] = row;
+  for (const row of krocTrRows(rows)) {
+    // An inactive type (no longer sold online) is left out, so its card hides.
+    if (row.tractionrec_id && krocDsActive(row)) {
+      index[row.tractionrec_id] = row;
+    }
   }
   return index;
 };
@@ -90,8 +94,8 @@ const KROC_TR_TERM_UNITS = {
 // "1 Monthly" -> "/mo", "12 Monthly" -> "/yr", "3 Monthly" -> " for 3 months"
 // (the leading space: the card prints the period straight after the price).
 const krocTrTermPeriod = (row) => {
-  const unit = KROC_TR_TERM_UNITS[krocTrText(row.TREX1__Term_Type__c).toLowerCase()];
-  const length = Number(row.TREX1__Term_Length__c);
+  const unit = KROC_TR_TERM_UNITS[krocTrText(row.term_type).toLowerCase()];
+  const length = Number(row.term_length);
   if (!unit || !(length > 0)) {
     return "";
   }
@@ -113,17 +117,16 @@ const krocTrMembershipPrice = (row) => {
     return null;
   }
   const schedules = krocTrRows(level.schedules);
-  const recurring = schedules.find((s) => s.termType && s.termType !== "One Time");
+  const recurring = schedules.find((s) => s.term_type && s.term_type !== "One Time");
   if (recurring) {
-    const unit = KROC_TR_TERM_UNITS[krocTrText(recurring.termType).toLowerCase()];
-    return { amount: recurring.amount, period: unit ? unit[2] : "", fee: level.initialFee };
+    const unit = KROC_TR_TERM_UNITS[krocTrText(recurring.term_type).toLowerCase()];
+    return { amount: recurring.amount, period: unit ? unit[2] : "", fee: level.initial_fee };
   }
-  const once = schedules.find((s) => s.termType === "One Time");
+  const once = schedules.find((s) => s.term_type === "One Time");
   if (once) {
-    return { amount: once.amount, period: krocTrTermPeriod(row), fee: level.initialFee };
+    return { amount: once.amount, period: krocTrTermPeriod(row), fee: level.initial_fee };
   }
-  const amount =
-    level.initialFee !== null && level.initialFee !== undefined ? level.initialFee : level.amount;
+  const amount = krocTrText(level.initial_fee) !== "" ? level.initial_fee : level.amount;
   return { amount: amount, period: krocTrTermPeriod(row), fee: null };
 };
 
@@ -145,20 +148,16 @@ const krocTrAgeSpan = (min, max) => {
 // Individual: "Ages 18–61" / "Ages 62+". Family: the household rules,
 // "Up to 2 adults (18+) · up to 4 youth (0–17)".
 const krocTrMembershipAges = (row) => {
-  if (row.TREX1__Is_Group__c) {
+  if (krocDsYes(row.is_group)) {
     const groups = [1, 2, 3]
       .map((n) => {
-        const name = krocTrText(row["TREX1__Group_" + n + "_Name__c"]);
-        const allowed = Number(row["TREX1__Group_" + n + "_Max_Allowed__c"]);
+        const name = krocTrText(row["group_" + n + "_name"]);
+        const allowed = Number(row["group_" + n + "_max_allowed"]);
         if (!name || !(allowed > 0)) {
           return "";
         }
-        const noun =
-          allowed === 1 ? name : krocTrText(row["TREX1__Group_" + n + "_Plural_Name__c"]) || name;
-        const span = krocTrAgeSpan(
-          row["TREX1__Group_" + n + "_Min_Age__c"],
-          row["TREX1__Group_" + n + "_Max_Age__c"]
-        );
+        const noun = allowed === 1 ? name : krocTrText(row["group_" + n + "_plural_name"]) || name;
+        const span = krocTrAgeSpan(row["group_" + n + "_min_age"], row["group_" + n + "_max_age"]);
         return "up to " + allowed + " " + noun.toLowerCase() + (span ? " (" + span + ")" : "");
       })
       .filter(Boolean)
@@ -167,7 +166,7 @@ const krocTrMembershipAges = (row) => {
       return groups.charAt(0).toUpperCase() + groups.slice(1);
     }
   }
-  const span = krocTrAgeSpan(row.TREX1__Min_Age__c, row.TREX1__Max_Age__c);
+  const span = krocTrAgeSpan(row.min_age, row.max_age);
   return span ? "Ages " + span : "";
 };
 
@@ -177,7 +176,7 @@ const krocTrMembershipAges = (row) => {
 // 2026" carries "Teen", which would read as the regular Teen membership.
 const KROC_TR_PLAN_SUFFIX = /\s*[-–]\s*(autopay|annual|\d+\s*months?)\s*$/i;
 const krocTrMembershipName = (row) =>
-  krocTrText(row && row.Name)
+  krocTrText(row && row.name)
     .replace(KROC_TR_PLAN_SUFFIX, "")
     .replace(/\s+membership$/i, "")
     .replace(/\s*\+\s*/g, " + ");

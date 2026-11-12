@@ -1,0 +1,9 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-de85fbb1a9-5wrkcq')}}
+	{{block('/-/block/intro_band.html?variant=7-a8b5d986cd-wl7w79')}}
+	{{block('/-/block/facility_section.html?variant=7-82d58cb8e3-cfctdb')}}
+	{{block('/-/block/faqs.html?variant=7-c89483ce81-df0962')}}
+	{{block('/-/block/facility_section.html?variant=7-ec9df6a899-bf3d0b')}}
+	{{block('/-/block/intro_band.html?variant=7-c2e5be9eea-cd8sr7')}}
+	{{block('/-/block/intro_band.html?variant=7-ccfacab0eb-5btgb8')}}
+</div>

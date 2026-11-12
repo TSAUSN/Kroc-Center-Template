@@ -1,0 +1,19 @@
+<section class="mx-4 mt-9" id="kroc-step-columns-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // toJson() escapes the heading; the columns repeater arrives as row objects,
+  // its WYSIWYG steps and footer notes already JSON-escaped
+  const item = {{this.toJson()}};
+
+  const data = {
+    eyebrow: item.eyebrow,
+    heading: item.heading,
+    columns: [{{ this.columns }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-step-columns-{{this.zuid}}")).render(
+    <StepColumns data={data} />
+  );
+})();
+</script>

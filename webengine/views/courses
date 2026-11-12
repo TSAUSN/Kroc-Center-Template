@@ -1,16 +1,12 @@
 (**
   Course detail — [courses] pageset · Category > Program > Course > Class
-  Traction Rec data, inlined at render time by this item's tractionrec_id (no
-  request): the course's own row — name and description — and its classes
-  (/tractionrec/courses/<id>/classes.json). Sibling courses and the crumb
-  trail are fetched by CourseDetail / CatalogCrumbs from the program's files.
-  The Zesty `description` and `programs` fields are no longer read. Zesty
-  supplies the hero image and subtitle; course_name is only a fallback for an
-  item with no Traction Rec row.
+  The course's row in the tr_courses dataset (its page relation is this item)
+  and its classes, printed into the script below with the row snippets in
+  views/datasets/, together with the program's other courses (the sidebar) and
+  the program and categories for the crumbs. Nothing is fetched. The Zesty
+  description and programs fields are not read. Zesty supplies the hero image
+  and subtitle; course_name is only a fallback for an item with no dataset row.
 **)
-<script type="application/json" id="kroc-tr-self">{{ include /tractionrec/courses/{this.tractionrec_id}.json }}</script>
-<script type="application/json" id="kroc-tr-children">{{ include /tractionrec/courses/{this.tractionrec_id}/classes.json }}</script>
-
 <section class="mx-4 mt-4" id="kroc-course-crumbs"></section>
 
 <section class="mx-4 mt-3" id="kroc-course-hero"></section>
@@ -19,17 +15,51 @@
 
 <script type="text/babel" data-presets="react">
 (() => {
-  const self = krocTrInline("kroc-tr-self");
+  const ds = krocDs({
+    self: "{{tr_courses.filter(page = '{this.zuid}').zuid}}",
+    courses: [
+      {{each tr_courses as crs where crs.page = '{this.zuid}'}}
+      {{ include /datasets/course.json }},
+      {{end-each}}
+      {{each tr_courses as me where me.page = '{this.zuid}'}}
+      {{each tr_courses as crs where crs.program = '{me.program}' AND crs.active = 1}}
+      {{ include /datasets/course.json }},
+      {{end-each}}
+      {{end-each}}
+    ],
+    classes: [
+      {{each tr_courses as me where me.page = '{this.zuid}'}}
+      {{each tr_classes as cls where cls.course = '{me.zuid}' AND cls.active = 1}}
+      {{ include /datasets/class.json }},
+      {{end-each}}
+      {{end-each}}
+    ],
+    programs: [
+      {{each tr_courses as me where me.page = '{this.zuid}'}}
+      {{each tr_programs as prg where prg.zuid = '{me.program}'}}
+      {{ include /datasets/program.json }},
+      {{end-each}}
+      {{end-each}}
+    ],
+    categories: [
+      {{each tr_courses as me where me.page = '{this.zuid}'}}
+      {{each tr_programs as meProgram where meProgram.zuid = '{me.program}'}}
+      {{each tr_program_categories as cat where FIND_IN_SET(cat.zuid, '{meProgram.program_categories}')}}
+      {{ include /datasets/category.json }},
+      {{end-each}}
+      {{end-each}}
+      {{end-each}}
+    ]
+  });
   const data = {
-    title: krocTrText(self && self.Name) || "{{!this.course_name}}".trim(),
+    title: krocTrText(ds.self && ds.self.name) || "{{!this.course_name}}".trim(),
     subtitle: "{{!this.hero_subtitle.escapeForJs()}}".trim(),
     heroDesktop: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
-    self: self,
-    classRows: krocTrInline("kroc-tr-children")
+    ds: ds
   };
 
   ReactDOM.createRoot(document.getElementById("kroc-course-crumbs")).render(
-    <CatalogCrumbs kind="course" self={self} title={data.title} />
+    <CatalogCrumbs kind="course" trail={krocDsTrail("course", ds)} title={data.title} />
   );
 
   ReactDOM.createRoot(document.getElementById("kroc-course-hero")).render(

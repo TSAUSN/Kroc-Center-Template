@@ -12,7 +12,7 @@
 
 ## Component
 
-- One global function per file, `function BlockName(props)`, reading `props.data`. Helpers from earlier loader scripts: `cx` (classnames), `Icon` (`<Icon id="#i-name" />` sprite in `components/icons.html`), `krocExternalUrl` (adds a missing `https://`, in `catalog.jsx`), `krocSortRows` (sorts only when every row has `sort_order`, in `featuredpages.jsx`), `useKrocMediaUrls` (in `cardgrid.jsx`), `krocYouTubeId` (any YouTube link → id, in `aboutjoankrocstory.jsx`; embed it the way that block does), `CheckList` (`tone`, `columns={2}` = one column below `sm`). `KrocSmsCard` (red "Text KEYWORD to SHORTCODE" card, in `careersapply.jsx`).
+- One global function per file, `function BlockName(props)`, reading `props.data`. Helpers from earlier loader scripts: `cx` (classnames), `Icon` (`<Icon id="#i-name" />` sprite in `components/icons.html`), `krocExternalUrl` (adds a missing `https://`, in `catalog.jsx`), `krocSortRows` (sorts only when every row has `sort_order`, in `featuredpages.jsx`), `useKrocMediaUrls` + `krocMediaZuid` / `krocMediaDirectUrl` (in `cardgrid.jsx`, so a user loads after it), `krocYouTubeId` (any YouTube link → id, in `aboutjoankrocstory.jsx`; embed it the way that block does), `CheckList` (`tone`, `columns={2}` = one column below `sm`). `KrocSmsCard` (red "Text KEYWORD to SHORTCODE" card, in `careersapply.jsx`; `variant="alerts"` adds a heading + CTA).
 - Header comment: block + variants, where it appears, provenance of non-obvious fields, every deviation from the design and the reason. Match the density of sibling files.
 - **Presence-driven:** every optional part renders only when filled, wrappers included (no empty flex rows, no margins left behind); a two-column layout collapses to full width when one side is empty; render nothing when nothing is filled. `trim()` every text value.
 - Desktop and mobile are separate designs: mobile is the base, `lg:` the desktop. When an element moves between surfaces (CTA top-right vs bottom), render it twice with `hidden lg:inline-flex` / `lg:hidden` so only one reaches the accessibility tree.
@@ -20,7 +20,11 @@
 - **Contrast:** brand red #EF3E42 fails AA for small text on white (3.86:1) → use `text-brand-red-300` #C5000E (6.21:1) and say so in the header and report. navy-150 #61769C passes on pure white only.
 - Tailwind v4: utilities beat `@layer components` (`btn-block lg:w-auto` works). Arbitrary values fine (`bg-[linear-gradient(...)]`).
 - Media sub-fields: resolve with `useKrocMediaUrls`; an unresolved image leaves its slot empty, never a broken `<img>`.
+- **Read repeater rows by their real sub-field names** (`zesty-model.mjs show <model>`), and test with those keys. `people.jsx` read `headshot` for `headshot_image`, and no People photo rendered for months.
+- **Email (D-17 / SCHEMA-39):** never print an address; put the `mailto:` behind "Contact {first name}" ("Contact us" without a name). Phone stays visible. The rule beats a design that prints the address.
+- **Before generalising a red band or card, measure it:** white on #EF3E42 fails below 24px, so red surfaces render `bg-brand-red-300`, and translucent white on red-300 needs ≥ 85% for small text (72% = 3.61, 80% ≈ 4.25, 85% = 4.69, 90% ≈ 5.15).
 - Links: `href={url || undefined}` so an empty link renders without `href`.
+- A whole authored section in one WYSIWYG uses `.kroc-rt` (the prototype's rich-text scale, incl. the `.rt-cols` icon row); a body inside a designed card uses `.kroc-prose` resized to the card's type.
 - WYSIWYG: build the markup object in a variable (`const html = { __html: … }`) — writing it inline is a double open-brace, which Parsley evaluates. `ssr-check.cjs` lists every such line. Treat a tag-only body (`<p>&nbsp;</p>`) as empty.
 
 ## After writing

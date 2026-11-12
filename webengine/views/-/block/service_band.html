@@ -1,0 +1,30 @@
+<section class="mx-4 mt-9" id="kroc-service-band-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is WYSIWYG — toJson() escapes its quotes and newlines (AGENTS.md §3);
+  // the photo is overlaid resolved, since toJson() leaves a ZUID
+  const item = {{this.toJson()}};
+
+  const data = {
+    name: item.name,
+    eyebrow: item.eyebrow,
+    body: item.body,
+    photo: "{{!this.photo.getImage(800)}}".trim(),
+    photoSide: item.photo_side,
+    backgroundColor: item.background_color,
+    primaryLabel: item.primary_cta_label,
+    primaryLink: item.primary_cta_link,
+    secondaryLabel: item.secondary_cta_label,
+    secondaryLink: item.secondary_cta_link,
+    panelLabel: item.panel_label,
+    panelRows: [{{ this.panel_rows }}],
+    panelCtaLabel: item.panel_cta_label,
+    panelCtaLink: item.panel_cta_link
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-service-band-{{this.zuid}}")).render(
+    <ServiceBand data={data} />
+  );
+})();
+</script>

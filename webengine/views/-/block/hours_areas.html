@@ -1,0 +1,19 @@
+<section class="mx-4 mt-9" id="kroc-hours-areas-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // the areas repeater arrives as row objects; each row's hours is Multi Line
+  // Text, which the repeater JSON already escapes
+  const item = {{this.toJson()}};
+
+  const data = {
+    eyebrow: item.eyebrow,
+    heading: item.heading,
+    areas: [{{ this.areas }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-hours-areas-{{this.zuid}}")).render(
+    <HoursAreas data={data} />
+  );
+})();
+</script>

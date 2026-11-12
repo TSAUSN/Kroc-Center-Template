@@ -1,0 +1,19 @@
+<section class="mx-4 mt-9" id="kroc-hours-closures-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // footnotes is Multi Line Text — toJson() escapes its quotes and newlines
+  // (AGENTS.md §3); the items repeater arrives as row objects
+  const item = {{this.toJson()}};
+
+  const data = {
+    heading: item.heading,
+    items: [{{ this.items }}],
+    footnotes: item.footnotes
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-hours-closures-{{this.zuid}}")).render(
+    <HoursClosures data={data} />
+  );
+})();
+</script>

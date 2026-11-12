@@ -1,17 +1,14 @@
 (**
   Category detail — [categories] pageset
-  Traction Rec data, inlined at render time by this item's tractionrec_id (no
-  request): the category's own row and its programs
-  (/tractionrec/program_categories/<id>/programs.json). The name comes from
-  Traction Rec; category_name is only a fallback for an item with no Traction
-  Rec row. Zesty supplies what Traction Rec has no source for: hero image,
-  icon, subtitle and intro copy.
+  The category's row in the tr_program_categories dataset (its page relation is
+  this item) and its programs (tr_programs whose program_categories include
+  it), printed into the script below with the row snippets in views/datasets/.
+  Nothing is fetched. The name comes from Traction Rec; category_name is only a
+  fallback for an item with no dataset row. Zesty supplies what Traction Rec
+  has no source for: hero image, icon, subtitle and intro copy.
   NOTE: no autolayout call here, so drag-in blocks (featured_programs,
   featured_stories, donation_block) will not render until one is added back.
 **)
-<script type="application/json" id="kroc-tr-self">{{ include /tractionrec/program_categories/{this.tractionrec_id}.json }}</script>
-<script type="application/json" id="kroc-tr-children">{{ include /tractionrec/program_categories/{this.tractionrec_id}/programs.json }}</script>
-
 <section class="mx-4 mt-4" id="kroc-category-crumbs"></section>
 
 <section class="mx-4 mt-3" id="kroc-category-hero"></section>
@@ -22,9 +19,23 @@
 
 <script type="text/babel" data-presets="react">
 (() => {
-  const self = krocTrInline("kroc-tr-self");
+  const ds = krocDs({
+    self: "{{tr_program_categories.filter(page = '{this.zuid}').zuid}}",
+    categories: [
+      {{each tr_program_categories as cat where cat.page = '{this.zuid}'}}
+      {{ include /datasets/category.json }},
+      {{end-each}}
+    ],
+    programs: [
+      {{each tr_program_categories as me where me.page = '{this.zuid}'}}
+      {{each tr_programs as prg where FIND_IN_SET('{me.zuid}', prg.program_categories) AND prg.active = 1}}
+      {{ include /datasets/program.json }},
+      {{end-each}}
+      {{end-each}}
+    ]
+  });
   const data = {
-    title: krocTrText(self && self.Name) || "{{!this.category_name}}".trim(),
+    title: krocTrText(ds.self && ds.self.name) || "{{!this.category_name}}".trim(),
     subtitle: "{{!this.hero_subtitle.escapeForJs()}}".trim(),
     iconUrl: "{{!this.category_icon.getImage(96)}}".trim(),
     heroDesktop: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
@@ -32,7 +43,7 @@
   };
 
   ReactDOM.createRoot(document.getElementById("kroc-category-crumbs")).render(
-    <CatalogCrumbs kind="category" self={self} title={data.title} />
+    <CatalogCrumbs kind="category" trail={krocDsTrail("category", ds)} title={data.title} />
   );
 
   ReactDOM.createRoot(document.getElementById("kroc-category-hero")).render(
@@ -51,7 +62,7 @@
     );
   }
 
-  const programsData = { heading: "Programs", rows: krocTrInline("kroc-tr-children") };
+  const programsData = { heading: "Programs", rows: ds.self ? ds.programs.filter(krocDsActive) : null };
   ReactDOM.createRoot(document.getElementById("kroc-category-programs")).render(
     <ProgramsSection data={programsData} />
   );

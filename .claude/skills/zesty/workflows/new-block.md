@@ -57,7 +57,7 @@ node .claude/skills/zesty/scripts/zesty-variant.mjs create variant.json --dry-ru
 node .claude/skills/zesty/scripts/zesty-variant.mjs create variant.json
 ```
 
-Variant file: [../templates/variant.json](../templates/variant.json); use the design's copy, leave unknown links empty. The tool validates against the model, stamps og_image, keeps the item listed, pulls, and prints the preview URL + status.
+Variant file: [../templates/variant.json](../templates/variant.json); use the design's copy, leave unknown links empty. The tool validates against the model, stamps og_image, keeps the item listed, pulls, and prints the preview URL + status and the catalog page link.
 
 ## 7. Verify on the instance
 
@@ -71,4 +71,4 @@ Variant file: [../templates/variant.json](../templates/variant.json); use the de
 
 ## 9. Report
 
-Lead with what shipped and the preview URL; list deviations from the ticket/design with reasons; say what's left for the user (status, Manager-only steps). No file-sync list is needed — the hook syncs.
+Lead with what shipped and the **block catalog page link** for each variant — `https://<hash>-dev.webengine.zesty.io/blocks-catalog-page/?block=<model>&variant=<7-zuid>` (the variant tool prints it as `catalog:`); the user wants that link, not the raw `/-/block/` preview; list deviations from the ticket/design with reasons; say what's left for the user (status, Manager-only steps). No file-sync list is needed — the hook syncs.

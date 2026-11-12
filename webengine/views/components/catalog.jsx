@@ -11,7 +11,7 @@
 //   catalogdetail.jsx    CourseDetail, ClassDetail
 //   classfinder.jsx      the tree-wide class finder on /categories-page/
 //
-// Split 2026-10-05 when the pages moved to Traction Rec data. The helpers below
+// Split when the pages moved to Traction Rec data. The helpers below
 // stayed here because other components call them by name: krocExternalUrl
 // (11 blocks), krocMoney (membership tiers, day passes), krocPick + krocZuid
 // (featured pages / volunteers) and krocIconFor (featured pages). Moving them

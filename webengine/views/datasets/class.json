@@ -1,0 +1,49 @@
+(**
+  One tr_classes row as a JSON object, for a page script's dataset bundle
+  (krocDs, catalogdata.jsx). Include it inside a loop over tr_classes whose
+  alias is cls; the caller separates rows. An included view sees the caller's
+  loop alias.
+  Output is strict JSON (keys quoted, rows in nested lists separated with
+  _arraycomma), so it parses as JSON and as JavaScript. Every value is a
+  string ("" for empty, "1"/"0" for yes/no) and is converted in JavaScript; text
+  goes through escapeForJs, which round-trips Traction Rec copy exactly and
+  stays valid JSON. A single related value is read with filter, never a
+  one-row loop: z.zuid for a ZUID, the bare field name for any other field
+  (the short filter form matches an arbitrary item when its value is empty).
+  url is the class's Zesty page (the page relation); prices are its Product's
+  price levels (tr_price_levels, through the product relation).
+**)
+{
+  "zuid": "{{cls.zuid}}",
+  "tractionrec_id": "{{!cls.tractionrec_id}}",
+  "active": "{{!cls.active}}",
+  "inactive_reason": "{{!cls.inactive_reason.escapeForJs()}}",
+  "name": "{{!cls.name.escapeForJs()}}",
+  "url": "{{classes.filter(z.zuid = '{cls.page}').getUrl()}}",
+  "course": "{{!cls.course}}",
+  "product": "{{!cls.product}}",
+  "season": "{{!cls.season.escapeForJs()}}",
+  "start_date": "{{!cls.start_date}}",
+  "end_date": "{{!cls.end_date}}",
+  "day_of_week": "{{!cls.day_of_week.escapeForJs()}}",
+  "start_time": "{{!cls.start_time}}",
+  "end_time": "{{!cls.end_time}}",
+  "age_min": "{{!cls.age_min}}",
+  "age_max": "{{!cls.age_max}}",
+  "instructor": "{{!cls.instructor.escapeForJs()}}",
+  "description": "{{!cls.description.escapeForJs()}}",
+  "deep_link_url": "{{!cls.deep_link_url.escapeForJs()}}",
+  "available_online": "{{!cls.available_online}}",
+  "option_available": "{{!cls.option_available}}",
+  "capacity_available": "{{!cls.capacity_available}}",
+  "unlimited_capacity": "{{!cls.unlimited_capacity}}",
+  "show_capacity_online": "{{!cls.show_capacity_online}}",
+  "waitlist_total": "{{!cls.waitlist_total}}",
+  "waitlist_capacity": "{{!cls.waitlist_capacity}}",
+  "prices": [
+    {{each tr_price_levels as clsLevel where clsLevel.product = '{cls.product}'}}
+    { "price_type": "{{!clsLevel.price_type}}", "amount": "{{!clsLevel.amount}}", "initial_fee": "{{!clsLevel.initial_fee}}" }
+    {{clsLevel._arraycomma}}
+    {{end-each}}
+  ]
+}

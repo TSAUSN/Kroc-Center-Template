@@ -1,16 +1,15 @@
 // Class finder — the tree-wide search on the catalog root (/categories-page/).
 // Loaded after catalogcards.jsx (ClassCard).
 //
-// A Class doesn't carry its Category: that is three levels up. So the finder
-// fetches the four Traction Rec tier files in parallel (~49 KB gzipped for the
-// whole catalog, and the same URLs the other catalog pages reuse) and joins
-// them here: class -> course (nested TREX1__Course__c) -> program
-// (TREX1__Program__c) -> categories (TREX1__Program_Category__c, an array —
-// the Category filter matches any of them).
+// A Class doesn't carry its Category: that is three levels up. The catalog
+// root prints every row the finder needs from the tr_* datasets (krocDs
+// bundle, data.ds) — classes with their prices, plus courses, programs and
+// categories — and they are joined here by relation ZUID: class -> course ->
+// program -> categories (program_categories, a one_to_many — the Category
+// filter matches any of them). Nothing is fetched.
 //
-// Everything past the fetch is client-side: filtering, search and pagination
-// all work off the one joined list, which is what lets the Category filter
-// exist at all.
+// Everything is client-side: filtering, search and pagination all work off
+// the one joined list, which is what lets the Category filter exist at all.
 //
 // Type: Traction Rec has no class type, and Zesty's class_type isn't on these
 // rows, so the Type filter only appears once a row actually carries a kind.
@@ -154,80 +153,67 @@ function ClassFinderTable(props) {
   );
 }
 
-// Fetch the four tier files and join each class to its course, program and
-// categories. Resolves to { classes: [card…], categories: [name…] }.
-const krocFinderFeed = () =>
-  Promise.all([
-    krocTrGet("/classes.json"),
-    krocTrGet("/courses.json"),
-    krocTrGet("/programs.json"),
-    krocTrGet("/program_categories.json")
-  ]).then((all) => {
-    const byId = (rows) => {
-      const map = {};
-      krocTrRows(rows).forEach((r) => {
-        if (r.Id) {
-          map[r.Id] = r;
-        }
-      });
-      return map;
-    };
-    const courseBy = byId(all[1]);
-    const programBy = byId(all[2]);
-    const categoryBy = byId(all[3]);
-    const name = (row) => krocTrText(row && row.Name);
+// Join each class to its course, program and categories, from the rows the
+// page printed. Returns { classes: [card…], categories: [name…] }.
+const krocFinderFeed = (ds) => {
+  const name = (row) => krocTrText(row && row.name);
 
-    const classes = krocTrRows(all[0]).map((row) => {
-      const card = krocTrClassToCard(row);
-      const course = courseBy[card.courseId];
-      const program = course ? programBy[course.TREX1__Program__c] : null;
-      const cats = krocTrCategoryIds(program)
-        .map((id) => categoryBy[id])
-        .filter(Boolean);
-      card.courseName = name(course);
-      card.programName = name(program);
-      card.categoryName = name(cats[0]);
-      card.categoryNames = cats.map(name);
-      card.searchText = [
-        card.title,
-        krocPlainText(card.desc),
-        card.instructor,
-        card.location,
-        card.courseName,
-        card.programName
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return card;
-    });
-
-    const categories = krocTrRows(all[3])
-      .map(name)
+  const classes = ds.classes.filter(krocDsActive).map((row) => {
+    const card = krocDsClassToCard(row);
+    const course = ds.byZuid[row.course] || null;
+    const program = course ? ds.byZuid[course.program] || null : null;
+    const cats = krocDsIds(program && program.program_categories)
+      .map((z) => ds.byZuid[z])
+      .filter(Boolean);
+    card.courseName = name(course);
+    card.programName = name(program);
+    card.categoryName = name(cats[0]);
+    card.categoryNames = cats.map(name);
+    card.searchText = [
+      card.title,
+      krocPlainText(card.desc),
+      card.instructor,
+      card.location,
+      card.courseName,
+      card.programName
+    ]
       .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b));
-
-    // Soonest first: start date, then day band, then time.
-    classes.sort(
-      (a, b) =>
-        String(a.startDate || "9999").localeCompare(String(b.startDate || "9999")) ||
-        a.dayRank - b.dayRank ||
-        a.startMinutes - b.startMinutes ||
-        a.title.localeCompare(b.title)
-    );
-    return { classes: classes, categories: categories };
+      .join(" ")
+      .toLowerCase();
+    return card;
   });
+
+  const categories = ds.categories
+    .map(name)
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  // Soonest first: start date, then day band, then time.
+  classes.sort(
+    (a, b) =>
+      String(a.startDate || "9999").localeCompare(String(b.startDate || "9999")) ||
+      a.dayRank - b.dayRank ||
+      a.startMinutes - b.startMinutes ||
+      a.title.localeCompare(b.title)
+  );
+  return { classes: classes, categories: categories };
+};
 
 function ClassFinder(props) {
   const d = props.data || {};
   const PAGE_SIZE = d.pageSize || 12;
   const heading = d.heading || "Search for Classes";
 
-  const [feed, setFeed] = React.useState({
-    classes: [],
-    categories: [],
-    loading: true,
-    failed: false
+  // The rows are in the page already, so the feed is ready on first render.
+  const [feed] = React.useState(() => {
+    const ds = d.ds || krocDs(null);
+    const f = krocFinderFeed(ds);
+    return {
+      classes: f.classes,
+      categories: f.categories,
+      loading: false,
+      failed: !ds.categories.length && !ds.classes.length
+    };
   });
   const [view, setView] = React.useState("card");
   const [catF, setCatF] = React.useState(KROC_ALL_CATEGORIES);
@@ -236,17 +222,6 @@ function ClassFinder(props) {
   const [q, setQ] = React.useState("");
   const [page, setPage] = React.useState(1);
   const topRef = React.useRef(null);
-
-  React.useEffect(() => {
-    krocFinderFeed()
-      .then((f) =>
-        setFeed({ classes: f.classes, categories: f.categories, loading: false, failed: false })
-      )
-      .catch((err) => {
-        console.error("KROC: class finder feed failed", err);
-        setFeed({ classes: [], categories: [], loading: false, failed: true });
-      });
-  }, []);
 
   // any filter change returns to page 1
   React.useEffect(() => {

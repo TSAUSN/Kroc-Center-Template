@@ -1,0 +1,26 @@
+<section class="mx-4 mt-7 lg:mt-8" id="kroc-hours-general-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // footnote is Multi Line Text — toJson() escapes its quotes and newlines
+  // (AGENTS.md §3); the hours repeater arrives as row objects
+  const item = {{this.toJson()}};
+
+  const data = {
+    heading: item.heading,
+    seasonalLabel: item.seasonal_label,
+    hours: [{{ this.hours }}],
+    footnote: item.footnote,
+    alertsEyebrow: item.alerts_eyebrow,
+    alertsHeading: item.alerts_heading,
+    alertsKeyword: item.alerts_keyword,
+    alertsShortcode: item.alerts_shortcode,
+    alertsCtaLabel: item.alerts_cta_label,
+    alertsCtaLink: item.alerts_cta_link
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-hours-general-{{this.zuid}}")).render(
+    <HoursGeneral data={data} />
+  );
+})();
+</script>

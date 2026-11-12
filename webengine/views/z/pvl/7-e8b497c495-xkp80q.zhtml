@@ -1,0 +1,6 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-a6d9beeddb-ncm43g')}}
+	{{block('/-/block/day_pass_intro_band.html?variant=7-9ce082bf88-17pqrb')}}
+	{{block('/-/block/day_pass_passes.html?variant=7-c48fc1b485-sk9t7x')}}
+	{{block('/-/block/intro_band.html?variant=7-a0fdf2d38c-1c1swq')}}
+</div>

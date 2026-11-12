@@ -1,0 +1,18 @@
+<section class="mx-4 mt-9" id="kroc-document-block-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // toJson() escapes the heading; the documents repeater arrives as row
+  // objects whose File is a bare media ZUID, resolved in the component
+  const item = {{this.toJson()}};
+
+  const data = {
+    heading: item.heading,
+    documents: [{{ this.documents }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-document-block-{{this.zuid}}")).render(
+    <DocumentBlock data={data} />
+  );
+})();
+</script>

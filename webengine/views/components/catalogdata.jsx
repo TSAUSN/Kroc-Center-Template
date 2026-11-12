@@ -2,82 +2,27 @@
 // Loaded after catalog.jsx (uses krocDateRange, krocMoney, krocExternalUrl,
 // krocDayIndex, KROC_DAYS, Breadcrumbs).
 //
-// Source: the files kroc-tractionrec-sync publishes under /tractionrec/ — see
-// ../kroc-tractionrec-sync/AGENTS.md for the full contract:
+// Source: the tr_* Zesty datasets kroc-tractionrec-sync's dataset sync fills
+// (that repo's docs/dataset-storage.md). Each page view prints the rows it
+// needs into its own script — see "tr_* datasets" below — so nothing is
+// fetched. (Before that the pages read the /tractionrec/ JSON files the
+// file sync still writes.)
 //
-//   /tractionrec/<tier>.json                       every row of a tier
-//   /tractionrec/<tier>/<id>.json                  one row
-//   /tractionrec/<parentTier>/<id>/<childTier>.json that parent's children
-//
-// Tiers: program_categories, programs, courses, classes. Each row is the
-// Salesforce record, field names untouched, plus `meta` (zestyItemZuid, and
-// zestyPath — the URL of the Zesty page that row belongs to).
-//
-// Ownership (Japheth, 2026-10-05): any Zesty field that mirrors Traction Rec —
+// Ownership: any Zesty field that mirrors Traction Rec —
 // names, course description, every class schedule/price/capacity field, the
 // relational parent fields — is IGNORED. Only what Traction Rec has no source
 // for still comes from Zesty: hero image, icon, subtitle, intro copy, class
 // type, location and tags, and those only on a page's OWN item (`this.*`).
 // Child cards therefore carry Traction Rec data only; every Zesty value they
-// could show is still the seed template's placeholder (checked 2026-10-05).
+// could show is still the seed template's placeholder.
 //
 // Spot counts (same decision): show the number whenever Traction Rec allows
-// it and it means something — see krocTrAvailability.
-
-const KROC_TR_ROOT = "/tractionrec";
-const KROC_TR_OPT = "TREX1__Course_Option__r";
-
-// One request per path per page view, shared by every component that asks.
-const krocTrRequests = {};
-const krocTrGet = (path) => {
-  if (!krocTrRequests[path]) {
-    krocTrRequests[path] = fetch(KROC_TR_ROOT + path)
-      .then((r) => {
-        if (!r.ok) {
-          throw new Error("HTTP " + r.status + " " + path);
-        }
-        return r.json();
-      })
-      .catch((err) => {
-        delete krocTrRequests[path];
-        throw err;
-      });
-  }
-  return krocTrRequests[path];
-};
-
-// A page view inlines its own row and its children at render time:
-//   <script type="application/json" id="kroc-tr-self">  + Parsley include
-// The loader leaves application/json scripts alone, so the JSON is still in the
-// DOM when the page script runs. A missing file includes as nothing -> null.
-const krocTrInline = (id) => {
-  const el = document.getElementById(id);
-  const text = el ? el.textContent.trim() : "";
-  if (!text) {
-    return null;
-  }
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    console.error("KROC: inline Traction Rec data #" + id + " is not JSON", err);
-    return null;
-  }
-};
+// it and it means something — see krocDsAvailability.
 
 const krocTrRows = (v) => [].concat(v || []).filter(Boolean);
-const krocTrMeta = (row) => (row && row.meta) || {};
-const krocTrOpt = (row) => (row && row[KROC_TR_OPT]) || {};
 const krocTrText = (v) => String(v === null || v === undefined ? "" : v).trim();
 
-// A class's parent Course is nested under its Course Session.
-const krocTrCourseId = (cls) =>
-  krocTrText(((cls && cls.TREX1__cso_Course_Session__r) || {}).TREX1__Course__c);
-
-// A program's categories are an array (many-to-many); the first is its home
-// for crumbs. No program is in more than one category today.
-const krocTrCategoryIds = (program) => krocTrRows(program && program.TREX1__Program_Category__c);
-
-/* --- formatting raw Salesforce values ------------------------------------ */
+/* --- formatting Traction Rec values ---------------------------------------- */
 
 // Rich text from Salesforce carries inline colours and fonts (course copy has
 // red and blue runs). Keep the structure, drop the styling and anything active.
@@ -170,150 +115,7 @@ const krocTrAges = (min, max) => {
   return "";
 };
 
-// Price levels attached by the sync: Member / Non-Member pair cleanly on class
-// products; a lone untyped level is a single price. Day Pass-style products
-// keep their price in initialFee, so fall back to it.
-const krocTrPrices = (prices) => {
-  const rows = krocTrRows(prices);
-  const amount = (p) => (p.amount !== null && p.amount !== undefined ? p.amount : p.initialFee);
-  const member = rows.find((p) => p.priceType === "Member");
-  const pub = rows.find((p) => p.priceType === "Non-Member");
-  const single = !member && !pub && rows.length ? rows[0] : null;
-  return {
-    memberPrice: member ? krocMoney(amount(member)) : "",
-    publicPrice: pub ? krocMoney(amount(pub)) : "",
-    price: single ? krocMoney(amount(single)) : ""
-  };
-};
-
-// Availability pill + whether registration is open, from Traction Rec's own
-// flags. The count is shown whenever TR allows it (Show_Capacity_Online) and
-// it is meaningful (a capped class with spots left); otherwise a state word.
-// Counts are as fresh as the sync's last run — the registration page has the
-// final say after the hand-off.
-const krocTrAvailability = (cls) => {
-  const o = krocTrOpt(cls);
-  if (
-    cls &&
-    (cls.TREX1__Available_Online__c === false || cls.TREX1__Option_Available__c === false)
-  ) {
-    return { isOpen: false, spots: null, availability: "Not available online", enrollLabel: "" };
-  }
-  if (o.TREX1__Unlimited_Capacity__c) {
-    return { isOpen: true, spots: null, availability: "Open", enrollLabel: "Enroll" };
-  }
-  const raw = o.TREX1__Total_Capacity_Available__c;
-  const left = Number(raw);
-  if (raw === null || raw === undefined || raw === "" || isNaN(left)) {
-    return { isOpen: true, spots: null, availability: "", enrollLabel: "Enroll" };
-  }
-  if (left > 0) {
-    return {
-      isOpen: true,
-      spots: left,
-      availability:
-        o.TREX1__Show_Capacity_Online__c === false
-          ? "Open"
-          : left + (left === 1 ? " spot remaining" : " spots remaining"),
-      enrollLabel: "Enroll"
-    };
-  }
-  const waitRoom =
-    (Number(o.TREX1__Waitlist_Capacity__c) || 0) - (Number(o.TREX1__Waitlist_Total__c) || 0);
-  if (waitRoom > 0) {
-    return { isOpen: true, spots: 0, availability: "Waitlist open", enrollLabel: "Join Waitlist" };
-  }
-  return { isOpen: false, spots: 0, availability: "Full", enrollLabel: "" };
-};
-
-/* --- class pages a course hides ------------------------------------------- */
-
-// Courses whose classes get no page of their own — the course field
-// hide_class_pages (10-02 working group: swim lessons list every time on the
-// course page). Traction Rec course Id -> that course page's URL. A class
-// under one of these links to its course instead (krocTrClassToCard), and its
-// own page redirects there (ClassGate). Read from Zesty on every request —
-// components are served no-cache — so the toggle needs no sync run.
-const KROC_HIDDEN_CLASS_PAGES = Object.fromEntries(
-  [
-    {{each courses as c where c.hide_class_pages = 1}}
-    ["{{!c.tractionrec_id}}".trim(), "{{c.getUrl()}}".trim()]
-    {{c._arraycomma}}
-    {{end-each}}
-  ].filter((r) => r[0] && r[1])
-);
-
-// The course page a class's own page gives way to, or "" when it keeps it.
-const krocTrClassGate = (cls) => KROC_HIDDEN_CLASS_PAGES[krocTrCourseId(cls)] || "";
-
-/* --- rows -> card props --------------------------------------------------- */
-
-const krocTrLink = (row) =>
-  row ? { label: krocTrText(row.Name), url: krocTrMeta(row).zestyPath || "" } : null;
-
-// ProgramCard props.card (also used for categories — same card face)
-const krocTrCategoryToCard = (row) => ({
-  id: krocTrText(row && row.Id),
-  zuid: krocTrMeta(row).zestyItemZuid || "",
-  title: krocTrText(row && row.Name),
-  summary: "",
-  iconUrl: "",
-  url: krocTrMeta(row).zestyPath || ""
-});
-
-const krocTrProgramToCard = (row) => {
-  const card = krocTrCategoryToCard(row);
-  card.summary = krocPlainText(row && row.TREX1__Description__c);
-  return card;
-};
-
-// CourseRow props.course
-const krocTrCourseToCard = (row) => ({
-  id: krocTrText(row && row.Id),
-  zuid: krocTrMeta(row).zestyItemZuid || "",
-  programId: krocTrText(row && row.TREX1__Program__c),
-  title: krocTrText(row && row.Name),
-  subtitle: "",
-  description: krocTrCleanHtml(
-    (row && (row.TREX1__Rich_Description__c || row.TREX1__Description__c)) || ""
-  ),
-  url: krocTrMeta(row).zestyPath || ""
-});
-
-// ClassCard props.item
-const krocTrClassToCard = (row) => {
-  const r = row || {};
-  const o = krocTrOpt(r);
-  const days = krocTrDays(o.TREX1__Day_of_Week__c);
-  const session = (r.TREX1__cso_Course_Session__r || {}).TREX1__Session__r || {};
-  return Object.assign(
-    {
-      id: krocTrText(r.Id),
-      zuid: krocTrMeta(r).zestyItemZuid || "",
-      courseId: krocTrCourseId(r),
-      title: krocTrText(o.Name),
-      kind: "",
-      day: days.label,
-      dayPlural: days.plural,
-      dayRank: days.rank,
-      time: krocTrTime(o.TREX1__Start_Time_Formula__c, o.TREX1__End_Time_Formula__c),
-      startMinutes: krocTrMinutes(o.TREX1__Start_Time_Formula__c),
-      dates: krocDateRange(o.TREX1__Start_Date__c, o.TREX1__End_Date__c),
-      startDate: krocTrText(o.TREX1__Start_Date__c),
-      endDate: krocTrText(o.TREX1__End_Date__c),
-      season: krocTrText(session.Name),
-      ages: krocTrAges(o.TREX1__Age_Min__c, o.TREX1__Age_Max__c),
-      instructor: krocTrText(o.TREX1__Instructor__c),
-      location: "",
-      desc: krocTrCleanHtml(o.TREX1__Description__c),
-      enrollUrl: krocExternalUrl(r.Deep_Link_URL__c),
-      image: "",
-      url: krocTrClassGate(r) || krocTrMeta(r).zestyPath || ""
-    },
-    krocTrPrices(r.prices),
-    krocTrAvailability(r)
-  );
-};
+/* --- ordering -------------------------------------------------------------- */
 
 // Calendar order: day band, then start date, then start time, then name.
 const krocTrSortClasses = (cards) =>
@@ -327,36 +129,232 @@ const krocTrSortClasses = (cards) =>
         a.title.localeCompare(b.title)
     );
 
-/* --- parents (crumbs) ----------------------------------------------------- */
+/* --- tr_* datasets --------------------------------------------------------- */
 
-// The trail above a row, nearest last: [category, program, course]. Parent ids
-// sit inside the Traction Rec data, which Parsley can't put in an include path,
-// so they are looked up here — one small record file per level.
-const krocTrTrail = (kind, self) => {
-  const one = (tier, id) =>
-    id ? krocTrGet("/" + tier + "/" + id + ".json").catch(() => null) : Promise.resolve(null);
-  const categoryOf = (program) => one("program_categories", krocTrCategoryIds(program)[0]);
-  const links = (rows) => rows.map(krocTrLink).filter((l) => l && l.label);
-  if (!self) {
-    return Promise.resolve([]);
+// The catalog pages read the tr_* Zesty datasets that kroc-tractionrec-sync's
+// dataset sync fills (its docs/dataset-storage.md), not the /tractionrec/
+// files. A page view prints the rows it needs into its own script, through the
+// row snippets in views/datasets/ (class, course, program, category), so the
+// data is in the HTML and nothing is fetched. Rows keep the Zesty field names;
+// every value arrives as a string ("" for empty, "1"/"0" for yes/no); relations
+// are ZUIDs; url is the row's Zesty page.
+//
+//   krocDs({ self: "<zuid>", categories: [...], programs: [...], courses: [...],
+//            classes: [...] })
+//
+// Nested loops can print a row more than once, so each kind is de-duplicated
+// by ZUID. Rows are ordered by name, then Traction Rec Id — the order the
+// /tractionrec/ children files had — since a dataset loop returns item order.
+const krocDsOrder = (a, b) =>
+  krocTrText(a.name).toLowerCase().localeCompare(krocTrText(b.name).toLowerCase()) ||
+  krocTrText(a.tractionrec_id).localeCompare(krocTrText(b.tractionrec_id));
+
+const krocDs = (bundle) => {
+  const b = bundle || {};
+  const ds = { byZuid: {} };
+  ["categories", "programs", "courses", "classes"].forEach((kind) => {
+    const seen = {};
+    ds[kind] = krocTrRows(b[kind])
+      .filter((row) => {
+        if (!row.zuid || seen[row.zuid]) {
+          return false;
+        }
+        seen[row.zuid] = true;
+        ds.byZuid[row.zuid] = row;
+        return true;
+      })
+      .sort(krocDsOrder);
+  });
+  ds.self = ds.byZuid[krocTrText(b.self)] || null;
+  return ds;
+};
+
+const krocDsYes = (v) => v === true || v === 1 || v === "1";
+// A row is active unless the sync marked it otherwise (the active field).
+const krocDsActive = (row) => !row || row.active === undefined || krocDsYes(row.active);
+const krocDsNumber = (v) => {
+  const t = krocTrText(v);
+  return t === "" || isNaN(Number(t)) ? null : Number(t);
+};
+const krocDsIds = (csv) =>
+  krocTrText(csv)
+    .split(",")
+    .map((z) => z.trim())
+    .filter(Boolean);
+
+// A program's categories (the one_to_many); the first is its home for crumbs.
+const krocDsCategoryOf = (program, ds) =>
+  krocDsIds(program && program.program_categories)
+    .map((z) => ds.byZuid[z])
+    .filter(Boolean)[0] || null;
+
+// Member / Non-Member pair on class products; a lone untyped level is a single
+// price, and a Day Pass-style level keeps its price in initial_fee.
+const krocDsPrices = (prices) => {
+  const rows = krocTrRows(prices);
+  const amount = (p) => (krocTrText(p.amount) !== "" ? p.amount : p.initial_fee);
+  const member = rows.find((p) => p.price_type === "Member");
+  const pub = rows.find((p) => p.price_type === "Non-Member");
+  const single = !member && !pub && rows.length ? rows[0] : null;
+  return {
+    memberPrice: member ? krocMoney(amount(member)) : "",
+    publicPrice: pub ? krocMoney(amount(pub)) : "",
+    price: single ? krocMoney(amount(single)) : ""
+  };
+};
+
+// Availability pill + whether registration is open, from Traction Rec's own
+// flags. The count is shown whenever TR allows it (show_capacity_online) and it
+// is meaningful (a capped class with spots left); otherwise a state word.
+// Counts are as fresh as the dataset sync's last run — the registration page
+// has the final say after the hand-off.
+const krocDsAvailability = (cls) => {
+  const c = cls || {};
+  // Inactive: Traction Rec no longer publishes it — its
+  // registration window closed, it was set Not Available, or it was removed.
+  // The page stays and says so; listings never show it (views filter on
+  // active, and krocDsActive above).
+  if (!krocDsActive(c)) {
+    return { isOpen: false, spots: null, availability: "Registration closed", enrollLabel: "" };
   }
+  if (!krocDsYes(c.available_online) || !krocDsYes(c.option_available)) {
+    return { isOpen: false, spots: null, availability: "Not available online", enrollLabel: "" };
+  }
+  if (krocDsYes(c.unlimited_capacity)) {
+    return { isOpen: true, spots: null, availability: "Open", enrollLabel: "Enroll" };
+  }
+  const left = krocDsNumber(c.capacity_available);
+  if (left === null) {
+    return { isOpen: true, spots: null, availability: "", enrollLabel: "Enroll" };
+  }
+  if (left > 0) {
+    return {
+      isOpen: true,
+      spots: left,
+      availability: krocDsYes(c.show_capacity_online)
+        ? left + (left === 1 ? " spot remaining" : " spots remaining")
+        : "Open",
+      enrollLabel: "Enroll"
+    };
+  }
+  const waitRoom = (krocDsNumber(c.waitlist_capacity) || 0) - (krocDsNumber(c.waitlist_total) || 0);
+  if (waitRoom > 0) {
+    return { isOpen: true, spots: 0, availability: "Waitlist open", enrollLabel: "Join Waitlist" };
+  }
+  return { isOpen: false, spots: 0, availability: "Full", enrollLabel: "" };
+};
+
+// Courses whose classes get no page (hide_class_pages): tr_courses ZUID -> the
+// course page's URL (working group decision: swim lessons list every time on the
+// course page). A class under one of these links to its course instead
+// (krocDsClassToCard) and its own page redirects there (ClassGate). Read on
+// every request — components are served no-cache — so the toggle needs no sync
+// run. The matching tr_courses row comes from filter() on its page relation;
+// the alias is lowercase on purpose — inside filter(), an alias with capitals
+// (hiddenCourse) does not interpolate and the lookup comes back empty.
+const KROC_DS_HIDDEN_CLASS_PAGES = Object.fromEntries(
+  [
+    {{each courses as hidden where hidden.hide_class_pages = 1}}
+    ["{{tr_courses.filter(page = '{hidden.zuid}').zuid}}", "{{hidden.getUrl()}}".trim()],
+    {{end-each}}
+    null
+  ].filter((r) => r && r[0] && r[1])
+);
+
+const krocDsClassGate = (cls) => KROC_DS_HIDDEN_CLASS_PAGES[krocTrText(cls && cls.course)] || "";
+
+const krocDsLink = (row) => (row ? { label: krocTrText(row.name), url: row.url || "" } : null);
+
+// ProgramCard props.card (categories share the card face)
+const krocDsCategoryToCard = (row) => ({
+  id: krocTrText(row && row.zuid),
+  zuid: krocTrText(row && row.zuid),
+  title: krocTrText(row && row.name),
+  summary: "",
+  iconUrl: "",
+  url: (row && row.url) || ""
+});
+
+const krocDsProgramToCard = (row) => {
+  const card = krocDsCategoryToCard(row);
+  card.summary = krocPlainText(row && row.description);
+  return card;
+};
+
+// CourseRow props.course
+const krocDsCourseToCard = (row) => ({
+  id: krocTrText(row && row.zuid),
+  zuid: krocTrText(row && row.zuid),
+  programId: krocTrText(row && row.program),
+  title: krocTrText(row && row.name),
+  subtitle: "",
+  description: krocTrCleanHtml((row && (row.rich_description || row.description)) || ""),
+  url: (row && row.url) || ""
+});
+
+// ClassCard props.item
+const krocDsClassToCard = (row) => {
+  const r = row || {};
+  const days = krocTrDays(r.day_of_week);
+  return Object.assign(
+    {
+      id: krocTrText(r.zuid),
+      zuid: krocTrText(r.zuid),
+      courseId: krocTrText(r.course),
+      title: krocTrText(r.name),
+      kind: "",
+      day: days.label,
+      dayPlural: days.plural,
+      dayRank: days.rank,
+      time: krocTrTime(r.start_time, r.end_time),
+      startMinutes: krocTrMinutes(r.start_time),
+      dates: krocDateRange(r.start_date, r.end_date),
+      startDate: krocTrText(r.start_date),
+      endDate: krocTrText(r.end_date),
+      season: krocTrText(r.season),
+      ages: krocTrAges(krocDsNumber(r.age_min), krocDsNumber(r.age_max)),
+      instructor: krocTrText(r.instructor),
+      location: "",
+      desc: krocTrCleanHtml(r.description),
+      enrollUrl: krocExternalUrl(r.deep_link_url),
+      image: "",
+      url: krocDsClassGate(r) || r.url || ""
+    },
+    krocDsPrices(r.prices),
+    krocDsAvailability(r)
+  );
+};
+
+// A course's active classes, as cards in calendar order.
+const krocDsClassesOf = (ds, courseZuid) =>
+  krocTrSortClasses(
+    ds.classes.filter((c) => c.course === courseZuid && krocDsActive(c)).map(krocDsClassToCard)
+  );
+
+// The crumb trail above the page's own row, nearest last, from rows the page
+// printed: [category, program, course]. No request.
+const krocDsTrail = (kind, ds) => {
+  const self = ds && ds.self;
+  if (!self) {
+    return [];
+  }
+  const links = (rows) => rows.map(krocDsLink).filter((l) => l && l.label);
   if (kind === "program") {
-    return categoryOf(self).then((c) => links([c]));
+    return links([krocDsCategoryOf(self, ds)]);
   }
   if (kind === "course") {
-    return one("programs", self.TREX1__Program__c).then((p) =>
-      categoryOf(p).then((c) => links([c, p]))
-    );
+    const program = ds.byZuid[self.program];
+    return links([krocDsCategoryOf(program, ds), program]);
   }
   if (kind === "class") {
-    return one("courses", krocTrCourseId(self)).then((co) =>
-      one("programs", co && co.TREX1__Program__c).then((p) =>
-        categoryOf(p).then((c) => links([c, p, co]))
-      )
-    );
+    const course = ds.byZuid[self.course];
+    const program = course ? ds.byZuid[course.program] : null;
+    return links([krocDsCategoryOf(program, ds), program, course]);
   }
-  return Promise.resolve([]);
+  return [];
 };
+
+/* --- parents (crumbs) ----------------------------------------------------- */
 
 // The catalog root (the [categories_page] item). Read from Zesty, so a path
 // change in the Manager follows: it lives at /categories-page/, and the old
@@ -375,25 +373,11 @@ const KROC_CATALOG_ROOT = {
 //     "‹ All Programs" on a category, "‹ Return to Aquatics" below it. The
 //     mobile design only drew the old two-level catalog, so Program / Course /
 //     Class extend the same rule one level each.
-// Parents resolve from Traction Rec ids (krocTrTrail) and fill in as their
-// records arrive; the mobile link waits for them rather than flashing a
-// wrong parent.
+// props.trail is the parents, nearest last (krocDsTrail): the page printed
+// their rows, so the trail is complete on first render — no lookup, no flash
+// of a wrong parent on mobile.
 function CatalogCrumbs(props) {
-  const [trail, setTrail] = React.useState({ items: [], ready: props.kind === "category" });
-  React.useEffect(() => {
-    let live = true;
-    krocTrTrail(props.kind, props.self)
-      .then((t) => live && setTrail({ items: t, ready: true }))
-      .catch((err) => {
-        console.error("KROC: crumb lookup failed", err);
-        if (live) {
-          setTrail({ items: [], ready: true });
-        }
-      });
-    return () => {
-      live = false;
-    };
-  }, [props.kind, props.self]);
+  const trail = { items: [].concat(props.trail || []).filter(Boolean) };
 
   const fromRoot = props.kind === "category" || props.kind === "program";
   const items = (fromRoot ? [KROC_CATALOG_ROOT] : [])
@@ -411,15 +395,13 @@ function CatalogCrumbs(props) {
       <div className="hidden lg:block">
         <Breadcrumbs items={items} />
       </div>
-      {trail.ready && (
-        <a
-          href={back.url || undefined}
-          className="inline-flex items-center gap-1.5 text-[13.5px] text-brand-red-300 lg:hidden"
-        >
-          <Icon className="h-3.5 w-3.5 flex-none rotate-90" id="#i-chev" />
-          {back.label}
-        </a>
-      )}
+      <a
+        href={back.url || undefined}
+        className="inline-flex items-center gap-1.5 text-[13.5px] text-brand-red-300 lg:hidden"
+      >
+        <Icon className="h-3.5 w-3.5 flex-none rotate-90" id="#i-chev" />
+        {back.label}
+      </a>
     </React.Fragment>
   );
 }

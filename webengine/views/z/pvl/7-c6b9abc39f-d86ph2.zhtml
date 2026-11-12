@@ -1,0 +1,10 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-e6ceeae29b-h6zsgh')}}
+	{{block('/-/block/about_vision.html?variant=7-98f686f293-jdrk8t')}}
+	{{block('/-/block/about_joan_kroc_story.html?variant=7-88fbefdbae-zxc4t7')}}
+	{{block('/-/block/about_impact.html?variant=7-aad781bac4-ww7g5p')}}
+	{{block('/-/block/featured_pages.html?variant=7-8a8d959297-pwxfvg')}}
+	{{block('/-/block/people.html?variant=7-b0b39eb3e0-vsr37x')}}
+	{{block('/-/block/map_block.html?variant=7-9ce8b0dfe0-xnj2sc')}}
+	{{block('/-/block/donation_block.html?variant=7-bac7e4bb8e-k8hsc6')}}
+</div>

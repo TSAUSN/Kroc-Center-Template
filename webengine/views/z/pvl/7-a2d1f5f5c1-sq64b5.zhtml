@@ -1,0 +1,8 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-9ee0bb8cf2-46zc7j')}}
+	{{block('/-/block/anchor_links.html?variant=7-fa8ecddc82-qbfg3n')}}
+	{{block('/-/block/hours_general.html?variant=7-b8eec7b9af-vkn98g')}}
+	{{block('/-/block/hours_areas.html?variant=7-c8a0ac88f9-jrq9g2')}}
+	{{block('/-/block/hours_closures.html?variant=7-a2a7a693a5-c3bwxb')}}
+	{{block('/-/block/faqs.html?variant=7-889594d5a2-d35xsh')}}
+</div>

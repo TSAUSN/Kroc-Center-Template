@@ -1,0 +1,11 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-c2a4de999d-989dbr')}}
+	{{block('/-/block/card_grid.html?variant=7-849a8ae2c0-v0kj18')}}
+	{{block('/-/block/careers_benefits.html?variant=7-8ae7f29996-cr43f5')}}
+	{{block('/-/block/intro_band.html?variant=7-a2bbab91a0-4xtq2s')}}
+	{{block('/-/block/careers_jobs.html?variant=7-c687b5fec0-km9jrg')}}
+	{{block('/-/block/careers_apply.html?variant=7-fc9cf48cec-s23ppg')}}
+	{{block('/-/block/intro_band.html?variant=7-faa1b7a8a9-77f5wc')}}
+	{{block('/-/block/people.html?variant=7-948781cbd0-11hr0c')}}
+	{{block('/-/block/rich_text.html?variant=7-b0a3b49693-pb9x4t')}}
+</div>

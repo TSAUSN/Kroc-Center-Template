@@ -1,18 +1,19 @@
 (**
   Class detail — [classes] pageset · the dated leaf (Traction Rec's Course
   Session Option)
-  Every schedule, price and availability fact comes from this class's Traction
-  Rec row, inlined at render time by its tractionrec_id (no request). The Zesty
-  fields that mirror it (class_name, dates, day_of_week, time, age_range,
-  instructors, prices, spots_remaining, enrollment_status, deep_link_url,
-  description, courses) are no longer read. Zesty supplies only what Traction
-  Rec has no source for: hero image, class type, location and tags.
-  class_name is a fallback title for an item with no Traction Rec row.
+  Every schedule, price and availability fact comes from this class's row in
+  the tr_classes dataset (its page relation is this item), printed into the
+  script below with the row snippets in views/datasets/ — together with the
+  other classes of its course, the course, program and categories for the
+  crumbs. Nothing is fetched. The Zesty fields that mirror Traction Rec
+  (class_name, dates, day_of_week, time, age_range, instructors, prices,
+  spots_remaining, enrollment_status, deep_link_url, description, courses) are
+  not read. Zesty supplies only what Traction Rec has no source for: hero
+  image, class type, location and tags. class_name is a fallback title for an
+  item with no dataset row.
   A class whose course has hide_class_pages on renders ClassGate instead, which
-  sends the visitor to the course page (krocTrClassGate in catalogdata.jsx).
+  sends the visitor to the course page (krocDsClassGate in catalogdata.jsx).
 **)
-<script type="application/json" id="kroc-tr-self">{{ include /tractionrec/classes/{this.tractionrec_id}.json }}</script>
-
 <section class="mx-4 mb-12 mt-4" id="kroc-class-detail"></section>
 
 <script type="text/babel" data-presets="react">
@@ -24,10 +25,49 @@
     {{end-each}}
   ];
 
-  const self = krocTrInline("kroc-tr-self");
-  const courseUrl = krocTrClassGate(self);
+  const ds = krocDs({
+    self: "{{tr_classes.filter(page = '{this.zuid}').zuid}}",
+    classes: [
+      {{each tr_classes as cls where cls.page = '{this.zuid}'}}
+      {{ include /datasets/class.json }},
+      {{end-each}}
+      {{each tr_classes as me where me.page = '{this.zuid}'}}
+      {{each tr_classes as cls where cls.course = '{me.course}' AND cls.active = 1}}
+      {{ include /datasets/class.json }},
+      {{end-each}}
+      {{end-each}}
+    ],
+    courses: [
+      {{each tr_classes as me where me.page = '{this.zuid}'}}
+      {{each tr_courses as crs where crs.zuid = '{me.course}'}}
+      {{ include /datasets/course.json }},
+      {{end-each}}
+      {{end-each}}
+    ],
+    programs: [
+      {{each tr_classes as me where me.page = '{this.zuid}'}}
+      {{each tr_courses as meCourse where meCourse.zuid = '{me.course}'}}
+      {{each tr_programs as prg where prg.zuid = '{meCourse.program}'}}
+      {{ include /datasets/program.json }},
+      {{end-each}}
+      {{end-each}}
+      {{end-each}}
+    ],
+    categories: [
+      {{each tr_classes as me where me.page = '{this.zuid}'}}
+      {{each tr_courses as meCourse where meCourse.zuid = '{me.course}'}}
+      {{each tr_programs as meProgram where meProgram.zuid = '{meCourse.program}'}}
+      {{each tr_program_categories as cat where FIND_IN_SET(cat.zuid, '{meProgram.program_categories}')}}
+      {{ include /datasets/category.json }},
+      {{end-each}}
+      {{end-each}}
+      {{end-each}}
+      {{end-each}}
+    ]
+  });
+  const courseUrl = krocDsClassGate(ds.self);
   const data = {
-    self: self,
+    ds: ds,
     title: "{{!this.class_name}}".trim(),
     heroWide: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
     kind: krocLabelCase("{{!this.class_type}}"),

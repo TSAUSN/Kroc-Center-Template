@@ -2,17 +2,17 @@
 // The "Our Benefits" card on 6.20 Careers: a heading over a green two-column
 // checklist, plus an optional employee-testimonial video under it.
 //
-// Its own block rather than a variant of [about_vision], decided 2026-10-05
-// (Japheth), so the catalog's Columns and Check Colour fields aren't fields:
+// Its own block rather than a variant of [about_vision], so
+// the catalog's Columns and Check Colour fields aren't fields:
 // green and two columns are this card's design (CheckList's columns-2 is one
 // column below sm, which is the mobile design).
 //
 // Video: morgan asked to show "videos of employee testimonials ... from
-// youtube" (2026-07-24, 💬1857887156); Erin settled the source as YouTube for
+// youtube" (💬1857887156); Erin settled the source as YouTube for
 // video with audio (T10, ticket 2493). No design places it, so it sits under
 // the checklist inside the card, framed exactly like [about_joan_kroc_story]'s
 // (16:9, up to 820px, centred) and parsed by the same krocYouTubeId, so any
-// YouTube link shape works. One video, per Japheth. Presence-driven: no URL,
+// YouTube link shape works. One video. Presence-driven: no URL,
 // no frame; an unparseable URL is treated as none.
 //
 // Desktop and mobile are separate designs and both are followed: 22px panel +

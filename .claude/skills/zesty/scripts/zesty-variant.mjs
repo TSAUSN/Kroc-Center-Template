@@ -13,7 +13,7 @@
 // blocks_catalog_page can read a variant's ZUID from. The Manager replaces it
 // with a real screenshot the first time the variant is saved there.
 // Nothing is deleted. Every write ends with `zesty-sync pull` and prints the
-// variant's preview URL.
+// variant's preview URL and its block catalog page link.
 //
 // Usage:
 //   node .claude/skills/zesty/scripts/zesty-variant.mjs list <model>
@@ -171,8 +171,8 @@ async function screenshotUrl(model, item) {
   );
 }
 
-// What every Manager-made variant carries (all 31 on the instance, checked
-// 2026-10-05). A PUT that omits `listed` UNLISTS the item, and an unlisted
+// What every Manager-made variant carries (all 31 on the instance, checked).
+// A PUT that omits `listed` UNLISTS the item, and an unlisted
 // variant drops out of /-/gql/ and fails to render (`this.zuid` → "field does
 // not exist"), so both are sent on every write.
 const MANAGER_META = { listed: true };
@@ -213,6 +213,16 @@ async function report(model, zuid) {
   if (!url) return;
   const res = await fetch(url).catch(() => null);
   console.log(`  preview ${res ? res.status : "unreachable"}: ${url}`);
+  // The link to give the user: the variant on the block catalog page.
+  console.log(`  catalog: ${catalogUrl(model, zuid)}`);
+}
+
+// The block catalog page (blocks_catalog_page item, /blocks-catalog-page/)
+// preselects a block and variant from its query string.
+// Always report this link for a block, not the raw /-/block/ preview.
+const CATALOG_PATH = "/blocks-catalog-page/";
+function catalogUrl(model, zuid) {
+  return `https://${previewHost}${CATALOG_PATH}?block=${model.name}&variant=${zuid}`;
 }
 
 // ---------- commands ----------

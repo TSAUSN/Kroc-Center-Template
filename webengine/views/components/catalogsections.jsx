@@ -138,12 +138,13 @@ const KROC_EMPTY_COURSES = {
   none: "Courses for this program haven’t been published yet — check back soon."
 };
 
-// "Browse by Category" on the catalog root. data.rows: program_categories.json
+// "Browse by Category" on the catalog root. data.rows: tr_program_categories
+// rows (krocDs)
 function CategoriesSection(props) {
   return (
     <CardGridListing
       data={props.data}
-      toCard={krocTrCategoryToCard}
+      toCard={krocDsCategoryToCard}
       heading="Browse by Category"
       placeholder="Search categories"
       ctaLabel="View Category"
@@ -152,12 +153,12 @@ function CategoriesSection(props) {
   );
 }
 
-// A Category's programs. data.rows: program_categories/<id>/programs.json
+// A Category's programs. data.rows: tr_programs rows (krocDs)
 function ProgramsSection(props) {
   return (
     <CardGridListing
       data={props.data}
-      toCard={krocTrProgramToCard}
+      toCard={krocDsProgramToCard}
       heading="Programs"
       placeholder="Search programs"
       ctaLabel="View Program"
@@ -167,38 +168,27 @@ function ProgramsSection(props) {
 }
 
 // A Program's courses, each an expandable row carrying its classes.
-// data.rows: programs/<id>/courses.json. The classes come from the classes
-// tier file, fetched once and grouped by course — one request however many
-// courses are on screen, and the browser reuses it on the course and class
-// pages (it sends the same URL).
+// data.ds: the krocDs bundle the program page printed — the program
+// (ds.self), its courses and all their classes. Nothing is fetched.
 function CoursesSection(props) {
   const d = props.data || {};
   const PAGE_SIZE = d.pageSize || 10;
-  const courses = krocTrRows(d.rows).map(krocTrCourseToCard);
-  const [classes, setClasses] = React.useState({ byCourse: {}, ready: false });
-
-  React.useEffect(() => {
-    if (!courses.length) {
-      setClasses({ byCourse: {}, ready: true });
-      return;
-    }
-    krocTrGet("/classes.json")
-      .then((rows) => {
-        const byCourse = {};
-        krocTrRows(rows)
-          .map(krocTrClassToCard)
-          .forEach((c) => {
-            if (c.courseId) {
-              (byCourse[c.courseId] = byCourse[c.courseId] || []).push(c);
-            }
-          });
-        setClasses({ byCourse: byCourse, ready: true });
-      })
-      .catch((err) => {
-        console.error("KROC: classes feed failed", err);
-        setClasses({ byCourse: {}, ready: true });
-      });
-  }, [courses.length]);
+  const ds = d.ds || krocDs(null);
+  const rows = ds.self
+    ? ds.courses.filter((c) => c.program === ds.self.zuid && krocDsActive(c))
+    : null;
+  const courses = krocTrRows(rows).map(krocDsCourseToCard);
+  // Traction Rec Id order, as the classes tier file had it: CourseRow rolls up
+  // its ages line in the order it is given, and ClassList bands them itself.
+  const classes = { byCourse: {}, ready: true };
+  ds.classes
+    .filter(krocDsActive)
+    .sort((a, b) => krocTrText(a.tractionrec_id).localeCompare(krocTrText(b.tractionrec_id)))
+    .forEach((row) => {
+      (classes.byCourse[row.course] = classes.byCourse[row.course] || []).push(
+        krocDsClassToCard(row)
+      );
+    });
 
   const listing = useKrocListing(
     courses,
@@ -225,7 +215,7 @@ function CoursesSection(props) {
           ))}
         </div>
       ) : (
-        <CatalogEmpty>{krocListingEmpty(d.rows, listing, KROC_EMPTY_COURSES)}</CatalogEmpty>
+        <CatalogEmpty>{krocListingEmpty(rows, listing, KROC_EMPTY_COURSES)}</CatalogEmpty>
       )}
     </CatalogListing>
   );

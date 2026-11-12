@@ -2,7 +2,7 @@
 // Ministries" on 6.19 Church, plus the navy "Prayer Request" card beside it.
 //
 // ONE block for what the catalog filed as two ([church_ministries] +
-// [church_prayer_card], merged 2026-09-29). The desktop design draws both in a
+// [church_prayer_card], merged). The desktop design draws both in a
 // single 7fr/5fr grid; mobile drops the pairing into two stacked sections. Two
 // separately placed blocks could express neither, which is also why the
 // catalog's "two blocks in a row" question never needed a Freestyle ruling.

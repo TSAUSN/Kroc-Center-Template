@@ -75,7 +75,7 @@ They live outside the repo, since its devDependencies are only Tailwind, ESLint 
 | Symptom | Cause / fix |
 |---|---|
 | Hook never reports anything after edits | Not loaded: open `/hooks` or restart. Or the edited file isn't under `webengine/views|styles|scripts`, or it's gitignored (`tractionrec/`, `_runner/`). |
-| `Cannot find module …/tools/zesty-sync.mjs` | The hook still points at the old path. The scripts moved from `tools/` into this skill on 2026-10-07; update the `command` above. |
+| `Cannot find module …/tools/zesty-sync.mjs` | The hook still points at the old path. The scripts moved from `tools/` into this skill; update the `command` above. |
 | `developer token rejected (expired?)` | Re-enter the token: run the extension's Sync to Instance (or update `ZESTY_TOKEN`). |
 | `new: views/… not on the instance` | New file; create it with `node $Z/zesty-sync.mjs push <file>` (scans never create). |
 | `conflict: …` / `remote-newer: …` | Someone changed it on the instance. `status` shows which, then `pull` (or `push --force` only if overwriting is intended). |

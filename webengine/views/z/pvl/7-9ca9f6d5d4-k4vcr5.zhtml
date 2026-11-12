@@ -1,0 +1,10 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-a6d5a9e598-6zc9n0')}}
+	{{block('/-/block/rich_text.html?variant=7-def6e7d1c4-f525sf')}}
+	{{block('/-/block/facility_section.html?variant=7-90b985dcfa-3z1q52')}}
+	{{block('/-/block/people.html?variant=7-e2dfcef1ab-4v4sh9')}}
+	{{block('/-/block/church_connect_links.html?variant=7-d2cbac9cf1-b74sjz')}}
+	{{block('/-/block/church_ministries.html?variant=7-84f593ebf8-31027s')}}
+	{{block('/-/block/church_kids.html?variant=7-beb0b7c7d4-tqz3fz')}}
+	{{block('/-/block/card_grid.html?variant=7-86f0b1c5fe-zst4tm')}}
+</div>

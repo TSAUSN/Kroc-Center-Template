@@ -1,0 +1,17 @@
+<section class="mx-4 mt-9" id="kroc-rich-text-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is WYSIWYG — toJson() escapes its quotes and newlines, which a
+  // hand-built string literal would break on (AGENTS.md §3)
+  const item = {{this.toJson()}};
+
+  const data = {
+    body: item.body
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-rich-text-{{this.zuid}}")).render(
+    <RichText data={data} />
+  );
+})();
+</script>

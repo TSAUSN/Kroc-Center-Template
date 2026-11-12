@@ -216,11 +216,11 @@ function OppCard(props) {
 // compact row, name + age note left, rate + period right. No CTA and no
 // eyebrow — the Figma master has neither, so the v5 §21 per-tier CTA fields
 // were modelled for a card that was never designed.
-// Content is vertically centred per quick-win A1 (Miranda Tsadilas, 2026-07-30)
+// Content is vertically centred per quick-win A1 (Miranda Tsadilas)
 // — the prototype's original `align-items: baseline` was the reported bug.
 //
-// Price is 28px, NOT the design's 24px — a deliberate deviation, asked for
-// 2026-09-10. Root cause of "the price looks small": these rows render 86.5px
+// Price is 28px, NOT the design's 24px — a deliberate deviation, asked for.
+// Root cause of "the price looks small": these rows render 86.5px
 // tall against the Figma master's 360x70, because the design's tight Figma
 // leading becomes line-height 1.5 in CSS. `leading-none` keeps the larger
 // price from growing the row further. Tightening the left block's leading is

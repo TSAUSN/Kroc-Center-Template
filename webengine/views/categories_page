@@ -1,15 +1,17 @@
 (**
-  All Categories — [categories_page] single page · the catalog root (/categories/)
-  Hero fields are authored here. The category grid reads Traction Rec's
-  categories, inlined below from /tractionrec/program_categories.json (no
-  request); the tree-wide class finder fetches the four tier files itself.
+  All Categories — [categories_page] single page · the catalog root
+  Hero fields are authored here. The category grid and the tree-wide class
+  finder read the tr_* datasets, printed into the script below (row snippets in
+  views/datasets/; the finder's courses and programs are printed inline with
+  only the fields it joins on). Nothing is fetched. Building the whole catalog
+  costs about 3 s of uncached render on stage; the live domain
+  caches the page. If that grows too slow, the finder can fetch its rows in the
+  browser instead — see kroc-tractionrec-sync docs/dataset-storage.md §4.
   Field refs are the instance's own — note the TRIPLE underscore on the hero
   media, which is how WebEngine renders the " - " in the "Hero Image - Desktop"
-  labels. (The original note said a drag-in CTA band needed an autolayout call;
-  this view has never had one, so drag-in blocks don't render here.)
+  labels. (This view has never had an autolayout call, so drag-in blocks don't
+  render here.)
 **)
-<script type="application/json" id="kroc-tr-categories">{{ include /tractionrec/program_categories.json }}</script>
-
 <section class="mx-4 mt-4" id="kroc-catalog-hero"></section>
 
 <section class="mx-4 mt-12" id="kroc-catalog-categories"></section>
@@ -30,12 +32,49 @@
     <CatalogHero data={data} />
   );
 
-  const gridData = { heading: "Browse by Category", rows: krocTrInline("kroc-tr-categories") };
+  const ds = krocDs({
+    categories: [
+      {{each tr_program_categories as cat where cat.active = 1}}
+      {{ include /datasets/category.json }},
+      {{end-each}}
+    ],
+    programs: [
+      {{each tr_programs as prg}}
+      {
+        zuid: "{{prg.zuid}}",
+        tractionrec_id: "{{!prg.tractionrec_id}}",
+        name: "{{!prg.name.escapeForJs()}}",
+        program_categories: "{{!prg.program_categories}}"
+      },
+      {{end-each}}
+    ],
+    courses: [
+      {{each tr_courses as crs}}
+      {
+        zuid: "{{crs.zuid}}",
+        tractionrec_id: "{{!crs.tractionrec_id}}",
+        name: "{{!crs.name.escapeForJs()}}",
+        program: "{{!crs.program}}"
+      },
+      {{end-each}}
+    ],
+    classes: [
+      {{each tr_classes as cls where cls.active = 1}}
+      {{ include /datasets/class.json }},
+      {{end-each}}
+    ]
+  });
+
+  // The grid keeps Traction Rec's own order (record Id), as before.
+  const gridRows = ds.categories
+    .filter(krocDsActive)
+    .sort((a, b) => krocTrText(a.tractionrec_id).localeCompare(krocTrText(b.tractionrec_id)));
+  const gridData = { heading: "Browse by Category", rows: gridRows };
   ReactDOM.createRoot(document.getElementById("kroc-catalog-categories")).render(
     <CategoriesSection data={gridData} />
   );
 
-  const finderData = { heading: "Search for Classes" };
+  const finderData = { heading: "Search for Classes", ds: ds };
   ReactDOM.createRoot(document.getElementById("kroc-catalog-finder")).render(
     <ClassFinder data={finderData} />
   );

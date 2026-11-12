@@ -1,0 +1,20 @@
+<section class="mx-4 mt-9" id="kroc-donate-impact-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is WYSIWYG and names are Multi Line Text — toJson() escapes their
+  // quotes and newlines (AGENTS.md §3); the repeater arrives as row objects
+  const item = {{this.toJson()}};
+
+  const data = {
+    statValue: item.stat_value,
+    statCaption: item.stat_caption,
+    body: item.body,
+    groups: [{{ this.donor_groups }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-donate-impact-{{this.zuid}}")).render(
+    <DonateImpact data={data} />
+  );
+})();
+</script>

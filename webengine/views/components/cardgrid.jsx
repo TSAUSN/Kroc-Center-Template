@@ -4,8 +4,11 @@
 //                    body and a pill row; filed in the catalog as [church_groups]
 //   "Careers Values" 6.20 Careers ("Why work with us?"): an icon band over
 //                    title + body; filed as [careers_values]
+//   "App & Portal System Cards" 6.23 App & Portal (Community Portal vs Kroc
+//                    Connect app): accent bar, eyebrow, title, tagline, a
+//                    checklist and a CTA; filed as [appportal_systems]
 //
-// A general block, decided 2026-10-05 (Japheth): both sections are the same
+// A general block: both sections are the same
 // white-card grid, so the second added its optional Heading and per-card Icon /
 // Photo to this model instead of becoming a second model. NOT [featured_cards]
 // 7.20, which the catalog named: that is the homepage's class / event / promo
@@ -18,9 +21,18 @@
 //     ValueCard): a 160px band (140 on mobile) over a 19px title. Photo fills
 //     the band full-bleed; otherwise the band is the navy-50 -> area gradient
 //     with the icon in a red-50 chip, lower-left. Photo is Erin's ask
-//     (2026-08-04, 💬1871730857, agreed 💬1874933828).
+//     (💬1871730857, agreed 💬1874933828).
 //   - A card with neither keeps the plain face: 28px title, body, pill row.
 //   - Pills render on either face.
+//   - Eyebrow, Checklist (one item per line) and CTA render on either face;
+//     Accent (navy | red) adds the plain face's 6px top bar (5 on mobile) and
+//     colours the eyebrow, the checks and the button — the System Card. A card
+//     with any of these takes the System Card's body metrics (14.5px / 1.6)
+//     and pins its CTA to the card foot. Red text and buttons are red-300
+//     #C5000E (#EF3E42 fails AA at 11-13px); the bar and checks keep #EF3E42.
+//     Mobile: full-width button, as designed. The catalog listed this block as
+//     identical to [careers_values] / [church_groups] (merge note 3), so it
+//     joined here rather than becoming [appportal_systems].
 //
 // The ticket's shapes nest a repeater (Pills inside Items), which Zesty
 // disallows, so Pills is Multi Line Text, one pill per line. No Columns field:
@@ -93,9 +105,17 @@ function CardGrid(props) {
         .map((p) => p.trim())
         .filter(Boolean),
       icon: c.icon,
-      photo: c.photo
+      photo: c.photo,
+      eyebrow: text(c.eyebrow),
+      accent: text(c.accent).toLowerCase(),
+      checklist: text(c.checklist)
+        .split(/\r?\n/)
+        .map((p) => p.trim())
+        .filter(Boolean),
+      ctaLabel: text(c.cta_label),
+      ctaLink: krocExternalUrl(text(c.cta_link))
     }))
-    .filter((c) => c.title || c.body);
+    .filter((c) => c.title || c.body || c.checklist.length > 0);
 
   const urls = useKrocMediaUrls(
     cards.flatMap((c) => [krocMediaZuid(c.icon), krocMediaZuid(c.photo)])
@@ -123,26 +143,100 @@ function CardGrid(props) {
       </div>
     );
 
-  const plainCard = (c, i) => (
-    <div key={c.title + i} className="rounded-card bg-surface p-[22px] lg:px-9 lg:py-8">
-      {c.title && (
-        <h3 className="mb-2 text-[19px] leading-[1.25] text-content lg:mb-2.5 lg:text-heading-sm lg:leading-[1.3]">
-          {c.title}
-        </h3>
+  const isSystem = (c) => Boolean(c.accent || c.eyebrow || c.checklist.length || c.ctaLabel);
+  const accentText = (c) =>
+    c.accent === "red"
+      ? "text-brand-red-300"
+      : c.accent === "navy"
+        ? "text-secondary"
+        : "text-primary";
+
+  const eyebrowLine = (c) =>
+    c.eyebrow && (
+      <div
+        className={cx(
+          "mb-2 text-[11px] tracking-[.14em] uppercase lg:mb-2.5",
+          c.accent ? accentText(c) : "text-brand-red-300"
+        )}
+      >
+        {c.eyebrow}
+      </div>
+    );
+
+  // Checklist + CTA: the System Card's foot. The CTA sits at the card's foot
+  // (mt-auto) so two cards' buttons line up.
+  const systemFoot = (c) => (
+    <React.Fragment>
+      {c.checklist.length > 0 && (
+        <div className={cx(c.ctaLabel && "mb-4 lg:mb-6")}>
+          <CheckList items={c.checklist} tone={c.accent === "navy" ? "navy" : "red"} />
+        </div>
       )}
-      {c.body && (
-        <p
+      {c.ctaLabel && (
+        <a
+          href={c.ctaLink || undefined}
           className={cx(
-            "whitespace-pre-line text-[13px] leading-[1.55] text-content-muted lg:text-[14px]",
-            c.pills.length > 0 && "mb-3 lg:mb-4"
+            "btn btn-sm mt-auto w-full lg:w-auto lg:self-start",
+            c.accent === "red"
+              ? "btn-primary bg-brand-red-300 hover:bg-brand-red-300/90"
+              : "btn-secondary"
           )}
         >
-          {c.body}
-        </p>
+          <Icon className="h-3.5 w-3.5" id="#i-arrowur" />
+          {c.ctaLabel}
+        </a>
       )}
-      {pillRow(c.pills)}
-    </div>
+    </React.Fragment>
   );
+
+  const plainCard = (c, i) => {
+    const sys = isSystem(c);
+    return (
+      <div
+        key={c.title + i}
+        className={cx(
+          "flex flex-col overflow-hidden rounded-card bg-surface",
+          !c.accent && "p-[22px] lg:px-9 lg:py-8"
+        )}
+      >
+        {c.accent && (
+          <div
+            className={cx(
+              "h-[5px] flex-none lg:h-1.5",
+              c.accent === "red" ? "bg-primary" : "bg-secondary"
+            )}
+          ></div>
+        )}
+        <div className={cx("flex flex-1 flex-col", c.accent && "p-5 lg:px-8 lg:pt-7 lg:pb-8")}>
+          {eyebrowLine(c)}
+          {c.title && (
+            <h3
+              className={cx(
+                "text-[19px] leading-[1.25] text-content lg:text-heading-sm lg:leading-[1.3]",
+                sys ? "mb-1.5 lg:mb-2" : "mb-2 lg:mb-2.5"
+              )}
+            >
+              {c.title}
+            </h3>
+          )}
+          {c.body && (
+            <p
+              className={cx(
+                "whitespace-pre-line text-[13px] text-content-muted",
+                sys ? "leading-[1.6] lg:text-[14.5px]" : "leading-[1.55] lg:text-[14px]",
+                (c.pills.length > 0 || c.checklist.length > 0 || c.ctaLabel) &&
+                  (sys ? "mb-3.5 lg:mb-5" : "mb-3 lg:mb-4")
+              )}
+            >
+              {c.body}
+            </p>
+          )}
+          {pillRow(c.pills)}
+          {systemFoot(c)}
+        </div>
+      </div>
+    );
+  };
 
   const mediaCard = (c, i) => {
     const photo = mediaUrl(c.photo);
@@ -163,6 +257,7 @@ function CardGrid(props) {
           </div>
         )}
         <div className="flex flex-1 flex-col px-5 pt-4 pb-5 lg:px-[26px] lg:pt-5 lg:pb-7">
+          {eyebrowLine(c)}
           {c.title && (
             <h3 className="mb-1.5 text-[19px] leading-[1.25] text-content lg:mb-2 lg:font-medium">
               {c.title}
@@ -172,13 +267,14 @@ function CardGrid(props) {
             <p
               className={cx(
                 "whitespace-pre-line text-[13px] leading-[1.6] text-content-muted lg:min-h-[90px] lg:text-[14px]",
-                c.pills.length > 0 && "mb-3 lg:mb-4"
+                (c.pills.length > 0 || c.checklist.length > 0 || c.ctaLabel) && "mb-3 lg:mb-4"
               )}
             >
               {c.body}
             </p>
           )}
           {pillRow(c.pills)}
+          {systemFoot(c)}
         </div>
       </div>
     );

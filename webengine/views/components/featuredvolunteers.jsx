@@ -8,7 +8,7 @@
 // Why not a repeater like §12 Featured Pages: a Zesty repeater cannot hold a
 // relational sub-field, so its rows could only duplicate the opportunity's
 // copy and hand-type an absolute URL — and the built [volunteer_opportunities]
-// model (2026-06-16) already carries every card field. Shifts stay on that
+// model already carries every card field. Shifts stay on that
 // model as their own {label, time} repeater; the design never puts them on the
 // card, only in the detail sidebar.
 //

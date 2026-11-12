@@ -10,6 +10,8 @@
 // Usage:
 //   node .claude/skills/zesty/scripts/zesty-media.mjs list
 //   node .claude/skills/zesty/scripts/zesty-media.mjs upload <file…>      --dry-run to only check
+//   node .claude/skills/zesty/scripts/zesty-media.mjs title <3-zuid> "<title>"   sets a file's title
+//     (Parsley's getImageTitle() reads it: alt text, and gallery captions)
 
 import { readFileSync, statSync } from "node:fs";
 import { basename, extname } from "node:path";
@@ -97,11 +99,29 @@ async function cmdUpload(paths) {
   }
 }
 
+// A file's title is what Parsley's getImageTitle() returns, so it becomes the
+// image's alt text and, in [image_gallery], its caption.
+async function cmdTitle([zuid, title]) {
+  if (!/^3-[0-9a-z]+-[0-9a-z]+$/.test(zuid || "") || !title) throw new UsageError('usage: title <3-zuid> "<title>"');
+  const file = (await get(`${MANAGER}/file/${zuid}`))[0];
+  if (DRY) return console.log(`Would retitle ${file.filename}: "${file.title || ""}" → "${title}"`);
+  const res = await fetch(`${MANAGER}/file/${zuid}`, {
+    method: "PATCH",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ title })
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new UsageError(`PATCH file ${zuid} → ${res.status} ${json.message || json.error || ""}`.trim());
+  const after = (await get(`${MANAGER}/file/${zuid}`))[0];
+  console.log(`${zuid}  ${after.filename}  title: "${after.title}"`);
+}
+
 async function main() {
   requireSetup();
   if (CMD === "list") await cmdList();
   else if (CMD === "upload") await cmdUpload(ARGS);
-  else throw new UsageError(`unknown command "${CMD ?? ""}" (list | upload)`);
+  else if (CMD === "title") await cmdTitle(ARGS);
+  else throw new UsageError(`unknown command "${CMD ?? ""}" (list | upload | title)`);
 }
 
 run("zesty-media", main);

@@ -18,7 +18,6 @@
 <script type="text/babel" data-presets="react" src="/components/header.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/footer.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/faqs.jsx"></script>
-<script type="text/babel" data-presets="react" src="/components/people.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/donation.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/gallery.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/facility.jsx"></script>
@@ -55,6 +54,20 @@
 <script type="text/babel" data-presets="react" src="/components/careersbenefits.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/careersjobs.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/careersapply.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/people.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/richtext.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/donateimpact.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/donateplannedgiving.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/anchorlinks.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/hoursgeneral.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/hoursareas.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/hoursclosures.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/notice.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/stepcolumns.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/documentblock.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/quote.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/mapblock.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/serviceband.jsx"></script>
 
 
 <script type="text/babel" data-presets="react">

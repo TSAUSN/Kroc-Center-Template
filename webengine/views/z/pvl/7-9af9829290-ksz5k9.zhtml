@@ -1,0 +1,10 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-a6fd83aed7-qqfqfc')}}
+	{{block('/-/block/card_grid.html?variant=7-9e979fd5ed-t2b1kw')}}
+	{{block('/-/block/notice.html?variant=7-86c1a0f5a2-d1dxqm')}}
+	{{block('/-/block/step_columns.html?variant=7-bceff88ad6-x37zf3')}}
+	{{block('/-/block/image_gallery.html?variant=7-a8b98b9180-smxzj0')}}
+	{{block('/-/block/document_block.html?variant=7-b8efaf8bf3-wn7lq7')}}
+	{{block('/-/block/faqs.html?variant=7-a6e1c8ce87-qt91rd')}}
+	{{block('/-/block/intro_band.html?variant=7-acce90e3ce-99jz2g')}}
+</div>

@@ -1,0 +1,23 @@
+(**
+  One tr_programs row as a JSON object for krocDs (catalogdata.jsx). Include it
+  inside a loop over tr_programs whose alias is prg; the caller separates rows.
+  Output is strict JSON (keys quoted, rows in nested lists separated with
+  _arraycomma), so it parses as JSON and as JavaScript. Every value is a
+  string ("" for empty, "1"/"0" for yes/no) and is converted in JavaScript; text
+  goes through escapeForJs, which round-trips Traction Rec copy exactly and
+  stays valid JSON. A single related value is read with filter, never a
+  one-row loop: z.zuid for a ZUID, the bare field name for any other field
+  (the short filter form matches an arbitrary item when its value is empty).
+  program_categories is the one_to_many: the categories' ZUIDs, comma-joined.
+  url is the program's Zesty page.
+**)
+{
+  "zuid": "{{prg.zuid}}",
+  "tractionrec_id": "{{!prg.tractionrec_id}}",
+  "active": "{{!prg.active}}",
+  "inactive_reason": "{{!prg.inactive_reason.escapeForJs()}}",
+  "name": "{{!prg.name.escapeForJs()}}",
+  "url": "{{programs.filter(z.zuid = '{prg.page}').getUrl()}}",
+  "program_categories": "{{!prg.program_categories}}",
+  "description": "{{!prg.description.escapeForJs()}}"
+}

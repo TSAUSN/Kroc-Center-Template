@@ -24,7 +24,8 @@
 // why [careers_positions_band] is a variant here, not a model). Empty or
 // anything else stays left, so the bands already placed don't move. Same
 // field and values as [hero]. The white card and the photo split ignore it:
-// no design centres them.
+// no design centres them. "Careers Join Us" (ticket 2462, [careers_join_band])
+// is the same band in red with one CTA — another variant, not a model.
 function IntroBand(props) {
   const d = props.data || {};
   const layout = String(d.layout_variant || "").toLowerCase();
@@ -43,8 +44,15 @@ function IntroBand(props) {
       .trim()
       .toLowerCase() === "center";
 
+  // Colour band on mobile: full-width stacked buttons, as every mobile colour
+  // band draws them (btn-block in m-shared's IntroBand and Band).
   const ctas = (light) => (
-    <div className={cx("flex flex-wrap gap-3", light && centred && "justify-center")}>
+    <div
+      className={cx(
+        light ? "grid gap-2 lg:flex lg:flex-wrap lg:gap-3" : "flex flex-wrap gap-3",
+        light && centred && "lg:justify-center"
+      )}
+    >
       {d.primary_cta_label && (
         <a
           href={d.primary_cta_url || "#"}
@@ -134,21 +142,41 @@ function IntroBand(props) {
     );
   }
 
-  const bandBg = bg === "navy" ? "bg-secondary" : "bg-primary";
+  // Red is red-300 #C5000E, not --kroc-red #EF3E42: white on that red is
+  // 3.86:1 and fails AA below 24px (the 22px mobile heading, the body) — the
+  // [hero] substitution. Mobile metrics are the mobile band design (.m-band
+  // 30/24 padding, 22px heading, 13px body), shared by every mobile colour band.
+  // The eyebrow's 72% white is 3.61:1 on red-300, so red takes 90% (5.15:1).
+  const bandBg = bg === "navy" ? "bg-secondary" : "bg-brand-red-300";
   return (
-    <div className={cx("rounded-card px-7 py-9 text-content-ondark lg:px-14 lg:py-12", bandBg)}>
+    <div
+      className={cx("rounded-card px-6 py-[30px] text-content-ondark lg:px-14 lg:py-12", bandBg)}
+    >
       <div className={cx("max-w-[720px]", centred && "mx-auto text-center")}>
         {d.eyebrow && (
-          <div className="mb-3 text-[12px] font-medium uppercase tracking-[0.14em] text-[rgba(255,255,255,0.72)]">
+          <div
+            className={cx(
+              "mb-3 text-[12px] font-medium uppercase tracking-[0.14em]",
+              bg === "navy" ? "text-[rgba(255,255,255,0.72)]" : "text-white/90"
+            )}
+          >
             {d.eyebrow}
           </div>
         )}
-        <h3 className="mb-3.5 text-heading-md">{d.title}</h3>
+        <h3
+          className={cx(
+            "text-[22px] leading-[1.2] lg:text-heading-md",
+            (d.body || hasCtas) && "mb-2 lg:mb-3.5"
+          )}
+        >
+          {d.title}
+        </h3>
         {d.body && (
           <p
             className={cx(
-              "whitespace-pre-line text-body-lg leading-relaxed text-[rgba(255,255,255,0.85)]",
-              hasCtas ? "mb-6" : ""
+              "whitespace-pre-line text-[13px] leading-[1.6] text-[rgba(255,255,255,0.85)]",
+              "lg:text-body-lg lg:leading-relaxed",
+              hasCtas ? "mb-4 lg:mb-6" : ""
             )}
           >
             {d.body}

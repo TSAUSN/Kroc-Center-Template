@@ -1,0 +1,23 @@
+<section class="mx-4 mt-9" id="kroc-map-block-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // body is Multi Line Text — toJson() escapes its quotes and newlines
+  // (AGENTS.md §3); an empty address falls back to the Globals address
+  const item = {{this.toJson()}};
+
+  const data = {
+    heading: item.heading,
+    body: item.body,
+    address: item.address,
+    globalAddress: "{{!globals.address}}",
+    directionsLabel: item.directions_label,
+    secondaryLabel: item.secondary_cta_label,
+    secondaryLink: item.secondary_cta_link
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-map-block-{{this.zuid}}")).render(
+    <MapBlock data={data} />
+  );
+})();
+</script>

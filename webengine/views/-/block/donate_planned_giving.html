@@ -1,0 +1,25 @@
+<section class="mx-4 mt-9" id="kroc-donate-planned-giving-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  // both bodies are Multi Line Text — toJson() escapes their quotes and
+  // newlines (AGENTS.md §3); the organisations repeater arrives as row objects
+  const item = {{this.toJson()}};
+
+  const data = {
+    pgHeading: item.planned_giving_heading,
+    pgBody: item.planned_giving_body,
+    pgPhone: item.planned_giving_phone,
+    pgEmail: item.planned_giving_email,
+    pgCtaLabel: item.planned_giving_cta_label,
+    pgCtaLink: item.planned_giving_cta_link,
+    ugHeading: item.used_goods_heading,
+    ugBody: item.used_goods_body,
+    ugOrganisations: [{{ this.used_goods_organisations }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-donate-planned-giving-{{this.zuid}}")).render(
+    <DonatePlannedGiving data={data} />
+  );
+})();
+</script>

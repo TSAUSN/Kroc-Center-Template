@@ -5,10 +5,13 @@
 //
 // X11 / AGENTS.md §3: a Media sub-field inside a repeater stores a bare ZUID
 // that Parsley cannot resolve, and both `Page Logo` and `Page Hero` are exactly
-// that. Accept whichever shape the row actually carries — a resolved URL, a
-// toJson() media object, or an unresolvable ZUID — so a card falls back to its
-// placeholder instead of rendering a broken <img>. If the model ever moves to a
-// resolvable media field, this starts working with no code change.
+// that. Since 2026-11-09 those ZUIDs are resolved in the browser by
+// useKrocMediaUrls (cardgrid.jsx, through custom-endpoints/media.json), as in
+// [card_grid] / [people]. A resolved URL or a toJson() media object is used as
+// it is. Until a ZUID resolves (or when there is none) the card shows its
+// placeholder: in compact mode the sprite glyph krocIconFor picks from the
+// title. useKrocMediaUrls is defined later in the loader (cardgrid.jsx); it is
+// only called at render, after every component file has loaded.
 const krocRepeaterMedia = (value) => {
   if (!value) {
     return "";
@@ -33,7 +36,9 @@ const krocFeaturedPageToCard = (row) => {
     ctaLabel: krocPick(r, ["cta_label", "button_text", "cta"]),
     url: krocPick(r, ["cta_url", "url", "link"]),
     logoUrl: krocRepeaterMedia(r.page_logo || r.logo || r.icon),
-    heroUrl: krocRepeaterMedia(r.page_hero || r.hero || r.image)
+    heroUrl: krocRepeaterMedia(r.page_hero || r.hero || r.image),
+    logoZuid: krocMediaZuid(r.page_logo || r.logo || r.icon),
+    heroZuid: krocMediaZuid(r.page_hero || r.hero || r.image)
   };
 };
 
@@ -147,9 +152,15 @@ function FeaturedPages(props) {
     .flat()
     .filter(Boolean);
 
-  const cards = krocSortRows(rows)
+  const base = krocSortRows(rows)
     .map(krocFeaturedPageToCard)
     .filter((c) => c.title);
+  const urls = useKrocMediaUrls(base.flatMap((c) => [c.logoZuid, c.heroZuid]));
+  const cards = base.map((c) => ({
+    ...c,
+    logoUrl: c.logoUrl || urls[c.logoZuid] || "",
+    heroUrl: c.heroUrl || urls[c.heroZuid] || ""
+  }));
 
   if (!cards.length) {
     return null;

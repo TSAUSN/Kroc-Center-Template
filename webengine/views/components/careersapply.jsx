@@ -3,7 +3,7 @@
 // beside it.
 //
 // ONE block for what the catalog filed as two ([careers_apply] +
-// [careers_text_apply], merged 2026-10-09), on the [church_ministries]
+// [careers_text_apply], merged), on the [church_ministries]
 // precedent: the desktop design draws both in a single 7fr/5fr row and mobile
 // stacks them, which two separately placed blocks can't express. Field names
 // carry their half (`text_apply_*`), like `prayer_request_*` there.
@@ -14,8 +14,10 @@
 // surfaces and nobody asked for a control (the standing rule).
 //
 // KrocSmsCard is its own component because the Hours page draws the same card
-// ("Closure Alerts — Text KROCINFO", [hours_alerts], blocks-doc F3) beside a
-// different main card; that block can reuse it and add its heading + CTA then.
+// ("Closure Alerts — Text KROCINFO") beside its hours card; [hours_general]
+// renders it with variant="alerts": a heading (desktop only, as designed), a
+// CTA, the keyword in bold rather than quoted, and left-aligned on desktop
+// (centred on mobile, like this one).
 //
 // Contrast deviations from the design, both for AA on small white text:
 //   - the card is red-300 #C5000E, not --kroc-red #EF3E42 (3.86:1 fails at
@@ -32,19 +34,43 @@ function KrocSmsCard(props) {
   const eyebrow = text(props.eyebrow);
   const keyword = text(props.keyword);
   const shortcode = text(props.shortcode);
+  const alerts = props.variant === "alerts";
+  const heading = alerts ? text(props.heading) : "";
+  const ctaLabel = alerts ? text(props.ctaLabel) : "";
+  const ctaLink = text(props.ctaLink);
 
   if (!keyword && !shortcode) {
     return null;
   }
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-card bg-brand-red-300 px-6 py-[30px] text-center text-content-ondark lg:px-9 lg:py-8">
+    <div
+      className={cx(
+        "flex flex-col items-center justify-center rounded-card bg-brand-red-300 px-6 py-[30px] text-center text-content-ondark lg:px-9 lg:py-8",
+        alerts && "lg:items-start lg:text-left"
+      )}
+    >
       {eyebrow && (
-        <div className="mb-1.5 text-[11px] tracking-[.14em] text-white/90 uppercase lg:mb-2">
+        <div
+          className={cx(
+            "mb-1.5 text-[11px] tracking-[.14em] text-white/90 uppercase",
+            alerts ? "lg:mb-2.5" : "lg:mb-2"
+          )}
+        >
           {eyebrow}
         </div>
       )}
-      {keyword && (
+      {heading && (
+        <h3 className="mb-3 hidden text-heading-sm leading-[1.3] text-content-ondark lg:block">
+          {heading}
+        </h3>
+      )}
+      {keyword && alerts && (
+        <div className="mb-0.5 text-[20px] leading-[1.25] lg:mb-1 lg:text-[21px]">
+          Text <strong className="font-semibold">{keyword}</strong>
+        </div>
+      )}
+      {keyword && !alerts && (
         <div className="mb-0.5 text-[21px] leading-[1.25] lg:mb-1 lg:text-[24px]">
           {'Text "' + keyword + '"'}
         </div>
@@ -53,6 +79,14 @@ function KrocSmsCard(props) {
         <div className="text-[15px] leading-normal text-white/90">
           to <strong className="font-semibold">{shortcode}</strong>
         </div>
+      )}
+      {ctaLabel && (
+        <a
+          href={krocExternalUrl(ctaLink) || undefined}
+          className="btn btn-light btn-sm mt-3.5 w-full lg:mt-5 lg:w-auto"
+        >
+          {ctaLabel}
+        </a>
       )}
     </div>
   );

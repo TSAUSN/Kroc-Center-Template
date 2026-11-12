@@ -3,7 +3,7 @@
 // left, the benefits checklist on the right.
 //
 // Background is deliberately NOT a field. The only palette request on record
-// (Figma 25:6, 2026-06-22, ticket BLK-1) is against [intro_band]; nothing asks
+// (Figma 25:6, ticket BLK-1) is against [intro_band]; nothing asks
 // for one here, and who owns the palette is still open (FC4/FC29). Navy is
 // hardcoded until someone asks — at which point this takes Background + Ink
 // (X8) together, since 7 of 11 palette colours fail AA behind white text.

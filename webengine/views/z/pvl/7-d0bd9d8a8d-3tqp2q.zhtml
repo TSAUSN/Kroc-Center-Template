@@ -1,0 +1,7 @@
+<div className={styles.pvlRoot}>
+	{{block('/-/block/hero.html?variant=7-8c95f9bfcd-j8jj6b')}}
+	{{block('/-/block/featured_pages.html?variant=7-c0bd85c580-tn2xf6')}}
+	{{block('/-/block/donate_planned_giving.html?variant=7-98dbb1c3de-5vtf2h')}}
+	{{block('/-/block/donate_impact.html?variant=7-f8ca93a5bc-208h14')}}
+	{{block('/-/block/quote.html?variant=7-bcabd798b0-4bzr2s')}}
+</div>

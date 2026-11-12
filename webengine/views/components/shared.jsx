@@ -49,9 +49,10 @@ function SocialLinks(props) {
 // Shared check list — Membership Benefits / Family Play, About Vision, Careers
 // Benefits (7 instances across 4 pages). `tone` picks the check colour so the
 // same list works on a colour band and on a white card:
-//   "ondark" white (colour bands) · "red" (About Vision) · default green.
+//   "ondark" white (colour bands) · "red" (About Vision) · "navy" · default green.
 // It is a prop, not a content field — the colour varies between blocks, never
-// within one, so each block pins its own the way it pins its background.
+// within one, so each block pins its own the way it pins its background. The
+// one exception is [card_grid], where each card's Accent picks navy or red.
 function CheckList(props) {
   const items = (props.items || []).filter(Boolean);
 
@@ -60,7 +61,13 @@ function CheckList(props) {
   }
 
   const ondark = props.tone === "ondark";
-  const checkColor = ondark ? "text-white" : props.tone === "red" ? "text-primary" : "text-success";
+  const checkColor = ondark
+    ? "text-white"
+    : props.tone === "red"
+      ? "text-primary"
+      : props.tone === "navy"
+        ? "text-secondary"
+        : "text-success";
 
   // Multi-column flow, not `grid-cols-2`: a grid shares row heights across both
   // columns, so one wrapped item punches a matching hole in its neighbour and

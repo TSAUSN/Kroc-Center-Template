@@ -306,6 +306,68 @@
   .kroc-prose ul { list-style: disc; }
   .kroc-prose ol { list-style: decimal; }
   .kroc-prose img { max-width: 100%; border-radius: var(--radius-card); }
+
+  /* .kroc-rt — the prototype's rich-text region (kroc.css / kroc-mobile.css),
+     for a whole authored section in one WYSIWYG ([rich_text]). Mobile scale
+     first, desktop at lg. `.rt-cols` is the icon row an editor pastes as HTML
+     (stacked on mobile, 3-up on desktop; `.rt-cols.two` for 2-up). */
+  .kroc-rt { color: var(--color-content); font-size: 0.90625rem; line-height: 1.7; } /* 14.5px */
+  .kroc-rt > :first-child { margin-top: 0; }
+  .kroc-rt > :last-child { margin-bottom: 0; }
+  .kroc-rt h2 { margin: 0 0 18px; font-size: 1.375rem; font-weight: 400; line-height: 1.2; }
+  .kroc-rt h3 { margin: 26px 0 8px; font-size: 1.1875rem; font-weight: 400; line-height: 1.25; }
+  .kroc-rt h4 { margin: 20px 0 6px; font-size: 1rem; font-weight: 500; line-height: 1.3; }
+  .kroc-rt p { margin: 0 0 12px; }
+  .kroc-rt ul, .kroc-rt ol { margin: 0 0 12px; padding-left: 20px; }
+  .kroc-rt ul { list-style: disc; }
+  .kroc-rt ol { list-style: decimal; }
+  .kroc-rt li { margin-bottom: 6px; }
+  .kroc-rt a { color: var(--color-brand-link); text-decoration: underline; text-decoration-color: var(--ui-primary); }
+  .kroc-rt hr { margin: 22px 0; border: 0; border-top: 1px solid var(--color-brand-area); }
+  .kroc-rt strong { font-weight: 500; }
+  .kroc-rt .rt-cols { display: grid; gap: 22px; margin: 0 0 12px; }
+  .kroc-rt .rt-cols p { font-size: 0.8125rem; line-height: 1.65; } /* 13px */
+  .kroc-rt .rt-cols .ico { display: flex; justify-content: center; margin-bottom: 10px; color: var(--color-brand-navy-200); }
+  .kroc-rt .rt-cols .ico img, .kroc-rt .rt-cols .ico svg { width: 36px; height: 36px; }
+  @media (width >= 64rem) {
+    .kroc-rt { font-size: 0.96875rem; } /* 15.5px */
+    .kroc-rt h2 { margin-bottom: 24px; font-size: var(--text-heading-md); line-height: 1.25; }
+    .kroc-rt h3 { margin: 32px 0 10px; font-size: 1.5rem; line-height: 1.3; }
+    .kroc-rt h4 { margin: 24px 0 8px; font-size: 1.125rem; line-height: 1.35; }
+    .kroc-rt p { margin-bottom: 14px; }
+    .kroc-rt ul, .kroc-rt ol { margin-bottom: 14px; padding-left: 22px; }
+    .kroc-rt hr { margin: 28px 0; }
+    .kroc-rt .rt-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-bottom: 14px; }
+    .kroc-rt .rt-cols.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .kroc-rt .rt-cols p { font-size: 0.84375rem; } /* 13.5px */
+    .kroc-rt .rt-cols .ico { margin-bottom: 16px; }
+    .kroc-rt .rt-cols .ico img, .kroc-rt .rt-cols .ico svg { width: 44px; height: 44px; }
+  }
+
+  /* .kroc-steps — the prototype's numbered Stepper, for steps authored in a
+     WYSIWYG ([step_columns]): each list item, or each top-level paragraph,
+     gets a numbered circle. Navy by default, `.red` for the red accent
+     (red-300 #C5000E: white numbers on #EF3E42 fail AA at 12-13px). */
+  .kroc-steps { --kroc-step-bg: var(--color-brand-navy-200); counter-reset: kroc-step; display: grid; gap: 12px; color: var(--color-content); font-size: 0.8125rem; line-height: 1.6; } /* 13px */
+  .kroc-steps.red { --kroc-step-bg: var(--color-brand-red-300); }
+  .kroc-steps ol, .kroc-steps ul { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .kroc-steps li, .kroc-steps > p { position: relative; min-height: 24px; margin: 0; padding-left: 36px; counter-increment: kroc-step; }
+  .kroc-steps li::before, .kroc-steps > p::before {
+    content: counter(kroc-step);
+    position: absolute; top: 1px; left: 0;
+    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 9999px;
+    background: var(--kroc-step-bg); color: #fff;
+    font-size: 0.75rem; font-weight: 500; line-height: 1; /* 12px */
+  }
+  .kroc-steps a { color: var(--color-brand-link); text-decoration: underline; text-decoration-color: var(--ui-primary); }
+  .kroc-steps strong { font-weight: 600; }
+  @media (width >= 64rem) {
+    .kroc-steps, .kroc-steps ol, .kroc-steps ul { gap: 14px; }
+    .kroc-steps { font-size: 0.90625rem; } /* 14.5px */
+    .kroc-steps li, .kroc-steps > p { min-height: 26px; padding-left: 40px; }
+    .kroc-steps li::before, .kroc-steps > p::before { width: 26px; height: 26px; font-size: 0.8125rem; }
+  }
 }
 
 /* ============================================================================

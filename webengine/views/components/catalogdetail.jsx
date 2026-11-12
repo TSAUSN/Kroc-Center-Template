@@ -99,29 +99,19 @@ function OtherCourses(props) {
 
 // Course detail body: the About card + sidebar, then the Course's own Classes
 // in the same day bands the Program page uses.
-//   data.self       courses/<id>.json          (inlined)
-//   data.classRows  courses/<id>/classes.json  (inlined)
-// Siblings come from the program's children file, programs/<id>/courses.json.
+//   data.ds  krocDs bundle the page printed: this course (ds.self), its
+//            classes, the program's other courses (the sidebar), and the
+//            program and category for the crumbs
 function CourseDetail(props) {
   const d = props.data || {};
-  const course = d.self ? krocTrCourseToCard(d.self) : null;
-  const classes = krocTrRows(d.classRows).map(krocTrClassToCard);
-  const [siblings, setSiblings] = React.useState([]);
-
-  React.useEffect(() => {
-    if (!course || !course.programId) {
-      return;
-    }
-    krocTrGet("/programs/" + course.programId + "/courses.json")
-      .then((rows) =>
-        setSiblings(
-          krocTrRows(rows)
-            .map(krocTrCourseToCard)
-            .filter((c) => c.id !== course.id)
-        )
-      )
-      .catch((err) => console.error("KROC: sibling courses feed failed", err));
-  }, [course && course.id]);
+  const ds = d.ds || krocDs(null);
+  const course = ds.self ? krocDsCourseToCard(ds.self) : null;
+  const classes = course ? krocDsClassesOf(ds, course.id) : [];
+  const siblings = course
+    ? ds.courses
+        .filter((c) => c.program === course.programId && c.zuid !== course.id && krocDsActive(c))
+        .map(krocDsCourseToCard)
+    : [];
 
   // Location has no Traction Rec source (no Location object in the org), so
   // that row drops out until one exists.
@@ -136,7 +126,7 @@ function CourseDetail(props) {
   const descHtml = { __html: description };
 
   let classBody = null;
-  if (!d.self) {
+  if (!course) {
     classBody = "Classes couldn’t be loaded right now.";
   } else if (!classes.length) {
     classBody = "Class dates for this course haven’t been posted yet — check back soon.";
@@ -251,32 +241,20 @@ function ClassFact(props) {
 
 // Class detail body: crumbs + share, title, wide hero, then the facts sidebar
 // beside the description, then the course's other classes.
-//   data.self      classes/<id>.json (inlined) — every schedule, price and
+//   data.ds        krocDs bundle the page printed: this class (ds.self), the
+//                  other classes of its course, and the course, program and
+//                  category for the crumbs — every schedule, price and
 //                  availability fact
-//   data.title     the Zesty title, used only when there is no Traction Rec row
+//   data.title     the Zesty title, used only when there is no dataset row
 //   data.heroWide / kind / location / tags — Zesty-only, from this page's item
-// Siblings come from the course's children file, courses/<id>/classes.json.
 function ClassDetail(props) {
   const d = props.data || {};
-  const c = d.self ? krocTrClassToCard(d.self) : { title: d.title || "" };
+  const ds = d.ds || krocDs(null);
+  const self = ds.self;
+  const c = self ? krocDsClassToCard(self) : { title: d.title || "" };
   c.kind = d.kind || "";
   c.location = d.location || "";
-  const [siblings, setSiblings] = React.useState([]);
-
-  React.useEffect(() => {
-    if (!c.courseId) {
-      return;
-    }
-    krocTrGet("/courses/" + c.courseId + "/classes.json")
-      .then((rows) =>
-        setSiblings(
-          krocTrRows(rows)
-            .map(krocTrClassToCard)
-            .filter((x) => x.id !== c.id)
-        )
-      )
-      .catch((err) => console.error("KROC: sibling classes feed failed", err));
-  }, [c.courseId, c.id]);
+  const siblings = self ? krocDsClassesOf(ds, self.course).filter((x) => x.id !== c.id) : [];
 
   const schedule = [c.dayPlural, c.time].filter(Boolean);
   const calendarUrl = krocCalendarUrl(c);
@@ -288,7 +266,7 @@ function ClassDetail(props) {
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <CatalogCrumbs kind="class" self={d.self} title={c.title} />
+        <CatalogCrumbs kind="class" trail={krocDsTrail("class", ds)} title={c.title} />
         <ShareLinks title={c.title} />
       </div>
 
@@ -356,7 +334,7 @@ function ClassDetail(props) {
             </div>
           )}
 
-          {!!d.self && (
+          {!!self && (
             <div className="mt-4 border-t border-black/5 pt-4">
               {c.isOpen ? (
                 <a href={c.enrollUrl || undefined} className="btn btn-primary btn-block mb-2">
@@ -413,7 +391,7 @@ function ClassDetail(props) {
         <div className="mt-12">
           <h2 className="mb-[18px] text-heading-md text-content">Other classes in this course</h2>
           <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {krocTrSortClasses(siblings).map((s) => (
+            {siblings.map((s) => (
               <ClassCard key={s.id || s.title} item={s} />
             ))}
           </div>
@@ -424,7 +402,7 @@ function ClassDetail(props) {
 }
 
 // What a class page shows when its course hides class pages
-// (krocTrClassGate): a short holding card while it sends the visitor to the
+// (krocDsClassGate): a short holding card while it sends the visitor to the
 // course page, where every time for the course is listed. replace() keeps the
 // class page out of history, so Back doesn't bounce into the redirect again.
 // The card is the whole page: the view's other content (its autolayout) is

@@ -6,7 +6,7 @@
 // Built as a rich-text band rather than a bespoke primitive because that is
 // what the source is: kroccenter.org's #joan-kroc section is ONE freeTextArea
 // (WYSIWYG) with a CSS background photo and an .embed-container iframe. Erin
-// asked for "text, photo and video" (2026-08-04) and this is those three.
+// asked for "text, photo and video" and this is those three.
 //
 // No Scrim boolean, though the catalog lists one. Nobody requested it — the
 // word appears only in our own field list and in a Figma note describing the
