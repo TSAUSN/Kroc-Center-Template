@@ -1,7 +1,7 @@
 // Creates and edits Zesty content models from a JSON spec, so a block's fields
 // are set up from the spec instead of clicked through in the Manager.
 //
-// Same setup as zesty-sync.mjs: zesty.config.json (instance ZUID) and the
+// Same setup as zesty-sync.mjs (all in .claude/skills/zesty/scripts/): zesty.config.json (instance ZUID) and the
 // extension's developer token (.vscode/settings.json, or $ZESTY_TOKEN).
 //
 // Safety: every write command validates the whole spec before the first
@@ -11,11 +11,11 @@
 // ends with `zesty-sync pull`, so files the change generated land locally.
 //
 // Usage:
-//   node tools/zesty-model.mjs list
-//   node tools/zesty-model.mjs show <model>                     spec JSON; round-trips into create
-//   node tools/zesty-model.mjs create <spec.json>               model + fields, then pulls its view
-//   node tools/zesty-model.mjs add-fields <model> <spec.json>   append fields; existing names skipped
-//   node tools/zesty-model.mjs update-field <model> <field> <patch.json>
+//   node .claude/skills/zesty/scripts/zesty-model.mjs list
+//   node .claude/skills/zesty/scripts/zesty-model.mjs show <model>                     spec JSON; round-trips into create
+//   node .claude/skills/zesty/scripts/zesty-model.mjs create <spec.json>               model + fields, then pulls its view
+//   node .claude/skills/zesty/scripts/zesty-model.mjs add-fields <model> <spec.json>   append fields; existing names skipped
+//   node .claude/skills/zesty/scripts/zesty-model.mjs update-field <model> <field> <patch.json>
 //   <model> is a name or a 6-… ZUID.
 //
 // Spec:

@@ -12,7 +12,9 @@
     headings: [item.column_heading_1, item.column_heading_2, item.column_heading_3],
     footnote: item.footnote_line,
     ctaLabel: item.cta_label,
-    ctaUrl: item.cta_url,
+    // The button is the membership purchase: cta_url is not read. Traction Rec
+    // has no link yet, so Globals' interim one is used.
+    ctaUrl: krocTrMembershipPurchaseUrl(null, "{{!globals.membership_purchase_url}}"),
     // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
     checklist: [{{ this.checklist_items }}],
     comparison: [{{ this.comparison_rows }}]

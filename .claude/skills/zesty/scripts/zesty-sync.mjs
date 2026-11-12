@@ -16,13 +16,13 @@
 // (views/-/…); gitignored paths are skipped.
 //
 // Usage:
-//   node tools/zesty-sync.mjs status          compare every file (writes nothing to the instance)
-//   node tools/zesty-sync.mjs pull            bring instance changes down (never over an unpushed edit)
-//   node tools/zesty-sync.mjs push <file…>    push these files; --force overrides a conflict
-//   node tools/zesty-sync.mjs scan            push files modified since the last scan;
+//   node .claude/skills/zesty/scripts/zesty-sync.mjs status          compare every file (writes nothing to the instance)
+//   node .claude/skills/zesty/scripts/zesty-sync.mjs pull            bring instance changes down (never over an unpushed edit)
+//   node .claude/skills/zesty/scripts/zesty-sync.mjs push <file…>    push these files; --force overrides a conflict
+//   node .claude/skills/zesty/scripts/zesty-sync.mjs scan            push files modified since the last scan;
 //                                             --allow-many lifts the MANY_FILES guard
-//   node tools/zesty-sync.mjs init            re-baseline from the instance (drops pending changes)
-//   node tools/zesty-sync.mjs hook            scan, as a Claude Code PostToolUse hook
+//   node .claude/skills/zesty/scripts/zesty-sync.mjs init            re-baseline from the instance (drops pending changes)
+//   node .claude/skills/zesty/scripts/zesty-sync.mjs hook            scan, as a Claude Code PostToolUse hook
 //   --dry-run on push/scan reports without writing.
 
 import {
@@ -37,10 +37,17 @@ import {
   mkdirSync
 } from "node:fs";
 import { join, relative, resolve, extname, dirname, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 
-const ROOT = new URL("..", import.meta.url).pathname.replace(/^\/([a-zA-Z]:)/, "$1");
+const ROOT = (() => {
+  // The scripts live in .claude/skills/zesty/scripts/; the repo root is the
+  // nearest ancestor holding webengine/.
+  let dir = dirname(fileURLToPath(import.meta.url));
+  while (!existsSync(join(dir, "webengine")) && dirname(dir) !== dir) dir = dirname(dir);
+  return dir;
+})();
 const WEBENGINE = join(ROOT, "webengine");
 const CONFIG_PATH = join(ROOT, "zesty.config.json");
 const SETTINGS_PATH = join(ROOT, ".vscode", "settings.json");
@@ -201,7 +208,7 @@ async function syncFile(absPath, ctx, { scanMode }) {
       return out("skipped", "block/model views come from Zesty: create the model, then sync down");
     }
     // Creating adds a public endpoint, so it is never a side effect of a scan.
-    if (scanMode) return out("new", `not on the instance; create it with: node tools/zesty-sync.mjs push ${relative(ROOT, absPath)}`);
+    if (scanMode) return out("new", `not on the instance; create it with: node .claude/skills/zesty/scripts/zesty-sync.mjs push ${relative(ROOT, absPath)}`);
   }
 
   const code = readFileSync(absPath, "utf8");
@@ -465,8 +472,8 @@ async function main() {
       const lines = guard
         ? [
             `${guard} files under webengine/ changed at once (e.g. ${sample.join(", ")}); nothing pushed. ` +
-              `If they should go to the instance: node tools/zesty-sync.mjs scan --allow-many. ` +
-              `To drop them: node tools/zesty-sync.mjs init.`
+              `If they should go to the instance: node .claude/skills/zesty/scripts/zesty-sync.mjs scan --allow-many. ` +
+              `To drop them: node .claude/skills/zesty/scripts/zesty-sync.mjs init.`
           ]
         : summarise(results);
       if (fresh && CMD === "scan") lines.unshift("(first run: baselined from the instance)");

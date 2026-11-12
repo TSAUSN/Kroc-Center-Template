@@ -1,11 +1,16 @@
 (**
   Course detail — [courses] pageset · Category > Program > Course > Class
-  The crumb trail is two levels up, so it resolves through one FIND_IN_SET loop
-  over [programs]: the loop's toJson() carries the parent Program's own fields
-  AND its resolved `categories` parent, which is enough for both crumbs plus the
-  program zuid the "Other courses" sidebar needs. Classes and sibling courses
-  are fetched client-side from the same two endpoints the Program page uses.
+  Traction Rec data, inlined at render time by this item's tractionrec_id (no
+  request): the course's own row — name and description — and its classes
+  (/tractionrec/courses/<id>/classes.json). Sibling courses and the crumb
+  trail are fetched by CourseDetail / CatalogCrumbs from the program's files.
+  The Zesty `description` and `programs` fields are no longer read. Zesty
+  supplies the hero image and subtitle; course_name is only a fallback for an
+  item with no Traction Rec row.
 **)
+<script type="application/json" id="kroc-tr-self">{{ include /tractionrec/courses/{this.tractionrec_id}.json }}</script>
+<script type="application/json" id="kroc-tr-children">{{ include /tractionrec/courses/{this.tractionrec_id}/classes.json }}</script>
+
 <section class="mx-4 mt-4" id="kroc-course-crumbs"></section>
 
 <section class="mx-4 mt-3" id="kroc-course-hero"></section>
@@ -14,38 +19,17 @@
 
 <script type="text/babel" data-presets="react">
 (() => {
+  const self = krocTrInline("kroc-tr-self");
   const data = {
-    zuid: "{{this.zuid}}",
-    title: "{{!this.course_name}}".trim(),
+    title: krocTrText(self && self.Name) || "{{!this.course_name}}".trim(),
     subtitle: "{{!this.hero_subtitle.escapeForJs()}}".trim(),
     heroDesktop: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
-    description: "{{!this.description.escapeForJs()}}".trim()
+    self: self,
+    classRows: krocTrInline("kroc-tr-children")
   };
 
-  const parents = [
-    {{each programs as p where FIND_IN_SET(p.zuid, '{this.programs}')}}
-    { item: {{p.toJson()}}, url: "{{p.getUrl()}}" }
-    {{p._arraycomma}}
-    {{end-each}}
-  ];
-
-  const parent = parents[0] || {};
-  const program = parent.item || {};
-  const category = krocFirstOf(program.categories);
-
-  data.programZuid = krocZuid(program);
-
-  const categoryUrl =
-    (category && category.meta && category.meta.web && category.meta.web.uri) || "";
-  const crumbs = [
-    { label: "Programs & Classes", url: "/categories/" },
-    { label: category ? String(category.category_name || "").trim() : "", url: categoryUrl },
-    { label: String(program.program_name || "").trim(), url: parent.url || "" },
-    { label: data.title }
-  ].filter((c) => c.label);
-
   ReactDOM.createRoot(document.getElementById("kroc-course-crumbs")).render(
-    <Breadcrumbs items={crumbs} />
+    <CatalogCrumbs kind="course" self={self} title={data.title} />
   );
 
   ReactDOM.createRoot(document.getElementById("kroc-course-hero")).render(

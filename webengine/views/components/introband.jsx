@@ -18,6 +18,13 @@
 // pairs it with 44/36 padding and a heading that steps 34px -> 22px on mobile,
 // where the colour bands are a separate and roomier design; those bands are
 // left exactly as they were, since they are already placed on live pages.
+//
+// `alignment = center` centres the colour band's copy and CTA row, for the
+// centred no-CTA "Open Positions" band on 6.20 Careers (ticket 2458, which is
+// why [careers_positions_band] is a variant here, not a model). Empty or
+// anything else stays left, so the bands already placed don't move. Same
+// field and values as [hero]. The white card and the photo split ignore it:
+// no design centres them.
 function IntroBand(props) {
   const d = props.data || {};
   const layout = String(d.layout_variant || "").toLowerCase();
@@ -31,9 +38,13 @@ function IntroBand(props) {
     .replace(/[\s_]+/g, "-");
 
   const hasCtas = !!(d.primary_cta_label || d.secondary_cta_label);
+  const centred =
+    String(d.alignment || "")
+      .trim()
+      .toLowerCase() === "center";
 
   const ctas = (light) => (
-    <div className="flex flex-wrap gap-3">
+    <div className={cx("flex flex-wrap gap-3", light && centred && "justify-center")}>
       {d.primary_cta_label && (
         <a
           href={d.primary_cta_url || "#"}
@@ -126,7 +137,7 @@ function IntroBand(props) {
   const bandBg = bg === "navy" ? "bg-secondary" : "bg-primary";
   return (
     <div className={cx("rounded-card px-7 py-9 text-content-ondark lg:px-14 lg:py-12", bandBg)}>
-      <div className="max-w-[720px]">
+      <div className={cx("max-w-[720px]", centred && "mx-auto text-center")}>
         {d.eyebrow && (
           <div className="mb-3 text-[12px] font-medium uppercase tracking-[0.14em] text-[rgba(255,255,255,0.72)]">
             {d.eyebrow}

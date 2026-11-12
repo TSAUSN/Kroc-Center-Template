@@ -5,30 +5,38 @@ description: Working on the KROC Zesty.io instance from this repo — syncing we
 
 # Zesty workflow (KROC)
 
-Everything here runs from the **Kroc-Center-Template** root through `tools/zesty-*.mjs`, which share one setup (`tools/zesty-api.mjs`): the instance ZUID from `zesty.config.json` and the VS Code extension's developer token in `.vscode/settings.json` (`zesty.editor.token`), or `$ZESTY_TOKEN`. Both files are gitignored — never print, log or commit the token.
+The skill's scripts live in [scripts/](scripts/) and always run **from the Kroc-Center-Template root** (they find it themselves, so the working directory only matters for relative file arguments):
 
-## Tools
+```bash
+Z=.claude/skills/zesty/scripts      # shorthand used below
+node $Z/zesty-sync.mjs status
+```
 
-| Tool | Commands | What it's for |
+They share one setup (`scripts/zesty-api.mjs`): the instance ZUID from `zesty.config.json` and the VS Code extension's developer token in `.vscode/settings.json` (`zesty.editor.token`), or `$ZESTY_TOKEN`. Both files are gitignored — never print, log or commit the token. **First time on a machine (or the hook isn't firing): [reference/setup.md](reference/setup.md).**
+
+## Scripts
+
+| Script | Commands | What it's for |
 |---|---|---|
-| `tools/zesty-sync.mjs` | `status` · `pull` · `push <file…>` · `scan` · `init` · `hook` | webengine/ ↔ instance. A PostToolUse hook runs `hook` after every Edit/Write/Bash and pushes changed files. |
-| `tools/zesty-model.mjs` | `list` · `show <model>` · `create <spec.json>` · `add-fields <model> <spec.json>` · `update-field <model> <field> <patch.json>` | Models + fields from a JSON spec. |
-| `tools/zesty-variant.mjs` | `list <model>` · `show <model> <variant>` · `create <variant.json>` · `update <model> <variant> <patch.json>` | Block variants (content items). |
-| `tools/zesty-media.mjs` | `list` · `upload <file…>` | Media library; prints the `3-…` ZUIDs variants take. |
-| `scripts/ssr-check.cjs` (this skill) | `<Component> <file.jsx> <cases.json> [--html]` | Server-render a component per case + check its classes are compiled. |
+| `zesty-sync.mjs` | `status` · `pull` · `push <file…>` · `scan` · `init` · `hook` | webengine/ ↔ instance. The PostToolUse hook runs `hook` after every Edit/Write/Bash and pushes changed files. |
+| `zesty-model.mjs` | `list` · `show <model>` · `create <spec.json>` · `add-fields <model> <spec.json>` · `update-field <model> <field> <patch.json>` | Models + fields from a JSON spec. |
+| `zesty-variant.mjs` | `list <model>` · `show <model> <variant>` · `create <variant.json>` · `update <model> <variant> <patch.json>` | Block variants (content items). |
+| `zesty-media.mjs` | `list` · `upload <file…>` | Media library; prints the `3-…` ZUIDs variants take. |
+| `ssr-check.cjs` | `<Component> <file.jsx> <cases.json> [--html]` | Server-render a component per case + check its classes are compiled. |
+| `zesty-api.mjs` | — | Shared setup imported by model/variant/media. |
 
 Every write command takes `--dry-run`. **Always dry-run first**, read the output, then run for real.
 
 ## Rules that are not optional
 
-1. **Every API write is followed by `node tools/zesty-sync.mjs pull`** so files the change generated land locally. The model/variant tools do it themselves; anything else (curl, one-off scripts) must run it by hand.
-2. **Scans never create files.** A new component needs an explicit `node tools/zesty-sync.mjs push webengine/views/components/<name>.jsx`. Push it **before** adding it to `loader` — the hook pushes the loader immediately, and a loader pointing at a missing script breaks the dev site.
+1. **Every API write is followed by `node $Z/zesty-sync.mjs pull`** so files the change generated land locally. The model/variant tools do it themselves; anything else (curl, one-off scripts) must run it by hand.
+2. **Scans never create files.** A new component needs an explicit `node $Z/zesty-sync.mjs push webengine/views/components/<name>.jsx`. Push it **before** adding it to `loader` — the hook pushes the loader immediately, and a loader pointing at a missing script breaks the dev site.
 3. **Block views (`views/-/block/<name>.html`) only come from creating the model.** Never create one locally.
 4. **Never delete or rename on the instance** with these tools (models, fields, options, sub-fields, views, media). That stays a Manager action; ask the user.
 5. **Spec only fields someone asked for** — trace each to the design, a Figma comment, a ticket or a meeting note, not to a standard that merely lists it.
 6. **Prefer generalising**: before a new model, check whether an existing one (or a variant of it) covers the design. A variant is a content item sharing the model's schema; design differences should be driven by which fields are filled (presence-driven), not by new models or style switches.
 7. **Repeaters can't hold relations (One-to-One/Many, Internal Link) or another repeater.** Flatten (e.g. Multi Line Text, one item per line).
-8. The auto-mode classifier blocks editing `.claude/settings*.json` and some destructive API calls — don't work around it; tell the user what to do.
+8. The auto-mode classifier blocks editing `.claude/settings*.json` and some destructive API calls — don't work around it; tell the user what to do (the hook setup in [reference/setup.md](reference/setup.md) is a paste for the user, not an edit for Claude).
 
 ## Workflows
 
@@ -39,6 +47,7 @@ Every write command takes `--dry-run`. **Always dry-run first**, read the output
 
 ## Reference (read when needed)
 
+- [reference/setup.md](reference/setup.md) — one-time setup: instance config + token, gitignore entries, **the auto-sync hook**, test modules, and how to check it all works.
 - [reference/api-facts.md](reference/api-facts.md) — Zesty API behaviour learned the hard way: payload shapes, stored value formats, the unlisting trap, og_image/screenshots, media upload, preview URLs.
 - [reference/component-conventions.md](reference/component-conventions.md) — how KROC block views + components are written (Parsley-in-JSX, repeaters, media, contrast, desktop vs mobile).
 - [reference/docs-and-tracker.md](reference/docs-and-tracker.md) — which docs and tracker fields to update when a block ships.
@@ -46,4 +55,4 @@ Every write command takes `--dry-run`. **Always dry-run first**, read the output
 
 ## Keeping this skill current
 
-This skill is the workflow's memory. When a run teaches something new — an API quirk, a convention the user corrects, a step that was missing — **update the relevant file here in the same session**, and keep `AGENTS.md` (repo-wide facts) consistent with it. Keep SKILL.md short; put detail in `reference/` or `workflows/`.
+This skill is the workflow's memory. When a run teaches something new — an API quirk, a convention the user corrects, a step that was missing — **update the relevant file here in the same session**, and keep `AGENTS.md` (repo-wide facts) consistent with it. Keep SKILL.md short; put detail in `reference/` or `workflows/`. Script changes go in `scripts/` — keep each script's usage comment and the table above in step.

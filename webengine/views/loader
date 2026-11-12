@@ -31,8 +31,14 @@
 <script type="text/babel" data-presets="react" src="/components/alltags.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/tagdetail.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/catalog.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/catalogdata.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/catalogcards.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/catalogsections.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/catalogdetail.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/classfinder.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/featuredpages.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/featuredvolunteers.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/membershipdata.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/membershipbenefits.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/membershiptiers.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/membershipfamilyplay.jsx"></script>
@@ -46,6 +52,9 @@
 <script type="text/babel" data-presets="react" src="/components/churchministries.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/churchkids.jsx"></script>
 <script type="text/babel" data-presets="react" src="/components/cardgrid.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/careersbenefits.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/careersjobs.jsx"></script>
+<script type="text/babel" data-presets="react" src="/components/careersapply.jsx"></script>
 
 
 <script type="text/babel" data-presets="react">

@@ -261,8 +261,8 @@ function PassCard(props) {
         <div className="mb-1 mt-1.5 text-[64px] leading-none text-secondary">{c.price}</div>
       )}
       {c.ages && <div className="mb-6 text-[14px] text-content-muted">{c.ages}</div>}
-      {c.ctaLabel && (
-        <a href={c.ctaUrl || "#"} className="btn btn-primary btn-lg mt-auto">
+      {c.ctaLabel && c.ctaUrl && (
+        <a href={c.ctaUrl} className="btn btn-primary btn-lg mt-auto">
           {c.ctaLabel}
         </a>
       )}

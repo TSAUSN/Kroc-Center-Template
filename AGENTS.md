@@ -87,7 +87,7 @@ standalone entirely without changing the authoring model.
   regenerated `components/styles.html` along with the code change. Tailwind
   purges: a class not present in a scanned file has no CSS. (Scan globs:
   `webengine/views/**/*` and `webengine/scripts` — see `src/tailwind.css`.)
-- **Syncing with the instance** (`tools/zesty-*.mjs`, 2026-10-05). The VS Code
+- **Syncing with the instance** (`.claude/skills/zesty/scripts/zesty-*.mjs`, 2026-10-05; setup in that skill). The VS Code
   extension uploads only on an editor save, so files written by scripts, git
   or an agent never reached the instance. `zesty-sync.mjs` closes that: a
   Claude Code PostToolUse hook runs it after every edit and command, pushing
@@ -95,7 +95,7 @@ standalone entirely without changing the authoring model.
   agreed content (`.zesty-sync.json`). A file changed on both sides is a
   conflict and isn't pushed; >15 files at once (a branch switch) pushes
   nothing; gitignored paths are skipped. **A scan never creates a file** —
-  a new component needs `node tools/zesty-sync.mjs push <file>`, and block
+  a new component needs `node .claude/skills/zesty/scripts/zesty-sync.mjs push <file>`, and block
   views only come from creating the model. `pull` brings instance changes
   down without overwriting an unpushed edit. **Every API write must be
   followed by a pull**; the model and variant tools do it themselves.
@@ -305,13 +305,15 @@ view, alongside `{{ this.autolayout(auto) }}`. Components own their data
 src/tailwind.css          Tailwind v4 token source (see README for the 3-tier system)
 tools/inline-css.mjs      inlines compiled CSS into components/styles.html
 tools/format-views.mjs    Parsley-safe formatter (npm run format — see §2)
-tools/zesty-sync.mjs      webengine/ ↔ instance: status | pull | push | scan (see below)
-tools/zesty-model.mjs     models + fields from a JSON spec: list | show | create | add-fields | update-field
-tools/zesty-variant.mjs   block variants (content items): list | show | create | update
-tools/zesty-media.mjs     media library: list | upload (prints the 3-… ZUIDs variants take)
-.claude/skills/zesty/     the Zesty workflow as a Claude Code skill: tools, rules, new-block
-                          procedure, API facts, conventions, ssr-check.cjs — keep it current
-tools/zesty-api.mjs       shared setup for the two above (token, model lookups, pull)
+.claude/skills/zesty/     the Zesty workflow as a Claude Code skill — rules, setup (hook),
+                          new-block procedure, API facts, conventions — and its scripts;
+                          keep it current. Run scripts from the repo root:
+  scripts/zesty-sync.mjs    webengine/ ↔ instance: status | pull | push | scan | hook
+  scripts/zesty-model.mjs   models + fields from a JSON spec: list | show | create | add-fields | update-field
+  scripts/zesty-variant.mjs block variants (content items): list | show | create | update
+  scripts/zesty-media.mjs   media library: list | upload (prints the 3-… ZUIDs variants take)
+  scripts/zesty-api.mjs     shared setup for model/variant/media (token, model lookups, pull)
+  scripts/ssr-check.cjs     server-render a component per case + check its classes compiled
 webengine/
   views/
     loader                app shell (see §1)
@@ -356,7 +358,8 @@ webengine/
                           open|closed_seasonal|closed_maintenance; hours table or
                           closure notice
       introband.jsx       IntroBand — photo-right (white split card) | no-photo
-                          (red/navy band)
+                          (red/navy band, `alignment` left|center) | white
+                          card. Variants include "Careers Open Positions"
       cards.jsx           shared cards: StoryCard (+ krocFormatDate), OppCard,
                           TierCard (membership/rate row — name + note left,
                           price + period right; items-center per quick-win A1),
@@ -373,14 +376,20 @@ webengine/
       membershipbenefits.jsx MembershipBenefitsBand — navy band + 2 CTAs +
                           CheckList column (block: membership_benefits_band).
                           Background is NOT a field — see the header comment
+      membershipdata.jsx  Traction Rec memberships for the two blocks below:
+                          krocTrMembershipIndex (the inlined
+                          membership_types.json by Id), krocTrMembershipPrice
+                          (which hop holds the price), krocTrMembershipAges
+                          (incl. family household rules), krocTrMembershipName
       membershiptiers.jsx MembershipTiers — 3-up TierCard grid + section head +
-                          fine print (block: membership_tiers). Prices via
-                          krocMoney from catalog.jsx
+                          fine print (block: membership_tiers). Rows with a
+                          tractionrec_id read Traction Rec; prices via krocMoney
       daypassintro.jsx    DayPassIntroBand — green band + WYSIWYG body via
                           .kroc-prose repainted on-dark (block:
                           day_pass_intro_band)
       daypasspasses.jsx   DayPassPasses — 2-up PassCard grid, max 960 (block:
-                          day_pass_passes)
+                          day_pass_passes). Rows with a tractionrec_id read
+                          Traction Rec
       aboutvision.jsx     AboutVision — 5fr/7fr photo-LEFT card + red CheckList
                           (block: about_vision)
       aboutjoankrocstory.jsx AboutJoanKrocStory — photo band under a fixed
@@ -419,6 +428,35 @@ webengine/
                           pills). Columns follow the card count. Owns
                           useKrocMediaUrls, the two-pass repeater media
                           resolver (custom-endpoints/media.json)
+      careersbenefits.jsx CareersBenefits — "Our Benefits" white card: heading +
+                          green 2-column CheckList + optional YouTube
+                          testimonial framed like about_joan_kroc_story's
+                          (block: careers_benefits; reuses krocYouTubeId)
+      careersjobs.jsx     CareersJobs — one white card per department: optional
+                          Media icon centred above the name, location, role
+                          links parsed from "Title | link" lines (block:
+                          careers_jobs; krocParseRoles; reuses useKrocMediaUrls)
+      careersapply.jsx    CareersApply — How to Apply card (heading + WYSIWYG)
+                          (7fr) + red Text to Apply card (5fr) in ONE grid
+                          (block: careers_apply; absorbed careers_text_apply).
+                          Owns KrocSmsCard, which [hours_alerts] can reuse
+      catalog.jsx         Catalog CORE, loaded first of the catalog files: shared
+                          formatting (dates, money, days, times, krocExternalUrl,
+                          krocMoney, krocPick, krocZuid, krocIconFor — other
+                          blocks call these by name, so they stay here),
+                          CatalogIcon, CatalogHero, Breadcrumbs. Split 2026-10-05
+      catalogdata.jsx     Traction Rec data layer for the catalog pages: reads
+                          /tractionrec/ files (krocTrGet, cached per path), the
+                          inline rows a page view includes (krocTrInline),
+                          row -> card adapters (krocTr*ToCard), availability
+                          rules, CatalogCrumbs (parents from TR ids),
+                          KROC_HIDDEN_CLASS_PAGES + krocTrClassGate (below)
+      catalogcards.jsx    ProgramCard, ClassCard, ClassList (one band per day
+                          combination, e.g. "Monday & Wednesday"), CourseRow
+      catalogsections.jsx Category / Program / Course listings — complete row
+                          set inlined by the page, client-side search + paging
+      catalogdetail.jsx   CourseDetail, ClassDetail, ClassGate
+      classfinder.jsx     the /categories-page/ finder: joins the four tier files
       membershipfamilyplay.jsx MembershipFamilyPlay + ComparisonTable — white
                           card: checklist + 3-col Standard-vs-Family-Play table
                           + serif accent line + centred CTA (block:
@@ -457,7 +495,7 @@ webengine/
 `featured_pages`, `featured_volunteer_opportunities`, `membership_benefits_band`,
 `membership_tiers`, `membership_family_play_comparison`, `day_pass_intro_band`, `day_pass_passes`, `about_vision`,
 `about_joan_kroc_story`, `about_impact`, `hero`, `church_connect_links`,
-`church_ministries`, `church_kids`, `card_grid`.
+`church_ministries`, `church_kids`, `card_grid`, `careers_benefits`, `careers_jobs`, `careers_apply`.
 `[featured_volunteer_opportunities]` (block fields assumed:
 `block_name`, `block_title`, `view_all_link`, `display_mode`, one-to-many
 `featured_opportunities` → `[volunteer_opportunities]`; confirm the built
@@ -487,10 +525,9 @@ in the Code App.
 per-tier CTA and no `Highlighted?` — v5 §21 `[rate_cards]` modelled both, but
 Figma `Card · Membership` 424:531 is documented as having no button and no
 eyebrow. No Display Mode (the Comparison Table half is `[membership_family_play]`)
-and no Columns field (nothing asks for one; 3-up is hardcoded). Prices are
-authored, not read from TR — TR does model them (`Membership_Type__c` →
-`Product__c` → Price Level, `Total_Billing_Schedule_Amount__c`) but the proxy
-service does not exist yet.
+and no Columns field (nothing asks for one; 3-up is hardcoded). **Prices come
+from Traction Rec since 2026-10-08** — see "Membership blocks read Traction Rec"
+below; `tiers.tractionrec_id` was added then.
 `[membership_family_play_comparison]` as built 2026-09-14 (blocks-doc §3.1,
 where the model is called `[membership_family_play]` — **the Zesty ref ID is the
 longer one**): `block_name`, `eyebrow`, `title`*, `body` (WYSIWYG),
@@ -519,7 +556,9 @@ block needs the same care; navy ones have 11.59:1 of headroom.
 `[day_pass_passes]` as built 2026-09-17 (blocks-doc §3.2, catalog name
 `[daypass_passes]` — **Zesty ref ID is `day_pass_passes`**): `block_name` +
 `passes` repeater {`audience`, `label`, `price` (Currency), `ages`,
-`cta_label`, `cta_url`, `sort_order`}. Two fields only — no heading, the design
+`cta_label`, `cta_link`, `sort_order`, `tractionrec_id` (2026-10-08)}. ⚠ The
+sub-field is `cta_link`; the component read `cta_url` until 2026-10-08, so every
+pass button linked to `#` before then. Two fields only — no heading, the design
 runs straight from the green band into the cards. Audience and Label are split
 because the card renders them at different weights ("**Youth** Day Pass"). CTA
 is per-row so Youth/Adult can point at different purchase flows. Grid is 2-up
@@ -697,7 +736,7 @@ it is Multi Line Text, so it can carry quotes and newlines. ⚠ **Repeater
 sub-field IDs are unverified** — the model has no content item yet.
 
 `[church_kids]` as built 2026-10-05 (blocks-doc §3.5, ticket 2454; model
-`6-88aff6e990-2b59gd`, the first created with `tools/zesty-model.mjs`, so it
+`6-88aff6e990-2b59gd`, the first created with `zesty-model.mjs`, so it
 has no auto `og_image` field — the Manager adds that, the API doesn't):
 `eyebrow`, `heading`, `body` (Multi Line Text), `cta_label`, `cta_link`
 (External URL), `troops_heading`, `troops` repeater {`label`},
@@ -742,6 +781,67 @@ ZUIDs, resolved client-side by `useKrocMediaUrls` → `custom-endpoints/media.js
 uploaded — colour comes from the file. The three design icons were uploaded from
 the `icons.html` sprite, stroked #EF3E42: `kroc-icon-heart.svg`
 3-161f2cfb-w5mf29, `-users` 3-161f2cfd-7zfj57, `-star` 3-161f2cfc-llf6b5.
+
+`[careers_benefits]` as built 2026-10-07 (blocks-doc §3.6, ticket 2457; model
+`6-beb0bf9a9e-gj5vqr`, variant "Careers Benefits" `7-8ae7f29996-cr43f5`):
+`heading`, `checklist_items` repeater {`item`}, `video_url` (External URL).
+**Its own block, not an `[about_vision]` variant** (Japheth 2026-10-07), so the
+catalog's Columns and Check Colour are not fields: green and two columns are
+this card's design (`CheckList columns={2}` is one column below `sm`, which is
+the mobile design). **`video_url` is the employee-testimonial request** — morgan
+2026-07-24 (💬1857887156) "videos of employee testimonials … from youtube",
+source settled by Erin as YouTube for video with audio (T10, ticket 2493). No
+design places it, so it sits under the checklist inside the card, framed exactly
+like `[about_joan_kroc_story]`'s (16:9, max 820px, centred) and parsed by its
+`krocYouTubeId`, so any YouTube link shape works and a non-YouTube URL renders
+no frame. One video, per Japheth. No Sort Order (nobody asked).
+
+`[careers_positions_band]` → **variant "Careers Open Positions" of
+`[intro_band]`** (2026-10-07, ticket 2458; `7-a2bbab91a0-4xtq2s`), not a model:
+the centred navy band with title + body and no CTA is intro_band's colour band
+in every respect but alignment. So `[intro_band]` gained **`alignment`**
+(Dropdown `left` | `center`, same field + values as `[hero]`): `center` centres
+the colour band's copy and CTA row; empty stays left, so the bands already
+placed don't move; the white card and photo split ignore it. The catalog's
+Background (X4) is the existing `background_color`. ⚠ **The B5/T16 icon answer
+("centered above the title") belongs to the Job Listings cards
+(`[careers_jobs]`), not the Values cards** — the 2026-09-03 digest and ticket
+2499 filed it under "value cards", but Erin's B5 pin (💬1871731526) sits on Job
+Listings and T16 answers our B5 follow-up. The Values cards' band face comes
+from C2 (icon or photo) and stands.
+
+`[careers_jobs]` as built 2026-10-07 (blocks-doc §3.6, ticket 2459; model
+`6-86a5c2eeb5-lplp0x`, variant "Careers Job Listings" `7-c687b5fec0-km9jrg`):
+`departments` repeater {`department`, `location`, `icon` (Media), `roles`
+(Multi Line Text)}. **The ticket's Roles repeater would nest inside
+Departments**, so the department stays the row (icon + location belong to it)
+and Roles is one role per line as `Title | link` — split on the LAST `|` (a
+title may contain one), link through `krocExternalUrl`, a line without a link
+renders as plain text. **Icon is B5** (Erin, 💬1871731526: "one card being
+Aquatic positions, one card Fitness positions"), placed "centered above the
+title" per T16 — undesigned, so taken literally: 44/48px, centred, rest of the
+card left-aligned; the slot keeps its size while `useKrocMediaUrls` resolves
+it. Role links render red-300 (design red fails AA at 15px). Columns follow the
+department count like `[card_grid]`. The variant's roles have no links yet —
+the design has none; add `| <posting URL>` per line.
+
+`[careers_apply]` as built 2026-10-09 (blocks-doc §3.6, ticket 2460; model
+`6-8099c2c6b3-n1qdsq`, variant "Careers How to Apply" `7-fc9cf48cec-s23ppg`):
+`heading`, `body` (WYSIWYG), `text_apply_eyebrow`, `text_apply_keyword`,
+`text_apply_shortcode`. **One block for what the catalog filed as two** —
+`[careers_text_apply]` (ticket 2461) was merged in on the `[church_ministries]`
+precedent: desktop draws both cards in ONE `7fr 5fr` row, mobile stacks them,
+and two placed blocks could express neither. Fields carry their half
+(`text_apply_*`). **The red half is presence-driven**: keyword or shortcode
+opens the grid (an eyebrow alone doesn't); either half alone runs full width;
+an emptied WYSIWYG (`<p>&nbsp;</p>`) counts as empty. No Background field (red
+on both surfaces, nobody asked). The red card is **`KrocSmsCard`**, a separate
+component, because Hours draws the same card beside its hours card
+(`[hours_alerts]`, blocks-doc F3) — that block should reuse it and add its
+heading + CTA. ⚠ **Two contrast deviations:** the card is red-300 #C5000E, not
+`--kroc-red` (3.86:1 fails at 11–15px), and the eyebrow / "to …" line are 90%
+white, not the design's 80% (~4.25:1 on red-300, fails at 11px; 90% ≈ 5.15:1).
+Body goes through `.kroc-prose`, resized to the design's 13 / 14.5px.
 
 **Still placeholder:** `external_embed`, `featured_classes`, `custom_forms`,
 `custom_navigation`. **Models not yet created** (v3): `featured_events`,
@@ -818,6 +918,101 @@ The 4 blocks that are still empty scaffolds (`custom_forms`,
 `custom_navigation`, `external_embed`, `featured_classes`) return the
 "Template File is empty" alert and have no variant.
 
+End-to-end overview of both (tiers, files, models, how pages and blocks read
+them): `../kroc-tractionrec-sync/docs/tractionrec-in-zesty.md`.
+
+**Catalog pages read Traction Rec, not Zesty** (2026-10-05). `categories`,
+`programs`, `courses`, `classes` and `categories_page` inline their own row and
+children at render time —
+`<script type="application/json" id="kroc-tr-self">` holding
+`{{ include /tractionrec/<tier>/{this.tractionrec_id}.json }}` (and
+`…/<id>/<childTier>.json`) — and read them with `krocTrInline`. Rules:
+
+- **Any Zesty field that mirrors Traction Rec is ignored** (Japheth): names,
+  course `description`, all 12 class schedule/price/capacity fields, and the
+  relational `categories`/`programs`/`courses` fields. The Zesty title is only
+  a fallback for an item with no Traction Rec row.
+- Zesty still supplies what TR has no source for, from the page's **own**
+  item only: hero image, icon, subtitle, intro copy, class type, location,
+  tags. Child cards are TR-only (those Zesty values are all seed-template
+  placeholders today).
+- Card links use `meta.zestyPath`, which the sync writes; parents (crumbs) come
+  from TR ids via `CatalogCrumbs`, drawn per the designs: desktop is a trail
+  ("Programs" root on category + program pages only; course + class pages
+  start at their category), mobile is one back link to the parent
+  ("‹ All Programs" / "‹ Return to <parent>"). The root's URL is read with
+  `each categories_page as cp` → `cp.getUrl()`; a direct
+  `categories_page.getUrl()` renders empty.
+- Spot counts show whenever TR allows (`Show_Capacity_Online__c`) and they mean
+  something: "N spots remaining", else Open / Waitlist open / Full.
+- The old endpoints `custom-endpoints/{categories,programs,courses,classes,
+  class-finder,catalog-parents}.json` have no callers since this change.
+- **Hidden class pages** (2026-10-09, 10-02 working group decision): the
+  course field **`hide_class_pages`** (Yes/No, not required, so the sync never
+  seeds it) keeps visitors on the course page. `catalogdata.jsx` builds
+  `KROC_HIDDEN_CLASS_PAGES` (TR course Id -> course URL) with one Parsley loop,
+  `each courses as c where c.hide_class_pages = 1` (verified: a `where` on a
+  yes_no field filters correctly). `krocTrClassGate(row)` matches a class row's
+  TR course Id against it: the `classes` view then renders `ClassGate` (holding
+  card, siblings hidden, `noindex`, `location.replace` to the course) instead of
+  `ClassDetail`, and `krocTrClassToCard` points the card's `url` at the course.
+  On the course, not the class, because classes are re-created every season;
+  matched by TR Id, not the class's `courses` relational field, which is due to
+  go. Components are served `no-cache` and the file's cache tags include the
+  courses model, so a saved toggle shows on the next request — no sync run.
+  Test course: Learn-To-Swim Level 2 (`7-c2d0b38fd0-rddgsb`) has it on.
+
+**Membership blocks read Traction Rec** (2026-10-08). The sync publishes
+memberships as **files only** — no Zesty model, no items:
+`/tractionrec/membership_types.json` (24 types sold online) and
+`membership_categories/<id>/membership_types.json`. `[membership_tiers]` and
+`[day_pass_passes]` inline the whole tier file next to the mount
+(`kroc-tr-memberships-<zuid>`, about 58 KB) and read it with
+`krocTrMembershipIndex` (`membershipdata.jsx`). Rules:
+
+- A repeater row opts in with **`tractionrec_id`** (the Membership Type Id,
+  `a2g…`) — one per card, so the editor picks the exact type (Autopay vs
+  Annual vs 1 Month are separate types) and the order (`sort_order`; Traction
+  Rec has none for types).
+- With an id, **price, period and ages come from Traction Rec** and the typed
+  ones are ignored. The name is the one exception: Traction Rec's name minus the
+  payment plan and a trailing "Membership" ("Adult Membership - Autopay" →
+  "Adult"), and a typed `tier_name` / `audience`+`label` **overrides** it — it
+  is wording, so a stale one cannot show a wrong price. The age label
+  (`Age_Range_Name__c`) is deliberately not used: "Summer Teen Membership 2026"
+  carries "Teen".
+- An id that is not in the file (no longer sold online) **hides the card**
+  (console warning). A missing file (instance without the sync) renders every
+  row as typed.
+- Price: Autopay = monthly schedule amount + "/mo"; Annual / 1 Month = one-time
+  schedule amount + period from the term ("/yr", "/mo", " for 3 months"); Day
+  Pass = the price level's initial fee. On memberships the initial fee is the
+  $20 registration fee — `fine_print` still states it in words.
+- **Purchase links never come from a block's link field** (Japheth
+  2026-10-08): `cta_link` (pass rows), `membership_benefits_band.primary_cta_url`
+  and `membership_family_play_comparison.cta_url` are **not read**. The link
+  belongs to Traction Rec, like the catalog's Register (the class's
+  `Deep_Link_URL__c`), but no membership has one — the class link is an
+  org-made formula, and the portal address it is built from
+  (`$Setup.TREX1__App_Config__c`) is not readable by the integration user. Until
+  the org adds a link field, `krocTrMembershipPurchaseUrl` returns the interim
+  site-wide **Globals → `membership_purchase_url`** for all three buttons (no
+  link = no button). The benefits band's secondary button is not a membership
+  link and keeps its own URL.
+- **Fee:** `fine_print` may hold **`{fee}`**, filled with the Traction Rec
+  registration fee of the cards shown (`krocTrFillFee` / `krocTrFeeText`:
+  "$20", or "$20–$55" if they differ); with no fee the sentence holding it is
+  dropped. The variant's text uses it since 2026-10-08.
+- Linked 2026-10-08: "Membership Tiers" (`7-e09de29d81-g5j19d`) holds the six
+  Phoenix Autopay types, "Day Pass Passes" (`7-c48fc1b485-sk9t7x`) the four
+  online day passes (San Diego demo rows replaced; the old versions are in the
+  item history). Globals' `membership_purchase_url` is set to the sandbox
+  portal's `/s/membership` — unconfirmed, the portal redirects to its login.
+  ⚠ Globals is a dataset item, not a variant: don't write it with
+  `zesty-variant.mjs` (it stamps a block og_image and renames the item).
+  There are no Membership / Day Pass pages on the instance yet
+  (`informational_pages` has 0 items).
+
 ---
 
 ## 6. Known gaps / pending
@@ -826,6 +1021,15 @@ The 4 blocks that are still empty scaffolds (`custom_forms`,
   globals (SCHEMA-3) and the `[custom_navigation]` model (SCHEMA-1/2);
   mega-menu content static until `[program_categories]` loop is re-verified
   and `[event_categories]` exists.
+- **Catalog content issues found 2026-10-05 (Manager fixes, not code):**
+  the catalog root item lives at `/categories-page/` (crumbs now read its URL
+  from the item, so they work; the URL itself is still worth renaming); the
+  Basketball program and the hand-made test course "Basketball"
+  (`7-b4d5d7c2fa-s3w9mw`, the sync's course seed template) both claim
+  `/basketball/`, and Zesty serves the course; the `classes` view's
+  `this.autolayout(auto)` prints the item's frozen Zesty field values under the
+  class detail. Six catalog endpoints are now unused (above) — delete in the
+  Manager once confirmed.
 - Footer mission text uses a hardcoded fallback — v3 puts the field on
   `[connect_block]`.
 - `globals.donation_link` referenced by the donation block but not yet in

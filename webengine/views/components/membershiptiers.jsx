@@ -7,12 +7,13 @@
 // block ([membership_family_play]). No Columns field either — nothing asks for
 // one, so 3-up is the layout.
 //
-// Prices are authored here rather than read from TractionRec: TR does model
-// them (Membership_Type -> Product -> Price Level), but the integration needs
-// a proxy service that does not exist yet.
+// A row with a `tractionrec_id` reads its price, period and ages from Traction
+// Rec (membershipdata.jsx) and its typed values are ignored; `tier_name` is an
+// optional override of the name. A row without one renders as typed.
+// `fine_print` may hold "{fee}", filled with Traction Rec's registration fee.
 //
-// Loads after cards.jsx (TierCard), catalog.jsx (krocMoney) and
-// featuredpages.jsx (krocSortRows).
+// Loads after cards.jsx (TierCard), catalog.jsx (krocMoney),
+// featuredpages.jsx (krocSortRows) and membershipdata.jsx.
 function MembershipTiers(props) {
   const d = props.data || {};
 
@@ -21,8 +22,30 @@ function MembershipTiers(props) {
     .flat()
     .filter(Boolean);
 
+  const tr = d.tractionrec || {};
+  // No rows at all means the file is missing (an instance without the sync):
+  // then every row falls back to what was typed.
+  const hasTr = Object.keys(tr).length > 0;
   const cards = krocSortRows(rows)
     .map((r) => {
+      const trId = krocTrText(r.tractionrec_id);
+      if (trId && hasTr) {
+        const t = tr[trId];
+        // Not in the file = no longer sold online. Hide it rather than show a
+        // typed price Traction Rec no longer stands behind.
+        if (!t) {
+          console.warn("KROC: membership " + trId + " is not sold online; card hidden");
+          return null;
+        }
+        const price = krocTrMembershipPrice(t) || {};
+        return {
+          name: krocTrText(r.tier_name) || krocTrMembershipName(t),
+          note: krocTrMembershipAges(t),
+          price: krocMoney(price.amount),
+          period: Number(price.amount) > 0 ? price.period : "",
+          fee: price.fee
+        };
+      }
       // Currency arrives as "126.00" / 126; krocMoney also passes through a
       // hand-typed "$126" and renders a zero-priced tier as Free. A period
       // only reads correctly against an amount — "Free/mo" does not.
@@ -34,11 +57,14 @@ function MembershipTiers(props) {
         period: amount > 0 ? String(r.period || "").trim() || "/mo" : ""
       };
     })
-    .filter((c) => c.name);
+    .filter((c) => c && c.name);
 
   if (!cards.length) {
     return null;
   }
+
+  // "{fee}" in the fine print is Traction Rec's registration fee for these cards.
+  const finePrint = krocTrFillFee(d.finePrint, krocTrFeeText(cards.map((c) => c.fee)));
 
   return (
     <div>
@@ -57,9 +83,9 @@ function MembershipTiers(props) {
           <TierCard key={c.name + i} card={c} />
         ))}
       </div>
-      {d.finePrint && (
+      {finePrint && (
         <p className="mt-4 whitespace-pre-line text-center text-[12.5px] text-content-muted">
-          {d.finePrint}
+          {finePrint}
         </p>
       )}
     </div>

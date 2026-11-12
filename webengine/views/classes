@@ -1,28 +1,22 @@
 (**
-  Class detail — [classes] pageset · the dated leaf (TR "Course Session")
-  toJson() hydrates relations one level only ("max hydration depth hit" beyond
-  that), so the crumb trail is assembled in three steps: the class and its
-  Course come from this item, the Program from a loop rooted at [courses], and
-  the Category from /custom-endpoints/catalog-parents.json — that query has to
-  be rooted at [programs] for its category to hydrate at all.
+  Class detail — [classes] pageset · the dated leaf (Traction Rec's Course
+  Session Option)
+  Every schedule, price and availability fact comes from this class's Traction
+  Rec row, inlined at render time by its tractionrec_id (no request). The Zesty
+  fields that mirror it (class_name, dates, day_of_week, time, age_range,
+  instructors, prices, spots_remaining, enrollment_status, deep_link_url,
+  description, courses) are no longer read. Zesty supplies only what Traction
+  Rec has no source for: hero image, class type, location and tags.
+  class_name is a fallback title for an item with no Traction Rec row.
+  A class whose course has hide_class_pages on renders ClassGate instead, which
+  sends the visitor to the course page (krocTrClassGate in catalogdata.jsx).
 **)
+<script type="application/json" id="kroc-tr-self">{{ include /tractionrec/classes/{this.tractionrec_id}.json }}</script>
+
 <section class="mx-4 mb-12 mt-4" id="kroc-class-detail"></section>
 
 <script type="text/babel" data-presets="react">
 (() => {
-  const classRow = {
-    zuid: "{{this.zuid}}",
-    item: {{this.toJson()}},
-    url: "{{this.getUrl()}}"
-  };
-
-  const parents = [
-    {{each courses as c where FIND_IN_SET(c.zuid, '{this.courses}')}}
-    { item: {{c.toJson()}}, url: "{{c.getUrl()}}" }
-    {{c._arraycomma}}
-    {{end-each}}
-  ];
-
   const tagRows = [
     {{each tags as t where FIND_IN_SET(t.zuid, '{this.tags}')}}
     { label: "{{!t.name}}".trim(), url: "{{t.getUrl()}}" }
@@ -30,25 +24,19 @@
     {{end-each}}
   ];
 
-  const parent = parents[0] || {};
-  const course = parent.item || {};
-  const program = krocFirstOf(course.programs);
-
+  const self = krocTrInline("kroc-tr-self");
+  const courseUrl = krocTrClassGate(self);
   const data = {
-    item: krocClassToCard(classRow),
+    self: self,
+    title: "{{!this.class_name}}".trim(),
     heroWide: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
-    courseZuid: krocZuid(course),
-    programZuid: krocZuid(program),
-    course: { label: String(course.course_name || "").trim(), url: parent.url || "" },
-    program: {
-      label: program ? String(program.program_name || "").trim() : "",
-      url: (program && program.meta && program.meta.web && program.meta.web.uri) || ""
-    },
+    kind: krocLabelCase("{{!this.class_type}}"),
+    location: "{{!this.facility_location.escapeForJs()}}".trim(),
     tags: tagRows.filter((t) => t.label)
   };
 
   ReactDOM.createRoot(document.getElementById("kroc-class-detail")).render(
-    <ClassDetail data={data} />
+    courseUrl ? <ClassGate url={courseUrl} /> : <ClassDetail data={data} />
   );
 })();
 </script>

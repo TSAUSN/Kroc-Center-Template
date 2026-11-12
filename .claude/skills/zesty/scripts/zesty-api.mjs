@@ -5,10 +5,17 @@
 // API write ends with.
 
 import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 
-export const ROOT = new URL("..", import.meta.url).pathname.replace(/^\/([a-zA-Z]:)/, "$1");
+export const ROOT = (() => {
+  // The scripts live in .claude/skills/zesty/scripts/; the repo root is the
+  // nearest ancestor holding webengine/.
+  let dir = dirname(fileURLToPath(import.meta.url));
+  while (!existsSync(join(dir, "webengine")) && dirname(dir) !== dir) dir = dirname(dir);
+  return dir;
+})();
 const CONFIG_PATH = join(ROOT, "zesty.config.json");
 const SETTINGS_PATH = join(ROOT, ".vscode", "settings.json");
 
@@ -84,13 +91,13 @@ export function readJson(path) {
 export function pullToLocal() {
   console.log("Pulling instance changes to local (zesty-sync pull):");
   try {
-    const out = execFileSync("node", [join(ROOT, "tools", "zesty-sync.mjs"), "pull"], {
+    const out = execFileSync("node", [join(dirname(fileURLToPath(import.meta.url)), "zesty-sync.mjs"), "pull"], {
       cwd: ROOT,
       encoding: "utf8"
     });
     console.log(out.trim().replace(/^/gm, "  "));
   } catch (e) {
-    console.log(`  pull failed: ${(e.stderr || e.message).trim()}\n  run: node tools/zesty-sync.mjs pull`);
+    console.log(`  pull failed: ${(e.stderr || e.message).trim()}\n  run: node .claude/skills/zesty/scripts/zesty-sync.mjs pull`);
   }
 }
 

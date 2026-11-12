@@ -12,7 +12,9 @@
     bodyHtml: { __html: item.body || "" },
     columns: "{{!this.checklist_columns}}".trim(),
     primaryCtaLabel: item.primary_cta_label,
-    primaryCtaUrl: item.primary_cta_url,
+    // The primary button is the membership purchase: primary_cta_url is not
+    // read. Traction Rec has no link yet, so Globals' interim one is used.
+    primaryCtaUrl: krocTrMembershipPurchaseUrl(null, "{{!globals.membership_purchase_url}}"),
     secondaryCtaLabel: item.secondary_cta_label,
     secondaryCtaUrl: item.secondary_cta_url,
     // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing

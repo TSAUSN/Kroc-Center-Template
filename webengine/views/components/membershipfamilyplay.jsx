@@ -123,9 +123,10 @@ function MembershipFamilyPlay(props) {
       {d.footnote && (
         <p className="mt-5.5 text-center font-serif text-[18px] text-secondary">{d.footnote}</p>
       )}
-      {d.ctaLabel && (
+      {/* the membership purchase: a Traction Rec link or no button */}
+      {d.ctaLabel && d.ctaUrl && (
         <div className="mt-5.5 flex justify-center">
-          <a href={krocExternalUrl(d.ctaUrl) || "#"} className="btn btn-primary">
+          <a href={krocExternalUrl(d.ctaUrl)} className="btn btn-primary">
             {d.ctaLabel}
           </a>
         </div>

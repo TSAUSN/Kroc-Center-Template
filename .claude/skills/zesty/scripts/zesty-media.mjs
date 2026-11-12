@@ -2,14 +2,14 @@
 // Media fields can be filled from the API (zesty-variant.mjs takes the 3-…
 // ZUIDs this prints).
 //
-// Same setup as the other tools (tools/zesty-api.mjs). Uploads go to the
+// Same setup as the other tools (zesty-api.mjs). Uploads go to the
 // instance's first bin, top-level group, through the media-storage service,
 // which registers the file record itself (files under 32MB). A file whose name
 // is already in the bin is refused rather than duplicated. Nothing is deleted.
 //
 // Usage:
-//   node tools/zesty-media.mjs list
-//   node tools/zesty-media.mjs upload <file…>      --dry-run to only check
+//   node .claude/skills/zesty/scripts/zesty-media.mjs list
+//   node .claude/skills/zesty/scripts/zesty-media.mjs upload <file…>      --dry-run to only check
 
 import { readFileSync, statSync } from "node:fs";
 import { basename, extname } from "node:path";

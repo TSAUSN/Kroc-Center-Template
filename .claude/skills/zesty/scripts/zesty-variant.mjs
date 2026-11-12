@@ -2,7 +2,7 @@
 // item of the block model: its name is the item's web.metaTitle, its content
 // the item's data. A block needs one before it has content to render.
 //
-// Same setup as zesty-model.mjs (tools/zesty-api.mjs). Every value is checked
+// Same setup as zesty-model.mjs (zesty-api.mjs). Every value is checked
 // against the model's fields before the first request — unknown fields,
 // unknown repeater keys, dropdown values that aren't options, wrong types —
 // and written in the shape the Manager stores (yes_no 0/1, currency as a
@@ -16,10 +16,10 @@
 // variant's preview URL.
 //
 // Usage:
-//   node tools/zesty-variant.mjs list <model>
-//   node tools/zesty-variant.mjs show <model> <variant>             variant = 7-… ZUID or its name
-//   node tools/zesty-variant.mjs create <variant.json>
-//   node tools/zesty-variant.mjs update <model> <variant> <patch.json>
+//   node .claude/skills/zesty/scripts/zesty-variant.mjs list <model>
+//   node .claude/skills/zesty/scripts/zesty-variant.mjs show <model> <variant>             variant = 7-… ZUID or its name
+//   node .claude/skills/zesty/scripts/zesty-variant.mjs create <variant.json>
+//   node .claude/skills/zesty/scripts/zesty-variant.mjs update <model> <variant> <patch.json>
 //   --dry-run on create/update prints the payload without sending it.
 //
 // variant.json: { "model": "church_kids", "name": "Church Kroc Kids", "data": { <field>: <value>, … } }

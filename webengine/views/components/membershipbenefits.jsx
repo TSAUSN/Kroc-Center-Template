@@ -22,10 +22,13 @@ function MembershipBenefitsBand(props) {
     .map((r) => String(r.item || "").trim())
     .filter(Boolean);
 
+  // The primary button is the membership purchase: its link comes from
+  // krocTrMembershipPurchaseUrl (block view), never primary_cta_url, and with
+  // no link there is no button.
   const ctas = [
-    { label: d.primaryCtaLabel, url: d.primaryCtaUrl, className: "btn-light" },
+    { label: d.primaryCtaLabel, url: d.primaryCtaUrl, className: "btn-light", purchase: true },
     { label: d.secondaryCtaLabel, url: d.secondaryCtaUrl, className: "btn-outline-light" }
-  ].filter((c) => c.label);
+  ].filter((c) => c.label && (c.url || !c.purchase));
 
   // A band with no title is an unfinished block, not an empty state.
   if (!d.title) {

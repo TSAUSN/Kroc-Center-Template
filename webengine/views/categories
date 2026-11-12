@@ -1,10 +1,17 @@
 (**
-  Category detail — [categories] pageset · /categories/:category
-  Hero + intro are page fields; the Programs listing is fetched client-side from
-  /custom-endpoints/programs.json, scoped to this category's zuid.
+  Category detail — [categories] pageset
+  Traction Rec data, inlined at render time by this item's tractionrec_id (no
+  request): the category's own row and its programs
+  (/tractionrec/program_categories/<id>/programs.json). The name comes from
+  Traction Rec; category_name is only a fallback for an item with no Traction
+  Rec row. Zesty supplies what Traction Rec has no source for: hero image,
+  icon, subtitle and intro copy.
   NOTE: no autolayout call here, so drag-in blocks (featured_programs,
   featured_stories, donation_block) will not render until one is added back.
 **)
+<script type="application/json" id="kroc-tr-self">{{ include /tractionrec/program_categories/{this.tractionrec_id}.json }}</script>
+<script type="application/json" id="kroc-tr-children">{{ include /tractionrec/program_categories/{this.tractionrec_id}/programs.json }}</script>
+
 <section class="mx-4 mt-4" id="kroc-category-crumbs"></section>
 
 <section class="mx-4 mt-3" id="kroc-category-hero"></section>
@@ -15,19 +22,17 @@
 
 <script type="text/babel" data-presets="react">
 (() => {
+  const self = krocTrInline("kroc-tr-self");
   const data = {
-    zuid: "{{this.zuid}}",
-    title: "{{!this.category_name}}".trim(),
+    title: krocTrText(self && self.Name) || "{{!this.category_name}}".trim(),
     subtitle: "{{!this.hero_subtitle.escapeForJs()}}".trim(),
     iconUrl: "{{!this.category_icon.getImage(96)}}".trim(),
     heroDesktop: "{{!this.hero_image_desktop.getImage(1400)}}".trim(),
     intro: "{{!this.intro_content.escapeForJs()}}".trim()
   };
 
-  const crumbs = [{ label: "Programs & Classes", url: "/categories/" }, { label: data.title }];
-
   ReactDOM.createRoot(document.getElementById("kroc-category-crumbs")).render(
-    <Breadcrumbs items={crumbs} />
+    <CatalogCrumbs kind="category" self={self} title={data.title} />
   );
 
   ReactDOM.createRoot(document.getElementById("kroc-category-hero")).render(
@@ -46,7 +51,7 @@
     );
   }
 
-  const programsData = { categoryZuid: data.zuid, heading: "Programs" };
+  const programsData = { heading: "Programs", rows: krocTrInline("kroc-tr-children") };
   ReactDOM.createRoot(document.getElementById("kroc-category-programs")).render(
     <ProgramsSection data={programsData} />
   );

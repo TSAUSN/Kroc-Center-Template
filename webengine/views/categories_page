@@ -1,11 +1,15 @@
 (**
   All Categories — [categories_page] single page · the catalog root (/categories/)
-  Hero fields are authored here; the category grid and the tree-wide class
-  finder are both fetched client-side. Field refs are the instance's own —
-  note the TRIPLE underscore on the hero media, which is how WebEngine renders
-  the " - " in the "Hero Image - Desktop" labels.
-  The CTA band at the foot is a drag-in block, hence the autolayout call.
+  Hero fields are authored here. The category grid reads Traction Rec's
+  categories, inlined below from /tractionrec/program_categories.json (no
+  request); the tree-wide class finder fetches the four tier files itself.
+  Field refs are the instance's own — note the TRIPLE underscore on the hero
+  media, which is how WebEngine renders the " - " in the "Hero Image - Desktop"
+  labels. (The original note said a drag-in CTA band needed an autolayout call;
+  this view has never had one, so drag-in blocks don't render here.)
 **)
+<script type="application/json" id="kroc-tr-categories">{{ include /tractionrec/program_categories.json }}</script>
+
 <section class="mx-4 mt-4" id="kroc-catalog-hero"></section>
 
 <section class="mx-4 mt-12" id="kroc-catalog-categories"></section>
@@ -26,7 +30,7 @@
     <CatalogHero data={data} />
   );
 
-  const gridData = { heading: "Browse by Category" };
+  const gridData = { heading: "Browse by Category", rows: krocTrInline("kroc-tr-categories") };
   ReactDOM.createRoot(document.getElementById("kroc-catalog-categories")).render(
     <CategoriesSection data={gridData} />
   );

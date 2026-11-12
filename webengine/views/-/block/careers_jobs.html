@@ -1,0 +1,14 @@
+<section class="mx-4 mt-7 lg:mt-8" id="kroc-careers-jobs-{{this.zuid}}"></section>
+
+<script type="text/babel" data-presets="react">
+(() => {
+  const data = {
+    // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
+    departments: [{{ this.departments }}]
+  };
+
+  ReactDOM.createRoot(document.getElementById("kroc-careers-jobs-{{this.zuid}}")).render(
+    <CareersJobs data={data} />
+  );
+})();
+</script>

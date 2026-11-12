@@ -1,4 +1,5 @@
 <section class="mx-4 mt-14" id="kroc-membership-tiers-{{this.zuid}}"></section>
+<script type="application/json" id="kroc-tr-memberships-{{this.zuid}}">{{ include /tractionrec/membership_types.json }}</script>
 
 <script type="text/babel" data-presets="react">
 (() => {
@@ -10,7 +11,9 @@
     heading: item.heading,
     finePrint: item.fine_print,
     // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
-    tiers: [{{ this.tiers }}]
+    tiers: [{{ this.tiers }}],
+    // Traction Rec membership types by Id, for rows with a tractionrec_id
+    tractionrec: krocTrMembershipIndex("kroc-tr-memberships-{{this.zuid}}")
   };
 
   ReactDOM.createRoot(document.getElementById("kroc-membership-tiers-{{this.zuid}}")).render(

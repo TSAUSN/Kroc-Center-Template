@@ -1,10 +1,15 @@
 <section class="mx-4 mt-12" id="kroc-daypass-passes-{{this.zuid}}"></section>
+<script type="application/json" id="kroc-tr-memberships-{{this.zuid}}">{{ include /tractionrec/membership_types.json }}</script>
 
 <script type="text/babel" data-presets="react">
 (() => {
   const data = {
     // repeater rows ship raw; the [] wrapper + .flat() keeps an empty field parsing
-    passes: [{{ this.passes }}]
+    passes: [{{ this.passes }}],
+    // Traction Rec membership types by Id, for rows with a tractionrec_id
+    tractionrec: krocTrMembershipIndex("kroc-tr-memberships-{{this.zuid}}"),
+    // interim purchase link until Traction Rec has one (krocTrMembershipPurchaseUrl)
+    purchaseUrl: "{{!globals.membership_purchase_url}}".trim()
   };
 
   ReactDOM.createRoot(document.getElementById("kroc-daypass-passes-{{this.zuid}}")).render(

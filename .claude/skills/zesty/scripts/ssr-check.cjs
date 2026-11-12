@@ -3,7 +3,7 @@
 // CSS (components/styles.html) — the two checks every block gets before it
 // ships.
 //
-// Usage (from the Kroc-Center-Template root):
+// Usage (from the Kroc-Center-Template root; file arguments are relative to the cwd):
 //   node .claude/skills/zesty/scripts/ssr-check.cjs <Component> <file.jsx> <cases.json> [--html]
 //     <Component>   the function name, e.g. CardGrid
 //     <file.jsx>    webengine/views/components/cardgrid.jsx
@@ -23,7 +23,12 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const ROOT = process.cwd();
+// The repo root: the nearest ancestor of this script holding webengine/.
+const ROOT = (() => {
+  let dir = __dirname;
+  while (!fs.existsSync(path.join(dir, "webengine")) && path.dirname(dir) !== dir) dir = path.dirname(dir);
+  return dir;
+})();
 const VIEWS = path.join(ROOT, "webengine", "views", "components");
 const MODULES = process.env.KROC_SSR_MODULES || path.join(os.homedir(), ".cache", "kroc-ssr", "node_modules");
 
@@ -54,10 +59,16 @@ const load = (p) => {
   return Babel.transform(src, { presets: ["react"] }).code;
 };
 
-// The loader's shared helpers (cx, Icon, krocExternalUrl, krocSortRows, …).
-const shared = ["shared.jsx", "cards.jsx", "catalog.jsx", "featuredpages.jsx"]
-  .map((f) => path.join(VIEWS, f))
-  .filter((p) => fs.existsSync(p) && path.resolve(p) !== path.resolve(file));
+// Everything the loader loads before this component, in the loader's order —
+// the same global scope the browser builds (cx, Icon, CheckList, krocYouTubeId,
+// …). A component not in the loader yet gets every other component first.
+const order = [...fs.readFileSync(path.join(ROOT, "webengine", "views", "loader"), "utf8")
+  .matchAll(/src="\/components\/([^"]+\.jsx)"/g)].map((m) => path.join(VIEWS, m[1]));
+const target = path.resolve(file);
+const at = order.findIndex((p) => path.resolve(p) === target);
+const shared = (at === -1 ? order : order.slice(0, at)).filter(
+  (p) => fs.existsSync(p) && path.resolve(p) !== target
+);
 const code = [...shared.map(load), load(file)].join("\n;\n");
 const Component = new Function("React", "window", "document", "console", `${code}\n; return ${name};`)(
   React,
@@ -93,13 +104,29 @@ for (const [label, data] of Object.entries(cases)) {
   if (hrefs.length) console.log(`   hrefs: ${hrefs.join(" | ")}`);
 }
 
+// Parsley evaluates every double-open-brace in a view, comments included, so
+// one left in JSX (style=, dangerouslySetInnerHTML=) breaks the render. List
+// them so each can be confirmed as an intentional Parsley call.
+const braces = fs
+  .readFileSync(file, "utf8")
+  .split("\n")
+  .map((line, i) => [i + 1, line])
+  .filter(([, line]) => line.includes("{" + "{"));
+if (braces.length) {
+  console.log(`\n⚠ ${braces.length} line(s) contain a double open-brace; each must be an intentional Parsley call:`);
+  for (const [n, line] of braces) console.log(`   ${n}: ${line.trim().slice(0, 120)}`);
+}
+
 // Every utility-looking token in the component's string literals must exist
 // in the compiled CSS, or `npm run build:css` hasn't run since it was added.
 const css = fs.readFileSync(path.join(VIEWS, "styles.html"), "utf8");
 const BARE = new Set(["flex", "grid", "hidden", "block", "inline", "contents", "uppercase", "italic", "underline", "truncate", "relative", "absolute", "fixed", "sticky", "rounded", "border", "shadow", "btn", "grow", "shrink"]);
 const tokens = new Set();
-for (const m of fs.readFileSync(file, "utf8").matchAll(/"([^"\n]*)"/g)) {
-  for (const t of m[1].split(/\s+/)) {
+// Attribute values other than className (referrerPolicy="…", type="…") aren't
+// classes, so they're skipped.
+for (const m of fs.readFileSync(file, "utf8").matchAll(/(?:\b([A-Za-z-]+)=)?"([^"\n]*)"/g)) {
+  if (m[1] && m[1] !== "className") continue;
+  for (const t of m[2].split(/\s+/)) {
     if (!t || /^[0-9/#]|^https?:|\.(jsx?|json|html|svg)$|\{\{|:$/.test(t)) continue;
     if (/^[a-z!-][a-z0-9:[\]().\/_%#,=!'-]*$/i.test(t) && (t.includes("-") || t.includes(":") || BARE.has(t))) {
       tokens.add(t);

@@ -16,6 +16,7 @@ The public docs (docs.zesty.io, index at `/llms.txt`, raw pages at `<page>.md`) 
 - **The API does not add `og_image`**; the Manager does. Its exact definition (sort 9999, `images`, `{defaultValue:null, group_id:"", limit:1, list:false}`) is in `zesty-model.mjs` (`OG_IMAGE_FIELD`) and is added automatically.
 - Manager starts user fields at sort 10000.
 - Field settings the Manager writes: scalars `{defaultValue:null, list:true}`; repeater `{list:false, subFields:[…]}` (no defaultValue); dropdown/yes_no add `options {value: Label}`; images add `limit`; currency adds `currency:"USD"`. `zesty-model.mjs` reproduces these — its `show` round-trips all 45 live models.
+- A field's `description` has a short DB column: ~260 characters fails with `500 … Data too long for column 'description'`, 136 is fine. Keep help text under ~200. (A repeater sub-field's description lives in `settings` and took ~240.)
 - Update field: `PUT …/fields/<12-zuid>` replaces `settings` wholesale — always send the full settings (the tool rebuilds them from a spec).
 - Relations: `relatedModelZUID` + `relatedFieldZUID` (the field to display).
 - Legacy oddities on the instance: `hero.background_color` and `clippings.timezone` dropdowns have only an empty option; `test_page.integration_test` stores a Salesforce bearer token in its settings.
@@ -24,6 +25,7 @@ The public docs (docs.zesty.io, index at `/llms.txt`, raw pages at `<page>.md`) 
 
 - A variant = a content item of the block model; its Manager name = `web.metaTitle`. `POST …/items {data, web:{metaTitle, canonicalTagMode:1, sitemapPriority:-1}, meta:{listed:true}}`; no pathPart/parent for blocks.
 - **`PUT …/items/<7-zuid>` without `meta.listed` UNLISTS the item** → it vanishes from `/-/gql/` and its render 400s (`{{!this.zuid}}` → "field does not exist"). Always send `meta:{masterZUID, listed:true}` and `web.sitemapPriority:-1` (all Manager variants carry both). PUT replaces the version wholesale — send every data field.
+- **Page items (pageset, e.g. a course)** are not variants — never write them with `zesty-variant.mjs` (it stamps og_image and renames). To set one field: `GET` the item, then `PUT {data: {...item.data, <field>: v}, meta: {masterZUID, listed: item.meta.listed}, web: item.web}` — sending `web` as received kept path, title and sitemap setting intact (2026-10-09, `hide_class_pages` on a course); run `zesty-sync pull` after.
 - Stored value shapes: text/textarea/wysiwyg/link/date strings; `datetime` `"YYYY-MM-DD HH:MM:SS.000000"`; `number`/`sort` numbers; `currency` string; `yes_no` 0/1; `images`/relations comma-joined ZUIDs (`3-…` / `7-…`); repeater = array of row objects keyed by sub-field name (Manager sets `sort_order: 0` on untouched sort sub-fields).
 - No publishing needed on dev — it renders the latest saved version (30 of 31 variants were never published). Publishing (`POST …/items/<z>/publishings {version, publishAt:"now", unpublishAt:"never"}`) goes live; don't, unless asked.
 - **Screenshots:** the Manager requests a variant screenshot on save and stores its URL in `og_image`: `https://storage.googleapis.com/zesty-prod-instance-screenshots/<host>!-!block!<model>.html!variant=<7-zuid>&version=<n>&_bypassError=true&preview=global_1280_720.png`. The API never requests one. `blocks_catalog_page` reads variant ZUIDs only from that URL, so `zesty-variant.mjs` stamps it; the Manager overwrites it with a real screenshot on the first save there.
@@ -36,10 +38,13 @@ The public docs (docs.zesty.io, index at `/llms.txt`, raw pages at `<page>.md`) 
 - A view's filename needs a **leading slash** (`/tractionrec/x.json`). Without it the API accepts it, reports it live, and every request 404s.
 - `updateView` doesn't return the new version number. Read it back with `GET` before `publishView`, or you re-publish the old version.
 
+- **A pushed `styles.html` takes a few seconds to reach stage.** A browser check run straight after `build:css` can show a new class as "missing" (`max-height: none`, an unsized SVG) when it is compiled and simply not served yet. Grep the served `components/styles.html` before concluding the build dropped it, and wait or re-run the check.
+
 ## Generated Traction Rec files (`views/tractionrec/`)
 
 - Written **only** by the sibling repo `../kroc-tractionrec-sync` (its `AGENTS.md` has the paths, row shape and rules). Gitignored here, so `zesty-sync` skips it. Never edit, push or create files there; change that service and re-run it.
-- Shape: `<tier>.json`, `<tier>/<id>.json`, `<parentTier>/<id>/<childTier>.json` (plural tiers `program_categories`, `programs`, `courses`, `classes`). Salesforce fields sit at each row's root; nested `__r` fields are read in JS.
+- Shape: `<tier>.json`, `<tier>/<id>.json`, `<parentTier>/<id>/<childTier>.json` (plural tiers `program_categories`, `programs`, `courses`, `classes`, and the files-only `membership_categories`, `membership_types` — no Zesty model; blocks reference a type by a `tractionrec_id` repeater sub-field).
+- `{{ include /tractionrec/<file>.json }}` works inside a **block view** too (verified 2026-10-08 on `membership_tiers`): the file lands raw in a `<script type="application/json">`, and a missing file includes as nothing. Salesforce fields sit at each row's root; nested `__r` fields are read in JS.
 - Reading them in Parsley: `api.json.get` with a full URL, one level deep only. A dotted read crashes the page. See `AGENTS.md` §3, "Fetched JSON".
 
 ## Media in repeaters
