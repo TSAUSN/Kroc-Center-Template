@@ -1,0 +1,86 @@
+{
+  "name": "donate_planned_giving",
+  "label": "Donate Planned Giving",
+  "type": "block",
+  "description": "Planned Giving card + Donate Used Goods card in one row (absorbed [donate_used_goods]).",
+  "listed": false,
+  "fields": [
+    {
+      "name": "planned_giving_heading",
+      "label": "Planned Giving Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "planned_giving_body",
+      "label": "Planned Giving Body",
+      "datatype": "textarea",
+      "sort": 10001
+    },
+    {
+      "name": "planned_giving_phone",
+      "label": "Planned Giving Phone",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "planned_giving_email",
+      "label": "Planned Giving Email",
+      "datatype": "text",
+      "description": "Never printed: the link reads 'Email us' (D-17).",
+      "sort": 10003
+    },
+    {
+      "name": "planned_giving_cta_label",
+      "label": "Planned Giving CTA Label",
+      "datatype": "text",
+      "sort": 10004
+    },
+    {
+      "name": "planned_giving_cta_link",
+      "label": "Planned Giving CTA Link",
+      "datatype": "link",
+      "sort": 10005
+    },
+    {
+      "name": "used_goods_heading",
+      "label": "Used Goods Heading",
+      "datatype": "text",
+      "sort": 10006
+    },
+    {
+      "name": "used_goods_body",
+      "label": "Used Goods Body",
+      "datatype": "textarea",
+      "sort": 10007
+    },
+    {
+      "name": "used_goods_organisations",
+      "label": "Used Goods Organisations",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "name",
+          "label": "Name",
+          "datatype": "text"
+        },
+        {
+          "name": "link",
+          "label": "Link",
+          "datatype": "link"
+        },
+        {
+          "name": "address",
+          "label": "Address",
+          "datatype": "text"
+        },
+        {
+          "name": "phone",
+          "label": "Phone",
+          "datatype": "text"
+        }
+      ],
+      "sort": 10008
+    }
+  ]
+}

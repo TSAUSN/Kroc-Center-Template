@@ -1,0 +1,67 @@
+{
+  "name": "featured_pages",
+  "label": "Featured Pages",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 10000
+    },
+    {
+      "name": "display_mode",
+      "label": "Display Mode",
+      "datatype": "dropdown",
+      "options": {
+        "carousel": "Carousel",
+        "compact": "Compact",
+        "grid": "Grid"
+      },
+      "sort": 10001
+    },
+    {
+      "name": "featured_pages",
+      "label": "Featured Pages",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "page_title",
+          "label": "Page Title",
+          "datatype": "text",
+          "required": true
+        },
+        {
+          "name": "page_logo",
+          "label": "Page Logo",
+          "datatype": "images",
+          "limit": ""
+        },
+        {
+          "name": "page_hero",
+          "label": "Page Hero",
+          "datatype": "images",
+          "limit": ""
+        },
+        {
+          "name": "page_description",
+          "label": "Page Description",
+          "datatype": "textarea"
+        },
+        {
+          "name": "cta_label",
+          "label": "CTA Label",
+          "datatype": "text"
+        },
+        {
+          "name": "cta_url",
+          "label": "CTA URL",
+          "datatype": "link"
+        }
+      ],
+      "sort": 10002
+    }
+  ]
+}

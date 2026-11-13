@@ -1,0 +1,39 @@
+{
+  "name": "careers_apply",
+  "label": "Careers How to Apply",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "sort": 10001
+    },
+    {
+      "name": "text_apply_eyebrow",
+      "label": "Text to Apply Eyebrow",
+      "datatype": "text",
+      "description": "Red card beside How to Apply. Fill the keyword or shortcode to show it.",
+      "sort": 10002
+    },
+    {
+      "name": "text_apply_keyword",
+      "label": "Text to Apply Keyword",
+      "datatype": "text",
+      "sort": 10003
+    },
+    {
+      "name": "text_apply_shortcode",
+      "label": "Text to Apply Shortcode",
+      "datatype": "text",
+      "sort": 10004
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "name": "hours_general",
+  "label": "General Facility Hours",
+  "type": "block",
+  "description": "Centre-wide hours card (auto open/closed pill, today emphasised) + the red Closure Alerts card beside it (absorbed [hours_alerts]).",
+  "listed": false,
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "seasonal_label",
+      "label": "Seasonal Label",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "hours",
+      "label": "Hours",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "day_label",
+          "label": "Day Label",
+          "datatype": "text",
+          "description": "e.g. Monday–Friday, Saturday, Weekdays."
+        },
+        {
+          "name": "time_range",
+          "label": "Time Range",
+          "datatype": "text",
+          "description": "e.g. 5:00 AM – 8:00 PM, or Closed."
+        }
+      ],
+      "sort": 10002
+    },
+    {
+      "name": "footnote",
+      "label": "Footnote",
+      "datatype": "textarea",
+      "sort": 10003
+    },
+    {
+      "name": "alerts_eyebrow",
+      "label": "Alerts Eyebrow",
+      "datatype": "text",
+      "sort": 10004
+    },
+    {
+      "name": "alerts_heading",
+      "label": "Alerts Heading",
+      "datatype": "text",
+      "sort": 10005
+    },
+    {
+      "name": "alerts_keyword",
+      "label": "Alerts Keyword",
+      "datatype": "text",
+      "sort": 10006
+    },
+    {
+      "name": "alerts_shortcode",
+      "label": "Alerts Number",
+      "datatype": "text",
+      "sort": 10007
+    },
+    {
+      "name": "alerts_cta_label",
+      "label": "Alerts CTA Label",
+      "datatype": "text",
+      "sort": 10008
+    },
+    {
+      "name": "alerts_cta_link",
+      "label": "Alerts CTA Link",
+      "datatype": "link",
+      "sort": 10009
+    }
+  ]
+}

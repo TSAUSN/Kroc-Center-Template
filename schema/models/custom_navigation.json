@@ -1,0 +1,22 @@
+{
+  "name": "custom_navigation",
+  "label": "Custom Navigation",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "navigation_name",
+      "label": "Navigation Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 10000
+    },
+    {
+      "name": "menu_item_label",
+      "label": "Menu Item Label",
+      "datatype": "repeater",
+      "subFields": [],
+      "sort": 10001
+    }
+  ]
+}

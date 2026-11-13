@@ -1,0 +1,114 @@
+{
+  "name": "service_band",
+  "label": "Service Band",
+  "type": "block",
+  "description": "One named service (PlayCare, Child Watch, Kroc Kids…) on a colour band: photo, copy and an optional rates panel.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "name",
+      "label": "Service Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "sort": 10002
+    },
+    {
+      "name": "photo",
+      "label": "Photo",
+      "datatype": "images",
+      "sort": 10003
+    },
+    {
+      "name": "photo_side",
+      "label": "Photo Side",
+      "datatype": "dropdown",
+      "options": {
+        "left": "Left",
+        "right": "Right"
+      },
+      "sort": 10004
+    },
+    {
+      "name": "background_color",
+      "label": "Background Color",
+      "datatype": "dropdown",
+      "description": "Empty = Purple.",
+      "options": {
+        "navy": "Navy",
+        "purple": "Purple"
+      },
+      "sort": 10005
+    },
+    {
+      "name": "primary_cta_label",
+      "label": "Primary CTA Label",
+      "datatype": "text",
+      "sort": 10006
+    },
+    {
+      "name": "primary_cta_link",
+      "label": "Primary CTA Link",
+      "datatype": "link",
+      "sort": 10007
+    },
+    {
+      "name": "secondary_cta_label",
+      "label": "Secondary CTA Label",
+      "datatype": "text",
+      "sort": 10008
+    },
+    {
+      "name": "secondary_cta_link",
+      "label": "Secondary CTA Link",
+      "datatype": "link",
+      "sort": 10009
+    },
+    {
+      "name": "panel_label",
+      "label": "Rates Panel Label",
+      "datatype": "text",
+      "sort": 10010
+    },
+    {
+      "name": "panel_rows",
+      "label": "Rates Panel Rows",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "key",
+          "label": "Label",
+          "datatype": "text"
+        },
+        {
+          "name": "value",
+          "label": "Value",
+          "datatype": "text"
+        }
+      ],
+      "sort": 10011
+    },
+    {
+      "name": "panel_cta_label",
+      "label": "Rates Panel CTA Label",
+      "datatype": "text",
+      "sort": 10012
+    },
+    {
+      "name": "panel_cta_link",
+      "label": "Rates Panel CTA Link",
+      "datatype": "link",
+      "sort": 10013
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "faqs",
+  "label": "FAQs",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "qa",
+      "label": "QA",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "question",
+          "label": "Question",
+          "datatype": "text",
+          "required": true
+        },
+        {
+          "name": "answer",
+          "label": "Answer",
+          "datatype": "wysiwyg_basic",
+          "required": true
+        },
+        {
+          "name": "sort_order",
+          "label": "Sort Order",
+          "datatype": "sort"
+        }
+      ],
+      "sort": 10001
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "featured_classes",
+  "label": "Featured Classes",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 10000
+    },
+    {
+      "name": "featured_class",
+      "label": "Featured Class",
+      "datatype": "one_to_one",
+      "required": true,
+      "relatedModel": "classes",
+      "relatedField": "class_name",
+      "sort": 10001
+    },
+    {
+      "name": "display_mode",
+      "label": "Display Mode",
+      "datatype": "dropdown",
+      "options": {
+        "Carousel": "Carousel",
+        "Grid 3_up": "Grid 3-up",
+        "Grid 4_up": "Grid 4-up"
+      },
+      "sort": 10002
+    },
+    {
+      "name": "featured_classes",
+      "label": "Featured Classes",
+      "datatype": "one_to_many",
+      "relatedModel": "classes",
+      "relatedField": "class_name",
+      "sort": 10003
+    }
+  ]
+}

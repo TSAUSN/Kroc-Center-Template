@@ -1,0 +1,22 @@
+{
+  "name": "tags_page",
+  "label": "Tags Page",
+  "type": "templateset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "name",
+      "label": "Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "datatype": "textarea",
+      "required": true,
+      "sort": 2
+    }
+  ]
+}

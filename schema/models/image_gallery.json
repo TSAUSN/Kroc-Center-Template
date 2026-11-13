@@ -1,0 +1,36 @@
+{
+  "name": "image_gallery",
+  "label": "Image Gallery",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "gallery_name",
+      "label": "Gallery Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 10000
+    },
+    {
+      "name": "layout_variant",
+      "label": "Layout Variant",
+      "datatype": "dropdown",
+      "options": {
+        "carousel": "Carousel",
+        "grid": "Grid",
+        "mosaic": "Mosaic"
+      },
+      "sort": 10001
+    },
+    {
+      "name": "images",
+      "label": "Images",
+      "datatype": "images",
+      "limit": "7",
+      "settings": {
+        "fileExtensionsErrorMessage": "Only files with the following extensions are allowed: undefined"
+      },
+      "sort": 10003
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "name": "programs",
+  "label": "Programs",
+  "type": "pageset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "program_name",
+      "label": "Program Name",
+      "datatype": "text",
+      "sort": 1
+    },
+    {
+      "name": "categories",
+      "label": "Categories",
+      "datatype": "one_to_one",
+      "relatedModel": "categories",
+      "relatedField": "category_name",
+      "sort": 2
+    },
+    {
+      "name": "program_icon",
+      "label": "Program Icon",
+      "datatype": "images",
+      "limit": "",
+      "sort": 3
+    },
+    {
+      "name": "hero_image_desktop",
+      "label": "Hero Image Desktop",
+      "datatype": "images",
+      "limit": "",
+      "sort": 4
+    },
+    {
+      "name": "hero_subtitle",
+      "label": "Hero Subtitle",
+      "datatype": "textarea",
+      "sort": 5
+    },
+    {
+      "name": "card_summary",
+      "label": "Card Summary",
+      "datatype": "textarea",
+      "sort": 6
+    },
+    {
+      "name": "intro_content",
+      "label": "Intro Content",
+      "datatype": "wysiwyg_basic",
+      "sort": 7
+    },
+    {
+      "name": "sort_order",
+      "label": "Sort Order",
+      "datatype": "sort",
+      "sort": 8
+    },
+    {
+      "name": "tractionrec_id",
+      "label": "tractionrec ID",
+      "datatype": "text",
+      "sort": 9
+    }
+  ]
+}

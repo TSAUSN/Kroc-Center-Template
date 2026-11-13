@@ -1,0 +1,57 @@
+{
+  "name": "about_impact",
+  "label": "About Impact",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "section_title",
+      "label": "Section Title",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "stat_image",
+      "label": "Stat Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 10001
+    },
+    {
+      "name": "stat_value",
+      "label": "Stat Value",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "stat_caption",
+      "label": "Stat Caption",
+      "datatype": "text",
+      "sort": 10003
+    },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10004
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "sort": 10005
+    },
+    {
+      "name": "cta_label",
+      "label": "CTA Label",
+      "datatype": "text",
+      "sort": 10006
+    },
+    {
+      "name": "cta_link",
+      "label": "CTA Link",
+      "datatype": "link",
+      "sort": 10007
+    }
+  ]
+}

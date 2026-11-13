@@ -1,0 +1,59 @@
+{
+  "name": "categories",
+  "label": "Categories",
+  "type": "pageset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "category_name",
+      "label": "Category Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "category_icon",
+      "label": "Category Icon",
+      "datatype": "images",
+      "limit": "",
+      "sort": 2
+    },
+    {
+      "name": "hero_image_desktop",
+      "label": "Hero Image Desktop",
+      "datatype": "images",
+      "limit": "",
+      "sort": 3
+    },
+    {
+      "name": "hero_subtitle",
+      "label": "Hero Subtitle",
+      "datatype": "textarea",
+      "sort": 4
+    },
+    {
+      "name": "card_summary",
+      "label": "Card Summary",
+      "datatype": "textarea",
+      "sort": 5
+    },
+    {
+      "name": "intro_content",
+      "label": "Intro Content",
+      "datatype": "wysiwyg_basic",
+      "sort": 6
+    },
+    {
+      "name": "sort_order",
+      "label": "Sort Order",
+      "datatype": "sort",
+      "sort": 7
+    },
+    {
+      "name": "tractionrec_id",
+      "label": "tractionrec ID",
+      "datatype": "text",
+      "sort": 8
+    }
+  ]
+}

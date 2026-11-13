@@ -1,0 +1,50 @@
+{
+  "name": "program_categories",
+  "label": "Program Categories",
+  "type": "pageset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "category_name",
+      "label": "Category Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "program_type",
+      "label": "Program Type",
+      "datatype": "dropdown",
+      "required": true,
+      "options": {
+        "test": "test"
+      },
+      "sort": 2
+    },
+    {
+      "name": "deep_link_url",
+      "label": "Deep Link URL",
+      "datatype": "link",
+      "sort": 3
+    },
+    {
+      "name": "hero_image",
+      "label": "Hero Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 4
+    },
+    {
+      "name": "left_category_intro",
+      "label": "Left Category Intro",
+      "datatype": "wysiwyg_basic",
+      "sort": 5
+    },
+    {
+      "name": "right_category_intro",
+      "label": "Right Category Intro",
+      "datatype": "wysiwyg_basic",
+      "sort": 6
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "name": "intro_band",
+  "label": "Intro Band",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "layout_variant",
+      "label": "Layout Variant",
+      "datatype": "dropdown",
+      "options": {
+        "no_photo": "No-photo",
+        "photo_right": "Photo-right"
+      },
+      "sort": 10001
+    },
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "sort": 10003
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "textarea",
+      "sort": 10004
+    },
+    {
+      "name": "primary_cta_label",
+      "label": "Primary CTA Label",
+      "datatype": "text",
+      "sort": 10005
+    },
+    {
+      "name": "primary_cta_url",
+      "label": "Primary CTA URL",
+      "datatype": "link",
+      "sort": 10006
+    },
+    {
+      "name": "secondary_cta_label",
+      "label": "Secondary CTA Label",
+      "datatype": "text",
+      "sort": 10007
+    },
+    {
+      "name": "secondary_cta_url",
+      "label": "Secondary CTA URL",
+      "datatype": "link",
+      "sort": 10008
+    },
+    {
+      "name": "image",
+      "label": "Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 10009
+    },
+    {
+      "name": "background_color",
+      "label": "Background Color",
+      "datatype": "dropdown",
+      "options": {
+        "navy": "Navy",
+        "red": "Red",
+        "white": "White"
+      },
+      "sort": 10010
+    },
+    {
+      "name": "alignment",
+      "label": "Alignment",
+      "datatype": "dropdown",
+      "description": "Colour band only. Empty = Left.",
+      "options": {
+        "center": "Center",
+        "left": "Left"
+      },
+      "sort": 10011
+    }
+  ]
+}

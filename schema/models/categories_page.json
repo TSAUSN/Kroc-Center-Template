@@ -1,0 +1,51 @@
+{
+  "name": "categories_page",
+  "label": "Categories Page",
+  "type": "templateset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "header_title",
+      "label": "Header Title",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "hero_eyebrow",
+      "label": "Hero Eyebrow",
+      "datatype": "text",
+      "sort": 2
+    },
+    {
+      "name": "subheader",
+      "label": "Subheader",
+      "datatype": "textarea",
+      "required": true,
+      "sort": 3
+    },
+    {
+      "name": "hero_image___desktop",
+      "label": "Hero Image - Desktop",
+      "datatype": "images",
+      "required": true,
+      "limit": "",
+      "sort": 4
+    },
+    {
+      "name": "hero_image___mobile",
+      "label": "Hero Image - Mobile",
+      "datatype": "images",
+      "required": true,
+      "limit": "",
+      "sort": 5
+    },
+    {
+      "name": "hero_image___thumbnail",
+      "label": "Hero Image - Thumbnail",
+      "datatype": "images",
+      "limit": "",
+      "sort": 6
+    }
+  ]
+}

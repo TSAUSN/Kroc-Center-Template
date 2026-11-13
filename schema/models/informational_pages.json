@@ -1,0 +1,47 @@
+{
+  "name": "informational_pages",
+  "label": "Informational Pages",
+  "type": "pageset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "page_name",
+      "label": "Page Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "page_content",
+      "label": "Page Content",
+      "datatype": "wysiwyg_basic",
+      "required": true,
+      "sort": 2
+    },
+    {
+      "name": "access_password",
+      "label": "Access Password",
+      "datatype": "text",
+      "sort": 3
+    },
+    {
+      "name": "page_eyebrow",
+      "label": "Page Eyebrow",
+      "datatype": "text",
+      "sort": 4
+    },
+    {
+      "name": "hero_subheader",
+      "label": "Hero Subheader",
+      "datatype": "text",
+      "sort": 5
+    },
+    {
+      "name": "hero_image",
+      "label": "Hero Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 6
+    }
+  ]
+}

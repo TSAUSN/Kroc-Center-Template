@@ -1,0 +1,39 @@
+{
+  "name": "about_joan_kroc_story",
+  "label": "About Joan Kroc Story",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "background_image",
+      "label": "Background Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 10000
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "title_emphasis",
+      "label": "Title Emphasis",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "sort": 10003
+    },
+    {
+      "name": "video_url",
+      "label": "Video URL",
+      "datatype": "link",
+      "sort": 10004
+    }
+  ]
+}

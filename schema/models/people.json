@@ -1,0 +1,76 @@
+{
+  "name": "people",
+  "label": "People",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 0
+    },
+    {
+      "name": "layout_variant",
+      "label": "Layout Variant",
+      "datatype": "dropdown",
+      "options": {
+        "cards": "Cards",
+        "contact": "Contact",
+        "featured": "Featured"
+      },
+      "sort": 1
+    },
+    {
+      "name": "feature_heading",
+      "label": "Feature Heading",
+      "datatype": "text",
+      "sort": 2
+    },
+    {
+      "name": "lead_in",
+      "label": "Lead-in",
+      "datatype": "text",
+      "sort": 3
+    },
+    {
+      "name": "people_details",
+      "label": "People details",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "name",
+          "label": "Name",
+          "datatype": "text"
+        },
+        {
+          "name": "role",
+          "label": "Role",
+          "datatype": "text"
+        },
+        {
+          "name": "headshot_image",
+          "label": "Headshot Image",
+          "datatype": "images",
+          "limit": ""
+        },
+        {
+          "name": "bio",
+          "label": "Bio",
+          "datatype": "textarea"
+        },
+        {
+          "name": "email",
+          "label": "Email",
+          "datatype": "text"
+        },
+        {
+          "name": "phone",
+          "label": "Phone",
+          "datatype": "text"
+        }
+      ],
+      "sort": 4
+    }
+  ]
+}

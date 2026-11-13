@@ -1,0 +1,28 @@
+{
+  "name": "anchor_links",
+  "label": "Anchor Links",
+  "type": "block",
+  "description": "Row of pill jump links to sections on the same page. First variant: Hours Section Anchors (ticket 2469).",
+  "listed": false,
+  "fields": [
+    {
+      "name": "items",
+      "label": "Items",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "label",
+          "label": "Label",
+          "datatype": "text"
+        },
+        {
+          "name": "target",
+          "label": "Target Section",
+          "datatype": "text",
+          "description": "The heading of the section to jump to, as shown on the page (or #id). Empty = the label."
+        }
+      ],
+      "sort": 10000
+    }
+  ]
+}

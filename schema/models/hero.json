@@ -1,0 +1,148 @@
+{
+  "name": "hero",
+  "label": "Hero",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "subheading",
+      "label": "Subheading",
+      "datatype": "textarea",
+      "sort": 10002
+    },
+    {
+      "name": "badge_icon",
+      "label": "Badge Icon",
+      "datatype": "images",
+      "limit": "",
+      "sort": 10003
+    },
+    {
+      "name": "badge_text",
+      "label": "Badge Text",
+      "datatype": "text",
+      "sort": 10004
+    },
+    {
+      "name": "primary_cta_label",
+      "label": "Primary CTA Label",
+      "datatype": "text",
+      "sort": 10005
+    },
+    {
+      "name": "primary_cta_link",
+      "label": "Primary CTA Link",
+      "datatype": "link",
+      "sort": 10006
+    },
+    {
+      "name": "secondary_cta_label",
+      "label": "Secondary CTA Label",
+      "datatype": "text",
+      "sort": 10007
+    },
+    {
+      "name": "secondary_cta_link",
+      "label": "Secondary CTA Link",
+      "datatype": "link",
+      "sort": 10008
+    },
+    {
+      "name": "show_social_links",
+      "label": "Show Social Links",
+      "datatype": "yes_no",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      },
+      "sort": 10009
+    },
+    {
+      "name": "media",
+      "label": "Media",
+      "datatype": "dropdown",
+      "options": {
+        "color": "Color",
+        "image": "Image",
+        "video": "Video"
+      },
+      "sort": 10010
+    },
+    {
+      "name": "background_color",
+      "label": "Background Color",
+      "datatype": "dropdown",
+      "options": {
+        "": "Default (navy)",
+        "dark": "Dark",
+        "green": "Green",
+        "navy": "Navy",
+        "red": "Red"
+      },
+      "sort": 10011
+    },
+    {
+      "name": "artwork_mode",
+      "label": "Artwork Mode",
+      "datatype": "dropdown",
+      "options": {
+        "pre_designed": "Pre-designed",
+        "responsive": "Responsive"
+      },
+      "sort": 10012
+    },
+    {
+      "name": "hero_image_desktop",
+      "label": "Hero Image Desktop",
+      "datatype": "images",
+      "limit": "",
+      "sort": 10013
+    },
+    {
+      "name": "hero_image_mobile",
+      "label": "Hero Image Mobile",
+      "datatype": "images",
+      "limit": "",
+      "sort": 10014
+    },
+    {
+      "name": "video_url",
+      "label": "Video URL",
+      "datatype": "link",
+      "sort": 10015
+    },
+    {
+      "name": "alignment",
+      "label": "Alignment",
+      "datatype": "dropdown",
+      "options": {
+        "center": "Center",
+        "left": "Left"
+      },
+      "sort": 10016
+    },
+    {
+      "name": "height",
+      "label": "Height",
+      "datatype": "dropdown",
+      "options": {
+        "compact": "Compact",
+        "standard": "Standard",
+        "tall": "Tall"
+      },
+      "sort": 10017
+    }
+  ]
+}

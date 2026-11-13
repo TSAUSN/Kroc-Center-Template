@@ -1,0 +1,47 @@
+{
+  "name": "map_block",
+  "label": "Map Block",
+  "type": "block",
+  "description": "One location: heading, body, address, a Google map and Get Directions. Empty address = Globals address.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "textarea",
+      "sort": 10001
+    },
+    {
+      "name": "address",
+      "label": "Address",
+      "datatype": "text",
+      "description": "Empty = the address in Globals.",
+      "sort": 10002
+    },
+    {
+      "name": "directions_label",
+      "label": "Directions Button Label",
+      "datatype": "text",
+      "description": "Empty = Get Directions.",
+      "sort": 10003
+    },
+    {
+      "name": "secondary_cta_label",
+      "label": "Secondary CTA Label",
+      "datatype": "text",
+      "sort": 10004
+    },
+    {
+      "name": "secondary_cta_link",
+      "label": "Secondary CTA Link",
+      "datatype": "link",
+      "sort": 10005
+    }
+  ]
+}

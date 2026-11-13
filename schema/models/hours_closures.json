@@ -1,0 +1,48 @@
+{
+  "name": "hours_closures",
+  "label": "Facility Closures",
+  "type": "block",
+  "description": "Dated list of closures and reduced hours, each with a Closed or Reduced pill, plus footnotes.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "items",
+      "label": "Items",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "date_label",
+          "label": "Date",
+          "datatype": "text"
+        },
+        {
+          "name": "label",
+          "label": "Label",
+          "datatype": "text"
+        },
+        {
+          "name": "kind",
+          "label": "Kind",
+          "datatype": "dropdown",
+          "options": {
+            "closed": "Closed",
+            "reduced": "Reduced"
+          }
+        }
+      ],
+      "sort": 10001
+    },
+    {
+      "name": "footnotes",
+      "label": "Footnotes",
+      "datatype": "textarea",
+      "sort": 10002
+    }
+  ]
+}

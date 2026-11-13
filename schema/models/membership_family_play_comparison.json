@@ -1,0 +1,114 @@
+{
+  "name": "membership_family_play_comparison",
+  "label": "Membership Family Play Comparison",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "sort": 10003
+    },
+    {
+      "name": "footnote_line",
+      "label": "Footnote Line",
+      "datatype": "text",
+      "sort": 10004
+    },
+    {
+      "name": "cta_label",
+      "label": "CTA Label",
+      "datatype": "text",
+      "sort": 10005
+    },
+    {
+      "name": "cta_url",
+      "label": "CTA URL",
+      "datatype": "link",
+      "sort": 10006
+    },
+    {
+      "name": "column_heading_1",
+      "label": "Column Heading 1",
+      "datatype": "text",
+      "sort": 10007
+    },
+    {
+      "name": "column_heading_2",
+      "label": "Column Heading 2",
+      "datatype": "text",
+      "sort": 10008
+    },
+    {
+      "name": "column_heading_3",
+      "label": "Column Heading 3",
+      "datatype": "text",
+      "sort": 10009
+    },
+    {
+      "name": "checklist_items",
+      "label": "Checklist Items",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "item",
+          "label": "Item",
+          "datatype": "text"
+        },
+        {
+          "name": "sort_order",
+          "label": "Sort Order",
+          "datatype": "sort"
+        }
+      ],
+      "sort": 10010
+    },
+    {
+      "name": "comparison_rows",
+      "label": "Comparison Rows",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "benefit",
+          "label": "Benefit",
+          "datatype": "text"
+        },
+        {
+          "name": "standard_plan",
+          "label": "Standard Plan",
+          "datatype": "text"
+        },
+        {
+          "name": "family_play",
+          "label": "Family Play",
+          "datatype": "text"
+        },
+        {
+          "name": "sort_order",
+          "label": "Sort Order",
+          "datatype": "sort"
+        }
+      ],
+      "sort": 10011
+    }
+  ]
+}

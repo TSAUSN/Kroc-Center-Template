@@ -1,0 +1,76 @@
+{
+  "name": "events",
+  "label": "Events",
+  "type": "pageset",
+  "listed": true,
+  "parent": {
+    "page": "events_page"
+  },
+  "fields": [
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "hero_image",
+      "label": "Hero Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 2
+    },
+    {
+      "name": "start_datetime",
+      "label": "Start Datetime",
+      "datatype": "datetime",
+      "required": true,
+      "sort": 3
+    },
+    {
+      "name": "end_datetime",
+      "label": "End Datetime",
+      "datatype": "datetime",
+      "sort": 4
+    },
+    {
+      "name": "event_body",
+      "label": "Event Body",
+      "datatype": "wysiwyg_basic",
+      "required": true,
+      "sort": 5
+    },
+    {
+      "name": "register_link",
+      "label": "Register Link",
+      "datatype": "link",
+      "sort": 6
+    },
+    {
+      "name": "address",
+      "label": "Address",
+      "datatype": "text",
+      "required": true,
+      "sort": 7
+    },
+    {
+      "name": "contact_name",
+      "label": "Contact Name",
+      "datatype": "text",
+      "sort": 8
+    },
+    {
+      "name": "contact_email",
+      "label": "Contact Email",
+      "datatype": "text",
+      "sort": 9
+    },
+    {
+      "name": "contact_phone",
+      "label": "Contact Phone",
+      "datatype": "text",
+      "sort": 10
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "notice",
+  "label": "Notice",
+  "type": "block",
+  "description": "Inline info callout (navy tint + info icon) in the page flow. First variant: App & Portal Two-Password Notice.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "description": "Start with a bold lead sentence, as in the design.",
+      "sort": 10000
+    }
+  ]
+}

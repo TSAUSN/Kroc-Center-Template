@@ -1,0 +1,67 @@
+{
+  "name": "unknown",
+  "label": "Unknown",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "banner_name",
+      "label": "Banner Name",
+      "datatype": "text",
+      "description": "Internal name to identify this banner",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "headline",
+      "label": "Headline",
+      "datatype": "text",
+      "description": "Main headline text displayed on the banner",
+      "required": true,
+      "sort": 2
+    },
+    {
+      "name": "subheadline",
+      "label": "Subheadline",
+      "datatype": "textarea",
+      "description": "Optional subheadline or supporting text",
+      "sort": 3
+    },
+    {
+      "name": "banner_image",
+      "label": "Banner Image",
+      "datatype": "images",
+      "description": "Background or featured image for the banner",
+      "sort": 4
+    },
+    {
+      "name": "cta_text",
+      "label": "CTA Text",
+      "datatype": "text",
+      "description": "Call-to-action button text",
+      "sort": 5
+    },
+    {
+      "name": "cta_link",
+      "label": "CTA Link",
+      "datatype": "internal_link",
+      "description": "Internal page link for the call-to-action button",
+      "sort": 6
+    },
+    {
+      "name": "is_active",
+      "label": "Is Active",
+      "datatype": "yes_no",
+      "description": "Toggle to show or hide this banner",
+      "required": true,
+      "options": {
+        "0": "Inactive",
+        "1": "Active"
+      },
+      "settings": {
+        "defaultValue": 1
+      },
+      "sort": 7
+    }
+  ]
+}
