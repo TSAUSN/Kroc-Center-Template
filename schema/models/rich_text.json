@@ -1,0 +1,16 @@
+{
+  "name": "rich_text",
+  "label": "Rich Text",
+  "type": "block",
+  "description": "One rich-text region in a white card. First variant: Careers Territorial Information (ticket 2464).",
+  "listed": false,
+  "fields": [
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "description": "Headings, paragraphs, lists and links. A three-column icon row is a <div class=\"rt-cols\"> of three <div>s, each an <div class=\"ico\"><img></div> over a <p>.",
+      "sort": 10000
+    }
+  ]
+}

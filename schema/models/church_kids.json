@@ -1,0 +1,90 @@
+{
+  "name": "church_kids",
+  "label": "Church Kroc Kids",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "textarea",
+      "sort": 10002
+    },
+    {
+      "name": "cta_label",
+      "label": "CTA Label",
+      "datatype": "text",
+      "sort": 10003
+    },
+    {
+      "name": "cta_link",
+      "label": "CTA Link",
+      "datatype": "link",
+      "sort": 10004
+    },
+    {
+      "name": "troops_heading",
+      "label": "Troops Heading",
+      "datatype": "text",
+      "sort": 10005
+    },
+    {
+      "name": "troops",
+      "label": "Troops",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "label",
+          "label": "Label",
+          "datatype": "text"
+        }
+      ],
+      "sort": 10006
+    },
+    {
+      "name": "awards_heading",
+      "label": "Awards Heading",
+      "datatype": "text",
+      "sort": 10007
+    },
+    {
+      "name": "awards",
+      "label": "Awards",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "title",
+          "label": "Title",
+          "datatype": "text"
+        },
+        {
+          "name": "description",
+          "label": "Description",
+          "datatype": "textarea"
+        },
+        {
+          "name": "tone",
+          "label": "Tone",
+          "datatype": "dropdown",
+          "options": {
+            "amber": "Amber",
+            "red": "Red"
+          }
+        }
+      ],
+      "sort": 10008
+    }
+  ]
+}

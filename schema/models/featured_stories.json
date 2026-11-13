@@ -1,0 +1,33 @@
+{
+  "name": "featured_stories",
+  "label": "Featured Stories",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 10000
+    },
+    {
+      "name": "featured_stories",
+      "label": "Featured Stories",
+      "datatype": "one_to_many",
+      "relatedModel": "stories",
+      "relatedField": "title",
+      "sort": 10002
+    },
+    {
+      "name": "display_mode",
+      "label": "Display Mode",
+      "datatype": "dropdown",
+      "options": {
+        "carousel": "Carousel",
+        "grid": "Grid"
+      },
+      "sort": 10003
+    }
+  ]
+}

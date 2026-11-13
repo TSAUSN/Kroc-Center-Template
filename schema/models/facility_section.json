@@ -1,0 +1,103 @@
+{
+  "name": "facility_section",
+  "label": "Facility Section",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "facility_section_name",
+      "label": "Facility Section Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 10000
+    },
+    {
+      "name": "hero_image",
+      "label": "Hero Image",
+      "datatype": "images",
+      "required": true,
+      "limit": "6",
+      "settings": {
+        "fileExtensionsErrorMessage": "Only files with the following extensions are allowed: undefined"
+      },
+      "sort": 10001
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "datatype": "wysiwyg_basic",
+      "required": true,
+      "sort": 10002
+    },
+    {
+      "name": "layout_variant",
+      "label": "Layout Variant",
+      "datatype": "dropdown",
+      "options": {
+        "Photo_left": "Photo-left",
+        "Photo_right": "Photo-right"
+      },
+      "sort": 10003
+    },
+    {
+      "name": "cta_label",
+      "label": "CTA Label",
+      "datatype": "text",
+      "sort": 10004
+    },
+    {
+      "name": "cta_url",
+      "label": "CTA URL",
+      "datatype": "link",
+      "sort": 10005
+    },
+    {
+      "name": "feature_pills",
+      "label": "Feature Pills",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "feature",
+          "label": "Feature",
+          "datatype": "text"
+        }
+      ],
+      "sort": 10006
+    },
+    {
+      "name": "hours_of_operation",
+      "label": "Hours of Operation",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "day",
+          "label": "Day",
+          "datatype": "text"
+        },
+        {
+          "name": "time",
+          "label": "Time",
+          "datatype": "textarea"
+        }
+      ],
+      "sort": 10007
+    },
+    {
+      "name": "status_mode",
+      "label": "Status Mode",
+      "datatype": "dropdown",
+      "options": {
+        "closed_maintenance": "Closed Maintenance",
+        "closed_seasonal": "Closed Seasonal",
+        "open": "Open"
+      },
+      "sort": 10008
+    },
+    {
+      "name": "status_message",
+      "label": "Status Message",
+      "datatype": "text",
+      "sort": 10009
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "external_embed",
+  "label": "External Embed",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 10000
+    },
+    {
+      "name": "embed_type",
+      "label": "Embed Type",
+      "datatype": "dropdown",
+      "required": true,
+      "options": {
+        "calendar": "Calendar",
+        "canva": "Canva",
+        "facebook": "Facebook",
+        "indesign": "Indesign",
+        "instagram": "Instagram",
+        "tiktok": "Tiktok",
+        "twitter": "Twitter",
+        "youtube": "YouTube"
+      },
+      "sort": 10001
+    },
+    {
+      "name": "embed_url",
+      "label": "Embed URL",
+      "datatype": "textarea",
+      "required": true,
+      "sort": 10002
+    }
+  ]
+}

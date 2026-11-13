@@ -1,0 +1,34 @@
+{
+  "name": "careers_benefits",
+  "label": "Careers Benefits",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "checklist_items",
+      "label": "Checklist Items",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "item",
+          "label": "Item",
+          "datatype": "text"
+        }
+      ],
+      "sort": 10001
+    },
+    {
+      "name": "video_url",
+      "label": "Video URL",
+      "datatype": "link",
+      "description": "Optional employee testimonial on YouTube (watch, youtu.be, embed or shorts link). Shown under the checklist.",
+      "sort": 10002
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "name": "stories",
+  "label": "Stories",
+  "type": "pageset",
+  "listed": true,
+  "parent": {
+    "page": "stories_page"
+  },
+  "fields": [
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "required": true,
+      "sort": 0
+    },
+    {
+      "name": "story_image_desktop",
+      "label": "Story Image Desktop",
+      "datatype": "images",
+      "required": true,
+      "limit": "",
+      "sort": 1
+    },
+    {
+      "name": "story_image_mobile",
+      "label": "Story Image Mobile",
+      "datatype": "images",
+      "limit": "",
+      "sort": 2
+    },
+    {
+      "name": "story_image_thumbnail",
+      "label": "Story Image Thumbnail",
+      "datatype": "images",
+      "limit": "",
+      "sort": 3
+    },
+    {
+      "name": "story_date",
+      "label": "Story Date",
+      "datatype": "date",
+      "required": true,
+      "sort": 4
+    },
+    {
+      "name": "story_body",
+      "label": "Story Body",
+      "datatype": "wysiwyg_basic",
+      "required": true,
+      "sort": 5
+    },
+    {
+      "name": "author",
+      "label": "Author",
+      "datatype": "text",
+      "required": true,
+      "sort": 6
+    },
+    {
+      "name": "author_location",
+      "label": "Author Location",
+      "datatype": "text",
+      "sort": 7
+    },
+    {
+      "name": "story_excerpt",
+      "label": "Story Excerpt",
+      "datatype": "textarea",
+      "sort": 8
+    },
+    {
+      "name": "story_cta_label",
+      "label": "Story CTA Label",
+      "datatype": "text",
+      "required": true,
+      "sort": 9
+    },
+    {
+      "name": "story_cta_url",
+      "label": "Story CTA URL",
+      "datatype": "link",
+      "sort": 10
+    },
+    {
+      "name": "donation_link",
+      "label": "Donation Link",
+      "datatype": "text",
+      "sort": 11
+    },
+    {
+      "name": "hashtag",
+      "label": "Hashtag",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "hashtag",
+          "label": "Hashtag",
+          "datatype": "text"
+        }
+      ],
+      "sort": 12
+    },
+    {
+      "name": "related_event",
+      "label": "Related Event",
+      "datatype": "one_to_one",
+      "relatedModel": "events",
+      "relatedField": "title",
+      "sort": 13
+    },
+    {
+      "name": "related_program_category",
+      "label": "Related Program Category",
+      "datatype": "one_to_one",
+      "required": true,
+      "relatedModel": "program_categories",
+      "relatedField": "category_name",
+      "sort": 14
+    },
+    {
+      "name": "external_article",
+      "label": "External Article",
+      "datatype": "link",
+      "sort": 15
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "name": "donate_impact",
+  "label": "Donate Impact",
+  "type": "block",
+  "description": "Impact stat + narrative + donor thank-you columns in one card (absorbed [donate_donors]).",
+  "listed": false,
+  "fields": [
+    {
+      "name": "stat_value",
+      "label": "Stat Value",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "stat_caption",
+      "label": "Stat Caption",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "sort": 10002
+    },
+    {
+      "name": "donor_groups",
+      "label": "Donor Groups",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "heading",
+          "label": "Heading",
+          "datatype": "text"
+        },
+        {
+          "name": "names",
+          "label": "Names",
+          "datatype": "textarea",
+          "description": "One name per line."
+        }
+      ],
+      "sort": 10003
+    }
+  ]
+}

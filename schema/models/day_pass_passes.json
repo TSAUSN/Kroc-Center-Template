@@ -1,0 +1,63 @@
+{
+  "name": "day_pass_passes",
+  "label": "Day Pass Passes",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "passes",
+      "label": "Passes",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "audience",
+          "label": "Audience",
+          "datatype": "text"
+        },
+        {
+          "name": "label",
+          "label": "Label",
+          "datatype": "text"
+        },
+        {
+          "name": "price",
+          "label": "Price",
+          "datatype": "currency"
+        },
+        {
+          "name": "ages",
+          "label": "Ages",
+          "datatype": "text"
+        },
+        {
+          "name": "cta_label",
+          "label": "CTA Label",
+          "datatype": "text"
+        },
+        {
+          "name": "cta_link",
+          "label": "CTA Link",
+          "datatype": "link"
+        },
+        {
+          "name": "sort_order",
+          "label": "Sort Order",
+          "datatype": "sort"
+        },
+        {
+          "name": "tractionrec_id",
+          "label": "Traction Rec ID",
+          "datatype": "text",
+          "description": "The Traction Rec Membership Type Id (a2g…) of this day pass. When set, the price and ages come from Traction Rec and the typed values in this row are ignored; Audience and Label are optional and override the name Traction Rec gives."
+        }
+      ],
+      "sort": 10001
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "blocks_catalog_page",
+  "label": "Blocks Catalog Page",
+  "type": "templateset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "sort": 1
+    }
+  ]
+}

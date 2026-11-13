@@ -1,0 +1,38 @@
+{
+  "name": "careers_jobs",
+  "label": "Careers Job Listings",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "departments",
+      "label": "Departments",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "department",
+          "label": "Department",
+          "datatype": "text"
+        },
+        {
+          "name": "location",
+          "label": "Location",
+          "datatype": "text"
+        },
+        {
+          "name": "icon",
+          "label": "Icon",
+          "datatype": "images",
+          "description": "Optional. Shown centred above the department name."
+        },
+        {
+          "name": "roles",
+          "label": "Roles",
+          "datatype": "textarea",
+          "description": "One role per line: Title | link to the posting. A line without a link shows as plain text."
+        }
+      ],
+      "sort": 10000
+    }
+  ]
+}

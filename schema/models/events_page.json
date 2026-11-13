@@ -1,0 +1,30 @@
+{
+  "name": "events_page",
+  "label": "Events Page",
+  "type": "templateset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "header_title",
+      "label": "Header Title",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "subheader",
+      "label": "Subheader",
+      "datatype": "textarea",
+      "required": true,
+      "sort": 2
+    },
+    {
+      "name": "hero_image",
+      "label": "Hero Image",
+      "datatype": "images",
+      "required": true,
+      "limit": "",
+      "sort": 3
+    }
+  ]
+}

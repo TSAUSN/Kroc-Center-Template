@@ -1,0 +1,40 @@
+{
+  "name": "quote",
+  "label": "Quote",
+  "type": "block",
+  "description": "A member or donor quote in a white card, with an optional photo or YouTube video beside it.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "quote",
+      "label": "Quote",
+      "datatype": "textarea",
+      "sort": 10001
+    },
+    {
+      "name": "attribution",
+      "label": "Attribution",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "photo",
+      "label": "Photo",
+      "datatype": "images",
+      "sort": 10003
+    },
+    {
+      "name": "video_url",
+      "label": "Video URL",
+      "datatype": "link",
+      "description": "A YouTube link. Shown instead of the photo.",
+      "sort": 10004
+    }
+  ]
+}

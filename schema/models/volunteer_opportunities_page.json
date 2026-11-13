@@ -1,0 +1,95 @@
+{
+  "name": "volunteer_opportunities_page",
+  "label": "Volunteer Opportunities Page",
+  "type": "templateset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "hero_title",
+      "label": "Hero Title",
+      "datatype": "text",
+      "sort": 1
+    },
+    {
+      "name": "hero_image",
+      "label": "Hero Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 2
+    },
+    {
+      "name": "hero_subtitle",
+      "label": "Hero Subtitle",
+      "datatype": "text",
+      "sort": 3
+    },
+    {
+      "name": "hero_cta_1_label",
+      "label": "Hero CTA 1 Label",
+      "datatype": "text",
+      "sort": 4
+    },
+    {
+      "name": "hero_cta_1_url",
+      "label": "Hero CTA 1 URL",
+      "datatype": "link",
+      "sort": 5
+    },
+    {
+      "name": "hero_cta_2_label",
+      "label": "Hero CTA 2 Label",
+      "datatype": "text",
+      "sort": 6
+    },
+    {
+      "name": "hero_cta_2_url",
+      "label": "Hero CTA 2 URL",
+      "datatype": "link",
+      "sort": 7
+    },
+    {
+      "name": "highlight_image",
+      "label": "Highlight Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 8
+    },
+    {
+      "name": "highlight_title",
+      "label": "Highlight Title",
+      "datatype": "text",
+      "sort": 9
+    },
+    {
+      "name": "highlight_body",
+      "label": "Highlight Body",
+      "datatype": "textarea",
+      "sort": 10
+    },
+    {
+      "name": "highlight_cta_label",
+      "label": "Highlight CTA Label",
+      "datatype": "text",
+      "sort": 11
+    },
+    {
+      "name": "highlight_cta_url",
+      "label": "Highlight CTA URL",
+      "datatype": "link",
+      "sort": 12
+    },
+    {
+      "name": "why_volunteer_image",
+      "label": "Why Volunteer Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 13
+    },
+    {
+      "name": "why_volunteer_body",
+      "label": "Why Volunteer Body",
+      "datatype": "textarea",
+      "sort": 14
+    }
+  ]
+}

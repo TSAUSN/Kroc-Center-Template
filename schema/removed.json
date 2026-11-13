@@ -1,0 +1,5 @@
+{
+  "$comment": "Models and fields to remove from every center. Applied only by the manual 'schema-removals' run, after the code that stopped using them is live (merged to production). Remove them from the main instance by hand, delete their schema/models file (for a model) or entry (for a field), and list them here. Clear an entry once every center has it removed.",
+  "models": [],
+  "fields": {}
+}

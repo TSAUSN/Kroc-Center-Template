@@ -1,0 +1,105 @@
+{
+  "name": "step_columns",
+  "label": "Step Columns",
+  "type": "block",
+  "description": "Side-by-side numbered steppers in white cards, each with its own note, buttons, document and footer. First variant: App & Portal Setup Steps.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "columns",
+      "label": "Columns",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "heading",
+          "label": "Heading",
+          "datatype": "text"
+        },
+        {
+          "name": "note",
+          "label": "Note",
+          "datatype": "text"
+        },
+        {
+          "name": "note_caution",
+          "label": "Note Is a Caution",
+          "datatype": "yes_no",
+          "description": "Shows the note in red.",
+          "options": {
+            "0": "No",
+            "1": "Yes"
+          }
+        },
+        {
+          "name": "accent",
+          "label": "Accent",
+          "datatype": "dropdown",
+          "options": {
+            "navy": "Navy",
+            "red": "Red"
+          }
+        },
+        {
+          "name": "steps",
+          "label": "Steps",
+          "datatype": "wysiwyg_basic",
+          "description": "A numbered list; each item (or paragraph) becomes a step."
+        },
+        {
+          "name": "cta_1_label",
+          "label": "CTA 1 Label",
+          "datatype": "text"
+        },
+        {
+          "name": "cta_1_link",
+          "label": "CTA 1 Link",
+          "datatype": "link"
+        },
+        {
+          "name": "cta_2_label",
+          "label": "CTA 2 Label",
+          "datatype": "text"
+        },
+        {
+          "name": "cta_2_link",
+          "label": "CTA 2 Link",
+          "datatype": "link"
+        },
+        {
+          "name": "document_title",
+          "label": "Document Title",
+          "datatype": "text"
+        },
+        {
+          "name": "document_description",
+          "label": "Document Description",
+          "datatype": "text"
+        },
+        {
+          "name": "document_link",
+          "label": "Document Link",
+          "datatype": "link",
+          "description": "The file's URL (e.g. a PDF in the media library)."
+        },
+        {
+          "name": "footer_note",
+          "label": "Footer Note",
+          "datatype": "wysiwyg_basic"
+        }
+      ],
+      "sort": 10002
+    }
+  ]
+}

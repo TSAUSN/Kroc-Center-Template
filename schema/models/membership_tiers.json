@@ -1,0 +1,72 @@
+{
+  "name": "membership_tiers",
+  "label": "Membership Tiers",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "tiers",
+      "label": "Tiers",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "tier_name",
+          "label": "Tier Name",
+          "datatype": "text"
+        },
+        {
+          "name": "age_note",
+          "label": "Age Note",
+          "datatype": "text"
+        },
+        {
+          "name": "price",
+          "label": "Price",
+          "datatype": "currency"
+        },
+        {
+          "name": "period",
+          "label": "Period",
+          "datatype": "text"
+        },
+        {
+          "name": "sort_order",
+          "label": "Sort Order",
+          "datatype": "sort"
+        },
+        {
+          "name": "tractionrec_id",
+          "label": "Traction Rec ID",
+          "datatype": "text",
+          "description": "The Traction Rec Membership Type Id (a2g…). When set, the price, period and ages come from Traction Rec and the typed values in this row are ignored; Tier Name is optional and overrides the name Traction Rec gives."
+        }
+      ],
+      "sort": 10003
+    },
+    {
+      "name": "fine_print",
+      "label": "Fine Print",
+      "datatype": "textarea",
+      "description": "Write {fee} where the registration fee goes; Traction Rec fills it in for the memberships shown. With no fee, that sentence is left out.",
+      "sort": 10004
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "name": "card_grid",
+  "label": "Card Grid",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "cards",
+      "label": "Cards",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "title",
+          "label": "Title",
+          "datatype": "text"
+        },
+        {
+          "name": "body",
+          "label": "Body",
+          "datatype": "textarea"
+        },
+        {
+          "name": "pills",
+          "label": "Pills",
+          "datatype": "textarea",
+          "description": "One pill per line."
+        },
+        {
+          "name": "icon",
+          "label": "Icon",
+          "datatype": "images"
+        },
+        {
+          "name": "photo",
+          "label": "Photo",
+          "datatype": "images",
+          "description": "Replaces the icon band with a full-bleed photo."
+        },
+        {
+          "name": "eyebrow",
+          "label": "Eyebrow",
+          "datatype": "text"
+        },
+        {
+          "name": "accent",
+          "label": "Accent",
+          "datatype": "dropdown",
+          "description": "Colour bar on top; also colours the eyebrow, checks and button.",
+          "options": {
+            "navy": "Navy",
+            "red": "Red"
+          }
+        },
+        {
+          "name": "checklist",
+          "label": "Checklist",
+          "datatype": "textarea",
+          "description": "One item per line."
+        },
+        {
+          "name": "cta_label",
+          "label": "CTA Label",
+          "datatype": "text"
+        },
+        {
+          "name": "cta_link",
+          "label": "CTA Link",
+          "datatype": "link"
+        }
+      ],
+      "sort": 10001
+    }
+  ]
+}

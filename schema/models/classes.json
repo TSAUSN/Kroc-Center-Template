@@ -1,0 +1,158 @@
+{
+  "name": "classes",
+  "label": "Classes",
+  "type": "pageset",
+  "listed": true,
+  "parent": {
+    "model": "program_categories"
+  },
+  "fields": [
+    {
+      "name": "class_name",
+      "label": "Class Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 0
+    },
+    {
+      "name": "courses",
+      "label": "Courses",
+      "datatype": "one_to_one",
+      "relatedModel": "courses",
+      "relatedField": "course_name",
+      "sort": 1
+    },
+    {
+      "name": "class_type",
+      "label": "Class Type",
+      "datatype": "dropdown",
+      "options": {
+        "roster": "Roster"
+      },
+      "sort": 2
+    },
+    {
+      "name": "day_of_week",
+      "label": "Day of Week",
+      "datatype": "dropdown",
+      "options": {
+        "friday": "Friday",
+        "monday": "Monday",
+        "saturday": "Saturday",
+        "sunday": "Sunday",
+        "thursday": "Thursday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday"
+      },
+      "sort": 3
+    },
+    {
+      "name": "time",
+      "label": "Time",
+      "datatype": "text",
+      "sort": 4
+    },
+    {
+      "name": "class_end_date",
+      "label": "Class End Date",
+      "datatype": "date",
+      "sort": 5
+    },
+    {
+      "name": "class_start_date",
+      "label": "Class Start Date",
+      "datatype": "date",
+      "sort": 6
+    },
+    {
+      "name": "age_range",
+      "label": "Age Range",
+      "datatype": "text",
+      "sort": 7
+    },
+    {
+      "name": "instructors",
+      "label": "Instructors",
+      "datatype": "text",
+      "sort": 8
+    },
+    {
+      "name": "member_price",
+      "label": "Member Price",
+      "datatype": "currency",
+      "sort": 9
+    },
+    {
+      "name": "public_price",
+      "label": "Public Price",
+      "datatype": "currency",
+      "sort": 10
+    },
+    {
+      "name": "price",
+      "label": "Price",
+      "datatype": "currency",
+      "sort": 11
+    },
+    {
+      "name": "hero_image_desktop",
+      "label": "Hero Image Desktop",
+      "datatype": "images",
+      "limit": "",
+      "sort": 12
+    },
+    {
+      "name": "enrollment_status",
+      "label": "Enrollment Status",
+      "datatype": "dropdown",
+      "options": {
+        "closed": "Closed",
+        "full": "Full",
+        "open": "Open",
+        "waitlist": "Waitlist"
+      },
+      "sort": 13
+    },
+    {
+      "name": "spots_remaining",
+      "label": "Spots Remaining",
+      "datatype": "number",
+      "settings": {
+        "defaultValue": 0
+      },
+      "sort": 14
+    },
+    {
+      "name": "facility_location",
+      "label": "Facility Location",
+      "datatype": "text",
+      "sort": 15
+    },
+    {
+      "name": "deep_link_url",
+      "label": "Deep Link URL",
+      "datatype": "link",
+      "sort": 16
+    },
+    {
+      "name": "tags",
+      "label": "Tags",
+      "datatype": "one_to_many",
+      "relatedModel": "tags",
+      "relatedField": "name",
+      "sort": 19
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "datatype": "wysiwyg_basic",
+      "sort": 20
+    },
+    {
+      "name": "tractionrec_id",
+      "label": "tractionrec ID",
+      "datatype": "text",
+      "sort": 21
+    }
+  ]
+}

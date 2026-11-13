@@ -1,0 +1,42 @@
+{
+  "name": "stories_page",
+  "label": "Stories Page",
+  "type": "templateset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "header_title",
+      "label": "Header Title",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "subheader",
+      "label": "Subheader",
+      "datatype": "textarea",
+      "required": true,
+      "sort": 2
+    },
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 3
+    },
+    {
+      "name": "hero_image_desktop",
+      "label": "Hero Image Desktop",
+      "datatype": "images",
+      "limit": "",
+      "sort": 4
+    },
+    {
+      "name": "hero_image_mobile",
+      "label": "Hero Image Mobile",
+      "datatype": "images",
+      "limit": "",
+      "sort": 5
+    }
+  ]
+}

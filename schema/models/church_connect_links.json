@@ -1,0 +1,47 @@
+{
+  "name": "church_connect_links",
+  "label": "Church Connect Links",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "items",
+      "label": "Items",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "label",
+          "label": "Label",
+          "datatype": "text"
+        },
+        {
+          "name": "link",
+          "label": "Link",
+          "datatype": "link"
+        },
+        {
+          "name": "style",
+          "label": "Style",
+          "datatype": "dropdown",
+          "options": {
+            "primary": "Primary",
+            "secondary": "Secondary",
+            "tertiary": "Tertiary"
+          }
+        },
+        {
+          "name": "sort_order",
+          "label": "Sort Order",
+          "datatype": "sort"
+        }
+      ],
+      "sort": 10001
+    }
+  ]
+}

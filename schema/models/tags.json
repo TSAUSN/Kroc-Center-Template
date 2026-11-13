@@ -1,0 +1,39 @@
+{
+  "name": "tags",
+  "label": "Tags",
+  "type": "pageset",
+  "listed": true,
+  "parent": {
+    "page": "tags_page"
+  },
+  "fields": [
+    {
+      "name": "name",
+      "label": "Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "datatype": "wysiwyg_basic",
+      "required": true,
+      "sort": 2
+    },
+    {
+      "name": "position",
+      "label": "Position",
+      "datatype": "sort",
+      "required": true,
+      "sort": 3
+    },
+    {
+      "name": "tag_icon",
+      "label": "Tag Icon",
+      "datatype": "images",
+      "limit": "",
+      "sort": 4
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "name": "volunteer_opportunities",
+  "label": "Volunteer Opportunities",
+  "type": "pageset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "opportunity_title",
+      "label": "Opportunity Title",
+      "datatype": "text",
+      "sort": 1
+    },
+    {
+      "name": "hero_image",
+      "label": "Hero Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 2
+    },
+    {
+      "name": "excerpt",
+      "label": "Excerpt",
+      "datatype": "textarea",
+      "required": true,
+      "sort": 3
+    },
+    {
+      "name": "start_date",
+      "label": "Start Date",
+      "datatype": "datetime",
+      "required": true,
+      "sort": 4
+    },
+    {
+      "name": "end_date",
+      "label": "End Date",
+      "datatype": "datetime",
+      "sort": 5
+    },
+    {
+      "name": "about_this_opportunity",
+      "label": "About this Opportunity",
+      "datatype": "wysiwyg_basic",
+      "required": true,
+      "sort": 6
+    },
+    {
+      "name": "shifts",
+      "label": "Shifts",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "label",
+          "label": "Label",
+          "datatype": "text"
+        },
+        {
+          "name": "time",
+          "label": "Time",
+          "datatype": "text"
+        }
+      ],
+      "sort": 7
+    },
+    {
+      "name": "role_requirements",
+      "label": "Role Requirements",
+      "datatype": "wysiwyg_basic",
+      "sort": 8
+    },
+    {
+      "name": "required_trainings",
+      "label": "Required Trainings",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "training_name",
+          "label": "Training Name",
+          "datatype": "text"
+        }
+      ],
+      "sort": 9
+    },
+    {
+      "name": "location",
+      "label": "Location",
+      "datatype": "text",
+      "sort": 10
+    },
+    {
+      "name": "register_link",
+      "label": "Register Link",
+      "datatype": "link",
+      "sort": 11
+    },
+    {
+      "name": "redirect_url",
+      "label": "Redirect URL",
+      "datatype": "link",
+      "sort": 12
+    },
+    {
+      "name": "contact_name",
+      "label": "Contact Name",
+      "datatype": "text",
+      "sort": 13
+    },
+    {
+      "name": "contact_phone",
+      "label": "Contact Phone",
+      "datatype": "text",
+      "sort": 14
+    },
+    {
+      "name": "contact_email",
+      "label": "Contact Email",
+      "datatype": "text",
+      "sort": 15
+    }
+  ]
+}

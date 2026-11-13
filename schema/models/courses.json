@@ -1,0 +1,65 @@
+{
+  "name": "courses",
+  "label": "Courses",
+  "type": "pageset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "course_name",
+      "label": "Course Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "programs",
+      "label": "Programs",
+      "datatype": "one_to_one",
+      "relatedModel": "programs",
+      "relatedField": "program_name",
+      "sort": 2
+    },
+    {
+      "name": "hero_image_desktop",
+      "label": "Hero Image Desktop",
+      "datatype": "images",
+      "limit": "",
+      "sort": 3
+    },
+    {
+      "name": "hero_subtitle",
+      "label": "Hero Subtitle",
+      "datatype": "textarea",
+      "sort": 4
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "datatype": "wysiwyg_basic",
+      "sort": 5
+    },
+    {
+      "name": "sort_order",
+      "label": "Sort Order",
+      "datatype": "sort",
+      "sort": 7
+    },
+    {
+      "name": "tractionrec_id",
+      "label": "tractionrec ID",
+      "datatype": "text",
+      "sort": 8
+    },
+    {
+      "name": "hide_class_pages",
+      "label": "Hide Class Pages",
+      "datatype": "yes_no",
+      "description": "Turn on for courses where people pick a time on the course page (e.g. swim lessons). This course's classes then link here, and their class pages send visitors back to this page.",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      },
+      "sort": 10000
+    }
+  ]
+}

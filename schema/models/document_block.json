@@ -1,0 +1,40 @@
+{
+  "name": "document_block",
+  "label": "Document Block",
+  "type": "block",
+  "description": "Downloadable files as a list of cards: each card is a download button for an uploaded file. First variant: App & Portal Help Documents.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "documents",
+      "label": "Documents",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "title",
+          "label": "Title",
+          "datatype": "text",
+          "description": "The link label, e.g. How to access my Community Portal."
+        },
+        {
+          "name": "description",
+          "label": "Description",
+          "datatype": "text"
+        },
+        {
+          "name": "file",
+          "label": "File",
+          "datatype": "images",
+          "description": "Upload the PDF (or any file) to the media library and pick it here."
+        }
+      ],
+      "sort": 10001
+    }
+  ]
+}

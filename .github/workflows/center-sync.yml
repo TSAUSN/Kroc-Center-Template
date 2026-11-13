@@ -1,0 +1,76 @@
+name: Center sync
+
+# Path A: one template repo → every center instance in centers.json.
+#   push to stage      → models (additive) then code saved to each center's dev version
+#   push to production → changed code published dev → live; views of deleted files removed
+#   manual run         → full sync (onboarding), model removals, or models to one test center
+# Design + rules: docs/center-sync.md
+
+on:
+  push:
+    branches: [stage, production]
+  workflow_dispatch:
+    inputs:
+      task:
+        description: What to run
+        type: choice
+        default: schema-one-center
+        options:
+          - schema-one-center # additive models only, e.g. to preview a model branch on a test center
+          - schema-removals # apply schema/removed.json (after the production merge)
+          - stage-full # every model + every file to dev (onboarding a center)
+          - production-full # publish every file (onboarding a center)
+      center:
+        description: Center id from centers.json (empty = all centers)
+        type: string
+        required: false
+      dry_run:
+        description: Dry run (report only)
+        type: boolean
+        default: true
+
+concurrency:
+  group: center-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy
+        if: github.event_name == 'push'
+        env:
+          CENTER_SECRETS: ${{ toJSON(secrets) }}
+          BRANCH: ${{ github.ref_name }}
+          DIFF_BASE: ${{ github.event.before }}
+        run: node tools/center-sync/cli.mjs deploy --branch "$BRANCH"
+
+      - name: Manual run
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          CENTER_SECRETS: ${{ toJSON(secrets) }}
+          TASK: ${{ inputs.task }}
+          CENTER: ${{ inputs.center }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          args=()
+          [ -n "$CENTER" ] && args+=(--center "$CENTER")
+          [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
+          case "$TASK" in
+            schema-one-center)
+              [ -n "$CENTER" ] || { echo "schema-one-center needs a center"; exit 1; }
+              node tools/center-sync/cli.mjs schema "${args[@]}" ;;
+            schema-removals) node tools/center-sync/cli.mjs schema --removals "${args[@]}" ;;
+            stage-full) node tools/center-sync/cli.mjs deploy --branch stage --full "${args[@]}" ;;
+            production-full) node tools/center-sync/cli.mjs deploy --branch production --full "${args[@]}" ;;
+          esac

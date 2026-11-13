@@ -1,0 +1,51 @@
+{
+  "name": "about_vision",
+  "label": "About Vision",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "image",
+      "label": "Image",
+      "datatype": "images",
+      "limit": "",
+      "sort": 10001
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "sort": 10003
+    },
+    {
+      "name": "checklist_items",
+      "label": "Checklist Items",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "item",
+          "label": "Item",
+          "datatype": "text"
+        },
+        {
+          "name": "sort_order",
+          "label": "Sort Order",
+          "datatype": "sort"
+        }
+      ],
+      "sort": 10004
+    }
+  ]
+}

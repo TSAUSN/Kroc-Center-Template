@@ -1,0 +1,60 @@
+{
+  "name": "homepage",
+  "label": "Homepage",
+  "type": "templateset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "hero_eyebrow",
+      "label": "Hero Eyebrow",
+      "datatype": "text",
+      "sort": 1
+    },
+    {
+      "name": "hero_title",
+      "label": "Hero Title",
+      "datatype": "text",
+      "required": true,
+      "sort": 2
+    },
+    {
+      "name": "hero_subtitle",
+      "label": "Hero Subtitle",
+      "datatype": "textarea",
+      "required": true,
+      "sort": 3
+    },
+    {
+      "name": "hero_image",
+      "label": "Hero Image",
+      "datatype": "images",
+      "required": true,
+      "limit": "",
+      "sort": 4
+    },
+    {
+      "name": "hero_primary_cta_label",
+      "label": "Hero Primary CTA Label",
+      "datatype": "text",
+      "sort": 5
+    },
+    {
+      "name": "hero_primary_cta_url",
+      "label": "Hero Primary CTA URL",
+      "datatype": "link",
+      "sort": 6
+    },
+    {
+      "name": "hero_secondary_cta_label",
+      "label": "Hero Secondary CTA Label",
+      "datatype": "text",
+      "sort": 7
+    },
+    {
+      "name": "hero_secondary_cta_url",
+      "label": "Hero Secondary CTA URL",
+      "datatype": "link",
+      "sort": 8
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "name": "clippings",
+  "label": "Globals",
+  "type": "dataset",
+  "listed": true,
+  "fields": [
+    {
+      "name": "site_name",
+      "label": "Site Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 1
+    },
+    {
+      "name": "logo",
+      "label": "Site Logo",
+      "datatype": "images",
+      "sort": 2
+    },
+    {
+      "name": "facility_name",
+      "label": "Facility Name",
+      "datatype": "text",
+      "required": true,
+      "sort": 2
+    },
+    {
+      "name": "general_hours",
+      "label": "General Hours",
+      "datatype": "text",
+      "required": true,
+      "sort": 3
+    },
+    {
+      "name": "address",
+      "label": "Address",
+      "datatype": "text",
+      "sort": 4
+    },
+    {
+      "name": "phone",
+      "label": "Phone",
+      "datatype": "text",
+      "sort": 5
+    },
+    {
+      "name": "email",
+      "label": "Email",
+      "datatype": "text",
+      "sort": 6
+    },
+    {
+      "name": "tractionrec",
+      "label": "TractionRec",
+      "datatype": "yes_no",
+      "required": true,
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      },
+      "sort": 7
+    },
+    {
+      "name": "donation_link",
+      "label": "Donation Link",
+      "datatype": "link",
+      "sort": 8
+    },
+    {
+      "name": "connect_band_hero_image",
+      "label": "Connect Band Hero Image",
+      "datatype": "images",
+      "required": true,
+      "limit": "",
+      "sort": 9
+    },
+    {
+      "name": "social_handles",
+      "label": "Social Handles",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "platform",
+          "label": "Platform",
+          "datatype": "text"
+        },
+        {
+          "name": "platform_url",
+          "label": "Platform URL",
+          "datatype": "link"
+        }
+      ],
+      "sort": 10
+    },
+    {
+      "name": "territory_links",
+      "label": "Territory Links",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "territory_name",
+          "label": "Territory Name",
+          "datatype": "text"
+        },
+        {
+          "name": "territory_url",
+          "label": "Territory URL",
+          "datatype": "link"
+        }
+      ],
+      "sort": 11
+    },
+    {
+      "name": "timezone",
+      "label": "Timezone",
+      "datatype": "dropdown",
+      "options": {
+        "": ""
+      },
+      "sort": 12
+    },
+    {
+      "name": "newsletter_signup_url",
+      "label": "Newsletter Signup URL",
+      "datatype": "link",
+      "sort": 13
+    },
+    {
+      "name": "footer_links",
+      "label": "Footer Links",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "site_name",
+          "label": "Site Name",
+          "datatype": "text"
+        },
+        {
+          "name": "site_url",
+          "label": "Site URL",
+          "datatype": "link"
+        }
+      ],
+      "sort": 14
+    },
+    {
+      "name": "membership_purchase_url",
+      "label": "Membership Purchase URL",
+      "datatype": "link",
+      "description": "Where membership and day pass purchase buttons go when a block has no link of its own: the Traction Rec online store's membership page (e.g. https://<portal>.my.site.com/s/membership).",
+      "sort": 10000
+    }
+  ]
+}

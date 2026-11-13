@@ -1,0 +1,18 @@
+{
+  "$comment": "Center sync (tools/center-sync, docs/center-sync.md). main = where models are designed and exported from; centers = instances that receive schema/ + webengine/. tokenEnv names the env var / GitHub secret holding that instance's developer token.",
+  "main": { "id": "kroc", "zuid": "8-80c0bba6b8-lhkcc7", "tokenEnv": "ZESTY_TOKEN_MAIN" },
+  "centers": [
+    { "id": "national", "label": "KROC National (Path A test)", "zuid": "8-cec38bc5e1-nkc8tg", "tokenEnv": "ZESTY_TOKEN_NATIONAL" }
+  ],
+  "schemaExclude": ["test_page"],
+  "codeExclude": [
+    "views/z/**",
+    "views/_runner/**",
+    "views/tractionrec/**",
+    "views/test_page",
+    "views/desktop_design.html",
+    "views/mobile_design.html",
+    "views/custom-endpoints/test.json",
+    "styles/tailwind.css"
+  ]
+}

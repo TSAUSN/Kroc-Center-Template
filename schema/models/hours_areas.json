@@ -1,0 +1,45 @@
+{
+  "name": "hours_areas",
+  "label": "Hours by Area",
+  "type": "block",
+  "description": "Grid of compact per-area hours cards, each with a live Open/Closed pill.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "eyebrow",
+      "label": "Eyebrow",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "areas",
+      "label": "Areas",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "area",
+          "label": "Area",
+          "datatype": "text"
+        },
+        {
+          "name": "note",
+          "label": "Note",
+          "datatype": "text"
+        },
+        {
+          "name": "hours",
+          "label": "Hours",
+          "datatype": "textarea",
+          "description": "One row per line: Day | Time, e.g. Mon–Fri | 5:30 AM – 7:45 PM, or Sunday | Closed."
+        }
+      ],
+      "sort": 10002
+    }
+  ]
+}

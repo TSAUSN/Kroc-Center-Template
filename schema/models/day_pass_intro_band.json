@@ -1,0 +1,50 @@
+{
+  "name": "day_pass_intro_band",
+  "label": "Day Pass Intro Band",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "wysiwyg_basic",
+      "sort": 10002
+    },
+    {
+      "name": "primary_cta_label",
+      "label": "Primary CTA Label",
+      "datatype": "text",
+      "sort": 10003
+    },
+    {
+      "name": "primary_cta_url",
+      "label": "Primary CTA URL",
+      "datatype": "link",
+      "sort": 10004
+    },
+    {
+      "name": "secondary_cta_label",
+      "label": "Secondary CTA Label",
+      "datatype": "text",
+      "sort": 10005
+    },
+    {
+      "name": "secondary_cta_url",
+      "label": "Secondary CTA URL",
+      "datatype": "link",
+      "sort": 10006
+    }
+  ]
+}

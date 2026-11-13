@@ -1,0 +1,66 @@
+{
+  "name": "church_ministries",
+  "label": "Church Ministries",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "ministries_heading",
+      "label": "Ministries Heading",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "ministries",
+      "label": "Ministries",
+      "datatype": "repeater",
+      "subFields": [
+        {
+          "name": "title",
+          "label": "Title",
+          "datatype": "text"
+        },
+        {
+          "name": "when",
+          "label": "When",
+          "datatype": "text"
+        },
+        {
+          "name": "description",
+          "label": "Description",
+          "datatype": "textarea"
+        },
+        {
+          "name": "sort_order",
+          "label": "Sort Order",
+          "datatype": "sort"
+        }
+      ],
+      "sort": 10001
+    },
+    {
+      "name": "prayer_request_heading",
+      "label": "Prayer Request Heading",
+      "datatype": "text",
+      "sort": 10002
+    },
+    {
+      "name": "prayer_request_body",
+      "label": "Prayer Request Body",
+      "datatype": "textarea",
+      "sort": 10003
+    },
+    {
+      "name": "prayer_request_cta_label",
+      "label": "Prayer Request CTA Label",
+      "datatype": "text",
+      "sort": 10004
+    },
+    {
+      "name": "prayer_request_cta_link",
+      "label": "Prayer Request CTA Link",
+      "datatype": "link",
+      "sort": 10005
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "name": "donation_block",
+  "label": "Donation Block",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "block_name",
+      "label": "Block Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "datatype": "text",
+      "sort": 10001
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "datatype": "textarea",
+      "sort": 10002
+    },
+    {
+      "name": "primary_cta_label",
+      "label": "Primary CTA Label",
+      "datatype": "text",
+      "sort": 10003
+    },
+    {
+      "name": "primary_cta_url",
+      "label": "Primary CTA URL",
+      "datatype": "link",
+      "sort": 10004
+    },
+    {
+      "name": "secondary_cta_label",
+      "label": "Secondary CTA Label",
+      "datatype": "text",
+      "sort": 10005
+    },
+    {
+      "name": "secondary_cta_url",
+      "label": "Secondary CTA URL",
+      "datatype": "link",
+      "sort": 10006
+    },
+    {
+      "name": "background_variant",
+      "label": "Background Variant",
+      "datatype": "dropdown",
+      "options": {
+        "navy": "Navy",
+        "red": "Red"
+      },
+      "sort": 10007
+    }
+  ]
+}

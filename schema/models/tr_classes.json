@@ -1,0 +1,275 @@
+{
+  "name": "tr_classes",
+  "label": "TR Classes",
+  "type": "dataset",
+  "description": "Traction Rec data, written by kroc-tractionrec-sync. Do not edit: the next sync overwrites every field. Source: TREX1__Course_Session_Option__c.",
+  "listed": false,
+  "fields": [
+    {
+      "name": "tractionrec_id",
+      "label": "Traction Rec Id",
+      "datatype": "text",
+      "description": "TREX1__Course_Session_Option__c.Id. The sync finds this item by it.",
+      "required": true,
+      "sort": 10000
+    },
+    {
+      "name": "name",
+      "label": "Name",
+      "datatype": "text",
+      "description": "TREX1__Course_Session_Option__c.Name",
+      "required": true,
+      "sort": 10001
+    },
+    {
+      "name": "page",
+      "label": "Page",
+      "datatype": "one_to_one",
+      "description": "The Zesty Classes page for this record (written by the sync).",
+      "relatedModel": "classes",
+      "relatedField": "class_name",
+      "sort": 10002
+    },
+    {
+      "name": "course",
+      "label": "Course",
+      "datatype": "one_to_one",
+      "description": "TREX1__cso_Course_Session__r.TREX1__Course__c",
+      "relatedModel": "tr_courses",
+      "relatedField": "name",
+      "sort": 10003
+    },
+    {
+      "name": "product",
+      "label": "Product",
+      "datatype": "one_to_one",
+      "description": "TREX1__Course_Option__r.TREX1__Product__c",
+      "relatedModel": "tr_products",
+      "relatedField": "name",
+      "sort": 10004
+    },
+    {
+      "name": "deep_link_url",
+      "label": "Register Link",
+      "datatype": "link",
+      "description": "TREX1__Course_Session_Option__c.Deep_Link_URL__c (org formula)",
+      "sort": 10005
+    },
+    {
+      "name": "available_online",
+      "label": "Available Online",
+      "datatype": "yes_no",
+      "description": "TREX1__Course_Session_Option__c.TREX1__Available_Online__c",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      },
+      "sort": 10006
+    },
+    {
+      "name": "option_available",
+      "label": "Option Available",
+      "datatype": "yes_no",
+      "description": "TREX1__Course_Session_Option__c.TREX1__Option_Available__c",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      },
+      "sort": 10007
+    },
+    {
+      "name": "course_session_id",
+      "label": "Course Session Id",
+      "datatype": "text",
+      "description": "TREX1__Course_Session_Option__c.TREX1__cso_Course_Session__c",
+      "sort": 10008
+    },
+    {
+      "name": "course_session_name",
+      "label": "Course Session",
+      "datatype": "text",
+      "description": "TREX1__cso_Course_Session__r.Name",
+      "sort": 10009
+    },
+    {
+      "name": "season",
+      "label": "Season",
+      "datatype": "text",
+      "description": "TREX1__cso_Course_Session__r.TREX1__Session__r.Name, e.g. \"Fall 2026\"",
+      "sort": 10010
+    },
+    {
+      "name": "course_option_id",
+      "label": "Course Option Id",
+      "datatype": "text",
+      "description": "TREX1__Course_Session_Option__c.TREX1__Course_Option__c",
+      "sort": 10011
+    },
+    {
+      "name": "start_date",
+      "label": "Start Date",
+      "datatype": "date",
+      "description": "TREX1__Course_Option__r.TREX1__Start_Date__c",
+      "sort": 10012
+    },
+    {
+      "name": "end_date",
+      "label": "End Date",
+      "datatype": "date",
+      "description": "TREX1__Course_Option__r.TREX1__End_Date__c",
+      "sort": 10013
+    },
+    {
+      "name": "day_of_week",
+      "label": "Days",
+      "datatype": "text",
+      "description": "TREX1__Course_Option__r.TREX1__Day_of_Week__c (multipicklist, kept as \"Monday;Wednesday\")",
+      "sort": 10014
+    },
+    {
+      "name": "start_time",
+      "label": "Start Time",
+      "datatype": "text",
+      "description": "TREX1__Course_Option__r.TREX1__Start_Time_Formula__c (\"19:00:00.000\")",
+      "sort": 10015
+    },
+    {
+      "name": "end_time",
+      "label": "End Time",
+      "datatype": "text",
+      "description": "TREX1__Course_Option__r.TREX1__End_Time_Formula__c (\"20:00:00.000\")",
+      "sort": 10016
+    },
+    {
+      "name": "age_min",
+      "label": "Age Min",
+      "datatype": "number",
+      "description": "TREX1__Course_Option__r.TREX1__Age_Min__c",
+      "sort": 10017
+    },
+    {
+      "name": "age_max",
+      "label": "Age Max",
+      "datatype": "number",
+      "description": "TREX1__Course_Option__r.TREX1__Age_Max__c (empty = no upper limit)",
+      "sort": 10018
+    },
+    {
+      "name": "instructor",
+      "label": "Instructor",
+      "datatype": "text",
+      "description": "TREX1__Course_Option__r.TREX1__Instructor__c (free text)",
+      "sort": 10019
+    },
+    {
+      "name": "capacity",
+      "label": "Capacity",
+      "datatype": "number",
+      "description": "TREX1__Course_Option__r.TREX1__Capacity__c",
+      "sort": 10020
+    },
+    {
+      "name": "registration_total",
+      "label": "Registrations",
+      "datatype": "number",
+      "description": "TREX1__Course_Option__r.TREX1__Registration_Total__c",
+      "sort": 10021
+    },
+    {
+      "name": "capacity_available",
+      "label": "Spots Remaining",
+      "datatype": "number",
+      "description": "TREX1__Course_Option__r.TREX1__Total_Capacity_Available__c",
+      "sort": 10022
+    },
+    {
+      "name": "unlimited_capacity",
+      "label": "Unlimited Capacity",
+      "datatype": "yes_no",
+      "description": "TREX1__Course_Option__r.TREX1__Unlimited_Capacity__c",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      },
+      "sort": 10023
+    },
+    {
+      "name": "show_capacity_online",
+      "label": "Show Capacity Online",
+      "datatype": "yes_no",
+      "description": "TREX1__Course_Option__r.TREX1__Show_Capacity_Online__c",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      },
+      "sort": 10024
+    },
+    {
+      "name": "waitlist_total",
+      "label": "Waitlist Total",
+      "datatype": "number",
+      "description": "TREX1__Course_Option__r.TREX1__Waitlist_Total__c",
+      "sort": 10025
+    },
+    {
+      "name": "waitlist_capacity",
+      "label": "Waitlist Capacity",
+      "datatype": "number",
+      "description": "TREX1__Course_Option__r.TREX1__Waitlist_Capacity__c",
+      "sort": 10026
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "datatype": "textarea",
+      "description": "TREX1__Course_Option__r.TREX1__Description__c",
+      "sort": 10027
+    },
+    {
+      "name": "last_modified_date",
+      "label": "Last Modified",
+      "datatype": "datetime",
+      "description": "TREX1__Course_Session_Option__c.LastModifiedDate (UTC)",
+      "sort": 10028
+    },
+    {
+      "name": "system_modstamp",
+      "label": "System Modstamp",
+      "datatype": "datetime",
+      "description": "TREX1__Course_Session_Option__c.SystemModstamp (UTC)",
+      "sort": 10029
+    },
+    {
+      "name": "sync_hash",
+      "label": "Sync Hash",
+      "datatype": "text",
+      "description": "Hash of this record's Traction Rec values. The sync rewrites the item only when it changes.",
+      "sort": 10030
+    },
+    {
+      "name": "synced_at",
+      "label": "Synced At",
+      "datatype": "datetime",
+      "description": "When the sync last wrote this item (UTC).",
+      "sort": 10031
+    },
+    {
+      "name": "active",
+      "label": "Active",
+      "datatype": "yes_no",
+      "description": "1 = published online in Traction Rec now. 0 = no longer published (removed, outside its registration window, set Not Available, or its parent is gone); the site hides it. Set by the sync.",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      },
+      "sort": 10032
+    },
+    {
+      "name": "inactive_reason",
+      "label": "Inactive Reason",
+      "datatype": "textarea",
+      "description": "Why active is 0: Traction Rec's own reason (e.g. Outside Course Option Registration Timeframe), Removed from Traction Rec, or a missing parent. Empty when active.",
+      "sort": 10033
+    }
+  ]
+}

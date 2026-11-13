@@ -1,0 +1,56 @@
+{
+  "name": "custom_forms",
+  "label": "Custom Forms",
+  "type": "block",
+  "listed": false,
+  "fields": [
+    {
+      "name": "form_name",
+      "label": "Form Name",
+      "datatype": "text",
+      "sort": 10000
+    },
+    {
+      "name": "form_selector",
+      "label": "Form Selector",
+      "datatype": "link",
+      "sort": 10001
+    },
+    {
+      "name": "submit_label",
+      "label": "Submit Label",
+      "datatype": "text",
+      "required": true,
+      "sort": 10002
+    },
+    {
+      "name": "submit_url",
+      "label": "Submit URL",
+      "datatype": "link",
+      "required": true,
+      "sort": 10003
+    },
+    {
+      "name": "post_submit_behavior",
+      "label": "Post-Submit Behavior",
+      "datatype": "dropdown",
+      "options": {
+        "Redirect to URL": "Redirect to URL",
+        "Show Message": "Show Message"
+      },
+      "sort": 10004
+    },
+    {
+      "name": "success_message",
+      "label": "Success Message",
+      "datatype": "text",
+      "sort": 10005
+    },
+    {
+      "name": "redirect_url",
+      "label": "Redirect URL",
+      "datatype": "link",
+      "sort": 10006
+    }
+  ]
+}
