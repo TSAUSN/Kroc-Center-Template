@@ -28,6 +28,10 @@ on:
         description: Dry run (report only)
         type: boolean
         default: true
+      allow_content_loss:
+        description: Allow deleting models that have items / fields that hold values on a center (content is never synced, so it can't be restored)
+        type: boolean
+        default: false
 
 concurrency:
   group: center-sync
@@ -62,10 +66,12 @@ jobs:
           TASK: ${{ inputs.task }}
           CENTER: ${{ inputs.center }}
           DRY_RUN: ${{ inputs.dry_run }}
+          ALLOW_CONTENT_LOSS: ${{ inputs.allow_content_loss }}
         run: |
           args=()
           [ -n "$CENTER" ] && args+=(--center "$CENTER")
           [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
+          [ "$ALLOW_CONTENT_LOSS" = "true" ] && args+=(--allow-content-loss)
           case "$TASK" in
             schema-one-center)
               [ -n "$CENTER" ] || { echo "schema-one-center needs a center"; exit 1; }

@@ -9,9 +9,13 @@
 //        [--since <sha> | --full] [--dry-run] [--report out.md]
 //        stage:      models (additive) then code saved to each center's dev version
 //        production: dev → live for the changed code; deletes views of deleted files
-//   node tools/center-sync/cli.mjs schema [--center id] [--removals] [--prune] [--dry-run]
+//   node tools/center-sync/cli.mjs schema [--center id] [--model a,b] [--removals] [--prune]
+//        [--allow-content-loss] [--dry-run]
 //        by hand only: --removals applies schema/removed.json; --prune makes a
-//        center match schema/ exactly (deletes extras, recreates type conflicts)
+//        center match schema/ exactly (deletes extras, recreates type conflicts).
+//        Deleting a model that has items, or a field that holds values, is
+//        refused without --allow-content-loss: content (block variants, pages)
+//        is never synced, so a center's own content is never thrown away silently.
 //
 // Tokens: each center's `tokenEnv` names an env var (in CI, a repo secret
 // passed through CENTER_SECRETS). The main instance's token is
@@ -21,7 +25,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { client } from "./zesty.mjs";
-import { readInstance, modelSpec, planSchema, applySchema, describeOp, secretsIn } from "./schema.mjs";
+import { readInstance, modelSpec, planSchema, assessImpact, applySchema, describeOp, secretsIn } from "./schema.mjs";
 import { manifest, changedPaths, readCode, planCode, applyCode } from "./code.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -34,7 +38,7 @@ const opt = (name) => {
   const i = argv.indexOf(`--${name}`);
   return i !== -1 ? argv[i + 1] : undefined;
 };
-const VALUED = new Set(["--branch", "--center", "--since", "--report"]);
+const VALUED = new Set(["--branch", "--center", "--since", "--report", "--model"]);
 const positional = argv.filter((a, i) => !a.startsWith("--") && !VALUED.has(argv[i - 1]));
 const [CMD, ...ARGS] = positional;
 const DRY = flag("dry-run") || Boolean(opt("report"));
@@ -112,7 +116,9 @@ async function cmdExport(names) {
 // ---------- schema ----------
 
 function schemaPlanFor(state) {
-  return planSchema(loadSchema(), state, { removed: loadRemoved(), exclude: config.schemaExclude || [] });
+  const only = opt("model") ? new Set(opt("model").split(",")) : null;
+  const specs = loadSchema().filter((s) => !only || only.has(s.name));
+  return planSchema(specs, state, { removed: loadRemoved(), exclude: config.schemaExclude || [], only });
 }
 
 // Prune and additive ops can name the same field; when pruning, a conflict's
@@ -126,14 +132,20 @@ function gatesFor({ removals, prune }) {
 
 async function runSchema(center, c, { removals = false, prune = false } = {}) {
   const state = await readInstance(c);
-  const ops = schemaPlanFor(state);
+  const ops = await assessImpact(c, state, schemaPlanFor(state));
   const gates = gatesFor({ removals, prune });
   const doing = ops.filter((o) => gates.includes(o.gate));
   const reported = ops.filter((o) => o.gate === "report");
   const later = ops.filter((o) => !gates.includes(o.gate) && o.gate !== "report");
   log(`  models: ${doing.length} change(s), ${reported.length} to review, ${later.filter((o) => o.gate === "removals").length} removal(s) pending`);
   for (const o of reported) log(`    ? ${describeOp(o).replace(/\*\*/g, "")}`);
-  const result = await applySchema(c, state, ops, { gates, dry: DRY, log: (s) => log(`  ${s}`) });
+  for (const o of doing.filter((o) => o.impact)) log(`    ! ${describeOp(o).replace(/\*\*/g, "")}`);
+  const result = await applySchema(c, state, ops, {
+    gates,
+    dry: DRY,
+    log: (s) => log(`  ${s}`),
+    allowContentLoss: flag("allow-content-loss")
+  });
   return { ops, gates, reported, later, ...result };
 }
 

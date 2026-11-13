@@ -9,8 +9,8 @@ variants, globals, `z/pvl` layouts) is **not** synced: every center keeps its
 own.
 
 Status: tested end to end against one test center, KROC National
-(`8-cec38bc5e1-nkc8tg`), on 2026-11-13. Create, update and delete all pass
-(§6).
+(`8-cec38bc5e1-nkc8tg`), on 2026-11-13. `tools/center-sync/e2e.mjs` passes
+53/53 checks (§6).
 
 ## 1. What lives where
 
@@ -93,14 +93,41 @@ production merge. A deleted model view goes when its model is removed.
 
 | Change | At the stage merge | Otherwise |
 | --- | --- | --- |
-| New model, new field, label / description / required / options / settings / sub-fields / relation / sort | applied | — |
-| Dropped dropdown option | applied, flagged ⚠ in the preview | — |
-| Field or model gone from `schema/` | reported only | `removed.json` + manual run |
+| New model (incl. relations to models created in the same merge), new field | applied | — |
+| Label, description, required, options, settings, repeater sub-fields, relation target or display field, sort, parent page/model | applied | — |
+| Dropped dropdown option | applied, flagged in the preview | — |
+| Model `listed` flag | reported under "Needs a person" | the API can't change it: set it in the Manager |
+| Field or model gone from `schema/` | reported as waiting | `removed.json` + manual run |
+| A field re-added with the same name and type | the center's deactivated field is **restored** (its old values come back) | — |
 | Datatype or model-type change, a center-only field or model | reported under "Needs a person" | change by hand, or `--prune` (below) |
 
 `--prune` (CLI only) makes one center match `schema/` exactly. It deletes
 fields and models the schema doesn't have, and recreates type conflicts. Use it
-for onboarding a center, never as a routine step: it deletes content.
+for onboarding a center, never as a routine step.
+
+### Content and block variants
+
+**Variants are content, so they are never copied.** That goes for block
+variants, page items and dataset rows alike. Main's variants stay on main, and
+each center makes its own. What the sync does instead is protect what a center
+already has:
+
+- **The preview shows each change's effect on the center's items** (ℹ / ⛔):
+  - "2 existing item(s) start with it empty" for a new field
+  - "1 item(s) hold a dropped option"
+  - "1 item(s) are empty and can't be saved until filled" for a newly required field
+  - "1 item(s) link to X items, which won't match Y" for a retargeted relation
+  - "N item(s) hold a value here" for a removed or retyped field
+- **Deleting a model that has items, or hard-deleting a field that holds
+  values, is refused** unless the run is given `--allow-content-loss` (an input
+  of the manual workflow, off by default). A removal through `removed.json`
+  only **deactivates** a field, so its values are hidden and come back if the
+  field is re-added.
+- **A model can't be removed while another model's relation still points at
+  it.** Remove the relation field in the same `removed.json` change.
+- New fields arrive empty on existing variants. Templates must read them
+  presence-driven (`{{if {this.field} }}`). An unguarded read of a new empty
+  text field or repeater still rendered fine on a block variant in the test.
 
 ## 5. Commands
 
@@ -112,8 +139,27 @@ node tools/center-sync/cli.mjs export [model…]
 node tools/center-sync/cli.mjs deploy --branch stage|production [--center id] [--since <sha> | --full] [--dry-run] [--report out.md]
 
 # by hand
-node tools/center-sync/cli.mjs schema [--center id] [--removals] [--prune] [--dry-run]
+node tools/center-sync/cli.mjs schema [--center id] [--model a,b] [--removals] [--prune] [--allow-content-loss] [--dry-run]
+
+# end-to-end test (temporary zz_e2e_* models on main + the center; ~3–6 min; cleans up)
+node tools/center-sync/e2e.mjs [--center national] [--verbose] [--keep]
 ```
+
+The e2e test acts as both the developer (changing models on main) and the
+center editors (creating variants and dataset rows on the center). It checks:
+- **S1:** create, including relations to a same-run model and to an existing
+  model, repeaters, options, and a nested pageset
+- **S2:** center-owned content
+- **S3:** relabels, reorders, a new field and option, sub-fields, the relation
+  display field, a parent move, and old variants rendering with new fields
+- **S4:** a dropped option, a newly required field, and a retargeted relation,
+  all flagged with their impact
+- **S5:** a datatype change is reported, prune refuses to destroy data, then
+  `--allow-content-loss`
+- **S6:** a soft field removal
+- **S7:** re-adding a field restores its values
+- **S8:** a relation target can't be removed alone
+- **S9:** models with center content aren't deleted without the flag
 
 Workflows: `.github/workflows/center-sync-preview.yml` posts the preview
 comment on PRs into stage/production. `.github/workflows/center-sync.yml` runs
@@ -125,7 +171,9 @@ on stage/production pushes and by hand (`schema-one-center`,
 1. Add it to `centers.json` with a `tokenEnv` name, and add a repo secret of
    that name holding the instance's developer token.
 2. `schema --center <id> --prune --dry-run`, read the output, then run it
-   without `--dry-run`.
+   without `--dry-run`. If it refuses because the center's own content would
+   be lost, decide what happens to that content first. Only then add
+   `--allow-content-loss`.
 3. Run the `stage-full` task (dry run first), then `production-full`.
 4. Link the instance to this repo in its developer settings
    (`gh_username`, `gh_repository`).
@@ -143,7 +191,15 @@ on stage/production pushes and by hand (`schema-one-center`,
 - **Empty Globals break the preview.** On a fresh center, `{{ globals.social_handles }}`
   in `components/shared.jsx` errors with "field doesn't exist on the globals
   content model" while the repeater is empty. Preview renders show the error
-  and live renders hide it. Fill Globals, or make the read empty-safe.
+  and live renders hide it. Fill Globals, or make the read empty-safe. This is
+  specific to `globals.*`: the same raw read on a block variant renders fine
+  (e2e S3).
+- **A model's `listed` flag can't be changed through the API.** `PUT
+  content/models/<6>` updates the label and description but silently keeps
+  `listed` (and rejects 0/1). It's set at creation only; afterwards the sync
+  reports the difference for someone to change in the Manager.
+- **Restoring a deactivated field brings its values back** (e2e S7). So a
+  removal through `removed.json` can be undone by re-adding the field.
 - **WebEngine caches renders.** Right after a sync the dev preview can serve
   the old template for a few minutes.
 - **Kroc-only IDs in code:** `loader` lists the Blocks Catalog item ZUID, but

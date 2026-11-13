@@ -192,7 +192,7 @@ function parentZuidOn(state, parent) {
 
 // ---------- diff ----------
 
-const canon = (v) =>
+export const canon = (v) =>
   JSON.stringify(v, (k, x) =>
     x && typeof x === "object" && !Array.isArray(x)
       ? Object.fromEntries(Object.keys(x).sort().map((key) => [key, x[key]]))
@@ -210,7 +210,9 @@ function droppedOptions(before, after) {
 //   prune     — make a center exactly match schema/: delete extras, recreate type conflicts
 //               (run by hand, for onboarding a center)
 //   report    — never applied: conflicts and extras, shown for a person to decide
-export function planSchema(specs, state, { removed = {}, exclude = [] } = {}) {
+// `only` (a Set of model names) limits the plan to those models: nothing else
+// on the center is reported or touched (used to sync one model, and by e2e.mjs).
+export function planSchema(specs, state, { removed = {}, exclude = [], only = null } = {}) {
   const ops = [];
   const add = (op) => ops.push(op);
   const wanted = new Set(specs.map((s) => s.name));
@@ -238,8 +240,14 @@ export function planSchema(specs, state, { removed = {}, exclude = [] } = {}) {
 
     const cur = modelSpec(state, m);
     const changes = {};
-    for (const k of ["label", "description", "listed"]) {
+    for (const k of ["label", "description"]) {
       if ((cur[k] ?? "") !== (spec[k] ?? "")) changes[k] = { from: cur[k], to: spec[k] };
+    }
+    // The model API sets `listed` only at creation: PUT accepts it and
+    // silently keeps the old value (verified 2026-11-13). A person changes it
+    // in the Manager.
+    if (Boolean(cur.listed) !== Boolean(spec.listed)) {
+      add({ gate: "report", op: "conflict", model: spec.name, detail: `listed is ${cur.listed}, schema says ${spec.listed} — the API can't change it; set it in the Manager` });
     }
     if (canon(cur.parent ?? null) !== canon(spec.parent ?? null)) {
       changes.parent = { from: cur.parent ?? null, to: spec.parent ?? null };
@@ -295,12 +303,63 @@ export function planSchema(specs, state, { removed = {}, exclude = [] } = {}) {
   }
 
   for (const m of state.models) {
-    if (wanted.has(m.name) || skip.has(m.name)) continue;
+    if (wanted.has(m.name) || skip.has(m.name) || (only && !only.has(m.name))) continue;
     if ((removed.models || []).includes(m.name)) {
       add({ gate: "removals", op: "remove-model", model: m.name, reason: "listed in removed.json" });
     } else {
       add({ gate: "report", op: "extra-model", model: m.name, detail: `${m.type}, not in schema` });
       add({ gate: "prune", op: "remove-model", model: m.name, hard: true, reason: "not in schema" });
+    }
+  }
+  return ops;
+}
+
+// ---------- content impact ----------
+
+// Content (block variants, page items, dataset rows) is never synced: each
+// center owns its own. So before a model change lands, look at what the
+// center's items hold and say what the change does to them. Deleting a model
+// that has items, or hard-deleting a field that holds values, is refused in
+// applySchema unless allowContentLoss is set.
+const hasValue = (v) => !(v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0));
+
+export async function assessImpact(c, state, ops) {
+  const kinds = ["remove-field", "remove-model", "update-field", "add-field", "conflict", "extra-field"];
+  const names = [...new Set(ops.filter((o) => kinds.includes(o.op)).map((o) => o.model))];
+  const items = new Map();
+  await mapLimit(names, 4, async (name) => {
+    const m = state.modelByName.get(name);
+    if (m) items.set(name, (await c.api("GET", `content/models/${m.ZUID}/items?limit=5000`)) || []);
+  });
+  for (const o of ops) {
+    const list = items.get(o.model);
+    if (!list || list.length === 0) continue;
+    const field = typeof o.field === "string" ? o.field : o.field?.name;
+    const values = field ? list.map((i) => i.data?.[field]) : [];
+    const holding = values.filter(hasValue).length;
+    if (o.op === "remove-model") {
+      o.impact = { items: list.length, destructive: true, note: `${list.length} item(s) are deleted with it` };
+    } else if (o.op === "remove-field" || o.op === "conflict" || o.op === "extra-field") {
+      if (holding) {
+        const lost = o.op === "remove-field" && !o.hard ? "hidden (restorable)" : o.op === "remove-field" ? "lost" : "at risk";
+        o.impact = { items: holding, destructive: o.op === "remove-field" && o.hard, note: `${holding} item(s) hold a value here — ${lost}` };
+      }
+    } else if (o.op === "add-field" && o.gate === "additive") {
+      o.impact = { items: list.length, note: `${list.length} existing item(s) start with it empty` };
+    } else if (o.op === "update-field") {
+      const notes = [];
+      if (o.lostOptions?.length) {
+        const n = values.filter((v) => hasValue(v) && o.lostOptions.includes(String(v))).length;
+        if (n) notes.push(`${n} item(s) hold a dropped option`);
+      }
+      if (o.field.required && !o.before?.required) {
+        const n = list.length - holding;
+        if (n) notes.push(`${n} item(s) are empty and can't be saved until filled`);
+      }
+      if (o.before?.relatedModel && o.before.relatedModel !== o.field.relatedModel && holding) {
+        notes.push(`${holding} item(s) link to ${o.before.relatedModel} items, which won't match ${o.field.relatedModel}`);
+      }
+      if (notes.length) o.impact = { items: Math.max(holding, 1), note: notes.join("; ") };
     }
   }
   return ops;
@@ -319,8 +378,14 @@ const waitFor = async (fn, tries = 8) => {
 
 // Applies the ops whose gate is in `gates`, in dependency order:
 // deletes → new models → model attrs (parents) → plain fields → relation fields → updates.
-export async function applySchema(c, state, ops, { gates, dry, log }) {
+export async function applySchema(c, state, ops, { gates, dry, log, allowContentLoss = false }) {
   const run = ops.filter((o) => gates.includes(o.gate) && o.gate !== "report");
+  // Never destroy a center's content by default (assessImpact marks it).
+  const guard = (o) => {
+    if (o.impact?.destructive && !allowContentLoss) {
+      throw new Error(`refusing: ${o.impact.note}. Re-run with --allow-content-loss if that's intended`);
+    }
+  };
   // A prune pass shadows the additive op for the same field/model.
   const errors = [];
   const step = async (label, fn) => {
@@ -339,6 +404,7 @@ export async function applySchema(c, state, ops, { gates, dry, log }) {
   for (const o of run.filter((o) => o.op === "remove-field")) {
     const m = of(o.model);
     await step(`${o.hard ? "delete" : "deactivate"} field ${o.model}.${o.field} (${o.reason})`, async () => {
+      guard(o);
       if (!o.deactivated) await c.api("DELETE", `content/models/${m.ZUID}/fields/${o.zuid}`);
       if (o.hard) await c.api("DELETE", `content/models/${m.ZUID}/fields/${o.zuid}?hardDelete=true`);
       const list = state.fieldsOf.get(m.ZUID);
@@ -354,6 +420,7 @@ export async function applySchema(c, state, ops, { gates, dry, log }) {
   for (const o of run.filter((o) => o.op === "remove-model")) {
     const m = of(o.model);
     await step(`delete model ${o.model} (${o.reason})`, async () => {
+      guard(o);
       const inbound = state.models
         .filter((x) => x.ZUID !== m.ZUID)
         .flatMap((x) => activeFields(state, x).filter((f) => f.relatedModelZUID === m.ZUID).map((f) => `${x.name}.${f.name}`));
@@ -455,6 +522,11 @@ export async function applySchema(c, state, ops, { gates, dry, log }) {
 // ---------- summaries ----------
 
 export function describeOp(o) {
+  const text = describeBare(o);
+  return o.impact ? `${text} — ${o.impact.destructive ? "⛔" : "ℹ"} ${o.impact.note}` : text;
+}
+
+function describeBare(o) {
   const at = o.field ? `${o.model}.${typeof o.field === "string" ? o.field : o.field.name}` : o.model;
   switch (o.op) {
     case "create-model":
